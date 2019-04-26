@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.MoreObjects;
 import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
-import com.qklx.qt.common.utils.JsonFormate;
 import com.qklx.qt.core.config.AccountConfig;
 import com.qklx.qt.core.config.KlineConfig;
 import com.qklx.qt.core.config.MarketConfig;
@@ -33,8 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
-import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
 
 /**
  * 火币策略
@@ -377,6 +374,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 profitMessage.setBuyAmount(lastBuyAmount);
                 profitMessage.setSellAmount(currentSellAmount);
                 profitMessage.setDiff(diff);
+                profitMessage.setDivide(divide);
                 profitMessage.setIsProfit(isProfit);
                 profitMessage.setBuyPrice(lastBuyPrice);
                 profitMessage.setSellPrice(currentSellPrice);

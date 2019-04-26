@@ -1,8 +1,10 @@
 package com.qklx.qt.core.strategy.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.MoreObjects;
 import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
+import com.qklx.qt.common.utils.JsonFormate;
 import com.qklx.qt.core.config.AccountConfig;
 import com.qklx.qt.core.config.KlineConfig;
 import com.qklx.qt.core.config.MarketConfig;
@@ -21,6 +23,7 @@ import com.qklx.qt.core.strategy.TradingStrategy;
 import com.qklx.qt.core.trading.*;
 import com.qklx.qt.core.vo.ProfitMessage;
 import com.qklx.qt.core.vo.StrategyVo;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
+import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
 
 /**
  * 火币策略
@@ -87,6 +92,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
     private String baseBalanceKey;
 
+    private String lastOrderState = "lastOrderState_";
     /**
      * 当前的最新购买价格
      */
@@ -144,10 +150,28 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 redisMqService.sendMsg("获取当前机器人的基础币种 配额币种 价格的精度 数量的精度失败！！！");
                 return;
             }
+            //检查最后一次状态
+
+            //记录当前机器人的最后一次状态
+            Object o = redisUtil.get(lastOrderState + robotId);
+            if (o != null) {
+                try {
+                    logger.info("上一次机器人运行的状态是" + o.toString());
+                    //恢复上一次的运行状态
+                    this.orderState = JSON.parseObject(o.toString(), OrderState.class);
+                    redisUtil.set(lastOrderState + robotId, null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.error("恢复机器人状态失败{}", e.getMessage());
+                }
+            }
+
             while (true) {
                 try {
                     if (checkIsStop(startkey)) {
                         redisMqService.sendMsg("机器人" + robotId + "已经被取消了任务 退出ing");
+                        //记录当前机器人的最后一次状态
+                        redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
                         break;
                     }
                     //设置机器人的运行状态 在休眠+15s之后没响应 就认为该机器人已经死亡
@@ -192,7 +216,14 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         //查看是否到达买的信号
                         if (this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
                                 && orderState.type == OrderType.SELL) {
-                            createBuyOrder(marketOrder, tradingApi);
+                            try {
+                                createBuyOrder(marketOrder, tradingApi);
+                            } catch (Exception e) {
+                                redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
+                                e.printStackTrace();
+                                logger.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                                createBuyOrder(marketOrder, tradingApi);
+                            }
                         } else {
                             redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
                         }
@@ -959,6 +990,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     /**
      * 订单状态
      */
+    @Data
     private static class OrderState {
 
         /**

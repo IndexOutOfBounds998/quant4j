@@ -12,7 +12,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-25
+ * @since 2019-04-26
  */
 public class Logs extends Model<Logs> {
 

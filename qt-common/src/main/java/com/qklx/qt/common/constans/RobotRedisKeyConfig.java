@@ -24,6 +24,12 @@ public class RobotRedisKeyConfig {
      * 订单成功后的id存储在queue这个队列中
      */
     private final static String robot_msg_queue = "robot_msg";
+
+    /**
+     *
+     */
+    private final static String order_profit = "order_profit";
+
     /**
      * 每个交易对对应的 和 quote 标志
      */
@@ -31,6 +37,10 @@ public class RobotRedisKeyConfig {
 
     public final static String ok = "ok";
 
+
+    public static String getOrder_profit() {
+        return order_profit;
+    }
 
     public static String getRobot_msg_queue() {
         return robot_msg_queue;
@@ -51,4 +61,5 @@ public class RobotRedisKeyConfig {
     public static String getRobotIsRunStateKey() {
         return robotIsRunStateKey;
     }
+
 }

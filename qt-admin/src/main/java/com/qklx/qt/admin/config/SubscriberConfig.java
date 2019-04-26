@@ -1,6 +1,7 @@
 package com.qklx.qt.admin.config;
 
 import com.qklx.qt.admin.component.OrderIdReceiver;
+import com.qklx.qt.admin.component.ProfitReceiver;
 import com.qklx.qt.admin.component.RobotMsgReceiver;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,11 @@ public class SubscriberConfig {
         return new MessageListenerAdapter(new RobotMsgReceiver(simpMessageSendingOperations), "receiveMessage"); //当没有继承MessageListener时需要写方法名字
     }
 
+    @Bean
+    public MessageListenerAdapter profitMsgReceiverAdapter() {
+        return new MessageListenerAdapter(new ProfitReceiver(), "receiveMessage"); //当没有继承MessageListener时需要写方法名字
+    }
+
     /**
      * 创建消息监听容器
      *
@@ -62,11 +68,14 @@ public class SubscriberConfig {
     @Bean
     public RedisMessageListenerContainer getRedisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory,
                                                                           MessageListenerAdapter orderIdReceiverAdapter,
-                                                                          MessageListenerAdapter robotMsgReceiverAdapter) {
+                                                                          MessageListenerAdapter robotMsgReceiverAdapter,
+                                                                          MessageListenerAdapter profitMsgReceiverAdapter) {
         RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
         redisMessageListenerContainer.setConnectionFactory(redisConnectionFactory);
         redisMessageListenerContainer.addMessageListener(orderIdReceiverAdapter, new PatternTopic(RobotRedisKeyConfig.getQueue()));
         redisMessageListenerContainer.addMessageListener(robotMsgReceiverAdapter, new PatternTopic(RobotRedisKeyConfig.getRobot_msg_queue()));
+        redisMessageListenerContainer.addMessageListener(profitMsgReceiverAdapter, new PatternTopic(RobotRedisKeyConfig.getOrder_profit()));
+
         return redisMessageListenerContainer;
     }
 

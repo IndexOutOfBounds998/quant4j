@@ -27,7 +27,7 @@ public class RobotMsgReceiver {
      */
     public void receiveMessage(String message) {
         try {
-            //这里是收到通道的消息之后执行的方法
+            //这里是收到通道的消息之后执行的方法？？
             RobotRunMessage msg = JSON.parseObject(parseJsonToString(message), RobotRunMessage.class);
             simpMessageSendingOperations.convertAndSend("/topic/" + msg.getRobotId(), parseJsonToString(message));
         } catch (NumberFormatException e) {

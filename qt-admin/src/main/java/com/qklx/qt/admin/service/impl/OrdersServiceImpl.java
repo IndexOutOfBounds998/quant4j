@@ -12,7 +12,7 @@ import com.qklx.qt.core.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collections;
 
 /**
  * <p>
@@ -31,6 +31,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         try {
             Wrapper<Orders> ordersWrapper = new EntityWrapper<>();
             ordersWrapper.eq("robot_id", rid);
+            ordersWrapper.orderDesc(Collections.singleton("create_time"));
             Orders orders = new Orders();
             Page<Orders> ordersPage = orders.selectPage(new Page<>(page, limit), ordersWrapper);
             return new ApiResult(Status.SUCCESS, ordersPage);

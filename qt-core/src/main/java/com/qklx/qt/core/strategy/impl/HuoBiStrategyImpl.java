@@ -135,6 +135,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             baseBalanceKey = baseCurrency + "_balance_" + accountConfig.accountId();
 
             if (!quotaPriceAndPrecision) {
+                logger.error("获取当前机器人的基础币种 配额币种 价格的精度 数量的精度失败！！！");
                 redisMqService.sendMsg("获取当前机器人的基础币种 配额币种 价格的精度 数量的精度失败！！！");
                 return;
             }

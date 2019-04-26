@@ -60,7 +60,6 @@ public class ApiClient {
     private String accessKeySecret;
     private String assetPassword;
 
-
     /**
      * 创建一个ApiClient实例
      *
@@ -75,6 +74,10 @@ public class ApiClient {
     }
 
     public ApiClient() {
+    }
+
+    public ApiClient(String ip, int port) {
+        client = createOkHttpClient(ip, port);
     }
 
     /**
@@ -477,6 +480,7 @@ public class ApiClient {
 
     // create OkHttpClient:
     static OkHttpClient createOkHttpClient(String ip, int port) {
+
 
         return new Builder().connectTimeout(CONN_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS).writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)

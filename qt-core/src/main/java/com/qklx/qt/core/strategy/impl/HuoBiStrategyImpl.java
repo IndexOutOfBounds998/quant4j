@@ -370,6 +370,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
                 ProfitMessage profitMessage = new ProfitMessage();
                 profitMessage.setBuyOrderId(buyOrderId);
+                profitMessage.setRobot_id(robotId);
                 profitMessage.setSellOrderId(sellOrderId);
                 profitMessage.setBuyAmount(lastBuyAmount);
                 profitMessage.setSellAmount(currentSellAmount);

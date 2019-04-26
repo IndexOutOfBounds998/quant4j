@@ -2,6 +2,7 @@ package com.qklx.qt.admin.service;
 
 import com.baomidou.mybatisplus.service.IService;
 import com.qklx.qt.admin.entity.OrderProfit;
+import com.qklx.qt.core.api.ApiResult;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.qklx.qt.admin.entity.OrderProfit;
  */
 public interface OrderProfitService extends IService<OrderProfit> {
 
+    ApiResult getProfitList(int rid, int page, int limit);
 }

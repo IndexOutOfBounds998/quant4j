@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.enums.IdType;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -24,6 +25,8 @@ public class OrderProfit extends Model<OrderProfit> {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
+    @TableField("robot_id")
+    private Integer robotId;
     @TableField("sell_order_id")
     private Long sellOrderId;
     @TableField("buy_order_id")
@@ -40,6 +43,8 @@ public class OrderProfit extends Model<OrderProfit> {
     private Integer isProfit;
     private BigDecimal diff;
     private BigDecimal divide;
+    @TableField("create_time")
+    private Date createTime;
 
 
     public Integer getId() {
@@ -48,6 +53,14 @@ public class OrderProfit extends Model<OrderProfit> {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getRobotId() {
+        return robotId;
+    }
+
+    public void setRobotId(Integer robotId) {
+        this.robotId = robotId;
     }
 
     public Long getSellOrderId() {
@@ -122,6 +135,14 @@ public class OrderProfit extends Model<OrderProfit> {
         this.divide = divide;
     }
 
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
     @Override
     protected Serializable pkVal() {
         return this.id;
@@ -131,6 +152,7 @@ public class OrderProfit extends Model<OrderProfit> {
     public String toString() {
         return "OrderProfit{" +
         ", id=" + id +
+        ", robotId=" + robotId +
         ", sellOrderId=" + sellOrderId +
         ", buyOrderId=" + buyOrderId +
         ", buyPrice=" + buyPrice +
@@ -140,6 +162,7 @@ public class OrderProfit extends Model<OrderProfit> {
         ", isProfit=" + isProfit +
         ", diff=" + diff +
         ", divide=" + divide +
+        ", createTime=" + createTime +
         "}";
     }
 }

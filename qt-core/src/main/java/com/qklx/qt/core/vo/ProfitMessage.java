@@ -10,6 +10,7 @@ public class ProfitMessage {
 
     long sellOrderId;
     long buyOrderId;
+    int robot_id;
 
     BigDecimal buyPrice;
     BigDecimal sellPrice;

@@ -27,10 +27,11 @@ public class ProfitReceiver {
         OrderProfit orderProfit = new OrderProfit();
         orderProfit.setSellOrderId(msg.getSellOrderId());
         orderProfit.setBuyOrderId(msg.getBuyOrderId());
+        orderProfit.setRobotId(msg.getRobot_id());
         orderProfit.setBuyAmount(msg.getBuyAmount());
         orderProfit.setBuyPrice(msg.getBuyPrice());
         orderProfit.setSellAmount(msg.getSellAmount());
-        orderProfit.setSellPrice(msg.getSellAmount());
+        orderProfit.setSellPrice(msg.getSellPrice());
         orderProfit.setDiff(msg.getDiff());
         orderProfit.setDivide(msg.getDivide());
         orderProfit.setIsProfit(msg.getIsProfit());

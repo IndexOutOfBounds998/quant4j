@@ -1,0 +1,63 @@
+server:
+  port: 8080
+  address: 127.0.0.1
+#添加数据源
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/qt?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: root
+    password: root
+    druid:
+      initial-size: 5
+      min-idle: 10
+      max-active: 20
+      max-wait: 60000
+      min-evictable-idle-time-millis: 6000
+      time-between-eviction-runs-millis: 3000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      filters: stat,wall
+      use-global-data-source-stat: true
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  application:
+    name: qt-admin
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+    timeout: 15000
+#mybatis-plus:
+logging:
+  level:
+    com:
+      qklx:
+        qt:
+          admin:
+            dao: debug
+    root: info
+  file: /logs/spring.log
+#  mapper-locations: classpath:/mapper/*
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_ZONE_HOST:localhost}:${EUREKA_ZONE_PORT:8761}/eureka/
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+landen:
+  ip: 127.0.0.1
+  port: 52565

@@ -1,0 +1,50 @@
+server:
+  port: 8024
+  address: 192.168.0.115
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_ZONE_HOST:localhost}:${EUREKA_ZONE_PORT:8761}/eureka/
+
+spring:
+  application:
+    name: qt-client
+#  rabbitmq:
+#    host: ${RABBIT_MQ_HOST:localhost}
+#    port: ${RABBIT_MQ_PORT:5672}
+#    username: ${RABBIT_MQ_USERNAME:yang}
+#    password: ${RABBIT_MQ_PASSWORD:yang}
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+    timeout: 15000
+feign:
+  hystrix:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      base-path: /
+
+logging:
+  level:
+    org.springframework.web: debug
+  path: logs/
+  file:
+    max-size: 1GB
+
+
+landen:
+  ip: 127.0.0.1
+  port: 52565

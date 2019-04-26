@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qklx.qt.admin.dao.RobotMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.qklx.qt.admin.entity.Robot">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="account_id" property="accountId"/>
+        <result column="robot_name" property="robotName"/>
+        <result column="symbol" property="symbol"/>
+        <result column="strategy_id" property="strategyId"/>
+        <result column="client_address" property="clientAddress"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="is_run" property="isRun"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id AS userId, robot_name AS robotName, symbol, strategy_id AS strategyId, client_address AS clientAddress, create_time AS createTime, is_delete AS isDelete,is_run as isRun
+    </sql>
+
+    <select id="getRobotList" resultType="com.qklx.qt.admin.model.RobotListModel">
+        select r.id,r.user_id as userId,r.robot_name as robotName,r.symbol as symbol,r.strategy_id
+        as strategyId,r.client_address as clientAddress,r.is_delete as isDelete,r.is_run as isRun,s.strategy_name as strategyName
+         from robot as r left join strategy as s on r.strategy_id=s.id where r.user_id=#{0}
+    </select>
+
+
+</mapper>

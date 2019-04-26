@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qklx.temp.dao.SymbolMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.qklx.temp.entity.Symbol">
+        <id column="id" property="id" />
+        <result column="base_currency" property="baseCurrency" />
+        <result column="quote_currency" property="quoteCurrency" />
+        <result column="price_precision" property="pricePrecision" />
+        <result column="amount_precision" property="amountPrecision" />
+        <result column="symbol" property="symbol" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, base_currency AS baseCurrency, quote_currency AS quoteCurrency, price_precision AS pricePrecision, amount_precision AS amountPrecision, symbol
+    </sql>
+
+</mapper>

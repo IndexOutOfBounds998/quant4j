@@ -1,11 +1,12 @@
 package com.qklx.qt.admin.entity;
 
-import com.baomidou.mybatisplus.enums.IdType;
-import java.math.BigDecimal;
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
+import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.enums.IdType;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -13,7 +14,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-15
+ * @since 2019-04-28
  */
 public class Strategy extends Model<Strategy> {
 
@@ -27,6 +28,11 @@ public class Strategy extends Model<Strategy> {
     private String strategyName;
     @TableField("buy_amount")
     private BigDecimal buyAmount;
+    /**
+     * 市价买入交易额
+     */
+    @TableField("buy_quota_price")
+    private BigDecimal buyQuotaPrice;
     @TableField("sell_amount")
     private BigDecimal sellAmount;
     @TableField("buy_price")
@@ -48,14 +54,14 @@ public class Strategy extends Model<Strategy> {
      */
     @TableField("is_limit_price")
     private Integer isLimitPrice;
-
-    @TableField("buy_quota_price")
-    private BigDecimal buyQuotaPrice;
-
     @TableField("sell_all_weights")
     private Integer sellAllWeights;
     @TableField("buy_all_weights")
     private Integer buyAllWeights;
+    /**
+     * 亏损次数
+     */
+    private Integer profit;
     private Integer sleep;
     private String setting1;
     private String setting2;
@@ -63,14 +69,6 @@ public class Strategy extends Model<Strategy> {
     private String setting4;
     private String setting5;
 
-
-    public BigDecimal getBuyQuotaPrice() {
-        return buyQuotaPrice;
-    }
-
-    public void setBuyQuotaPrice(BigDecimal buyQuotaPrice) {
-        this.buyQuotaPrice = buyQuotaPrice;
-    }
 
     public Integer getId() {
         return id;
@@ -102,6 +100,14 @@ public class Strategy extends Model<Strategy> {
 
     public void setBuyAmount(BigDecimal buyAmount) {
         this.buyAmount = buyAmount;
+    }
+
+    public BigDecimal getBuyQuotaPrice() {
+        return buyQuotaPrice;
+    }
+
+    public void setBuyQuotaPrice(BigDecimal buyQuotaPrice) {
+        this.buyQuotaPrice = buyQuotaPrice;
     }
 
     public BigDecimal getSellAmount() {
@@ -168,6 +174,14 @@ public class Strategy extends Model<Strategy> {
         this.buyAllWeights = buyAllWeights;
     }
 
+    public Integer getProfit() {
+        return profit;
+    }
+
+    public void setProfit(Integer profit) {
+        this.profit = profit;
+    }
+
     public Integer getSleep() {
         return sleep;
     }
@@ -228,6 +242,7 @@ public class Strategy extends Model<Strategy> {
         ", userId=" + userId +
         ", strategyName=" + strategyName +
         ", buyAmount=" + buyAmount +
+        ", buyQuotaPrice=" + buyQuotaPrice +
         ", sellAmount=" + sellAmount +
         ", buyPrice=" + buyPrice +
         ", sellPrice=" + sellPrice +
@@ -236,6 +251,7 @@ public class Strategy extends Model<Strategy> {
         ", isLimitPrice=" + isLimitPrice +
         ", sellAllWeights=" + sellAllWeights +
         ", buyAllWeights=" + buyAllWeights +
+        ", profit=" + profit +
         ", sleep=" + sleep +
         ", setting1=" + setting1 +
         ", setting2=" + setting2 +

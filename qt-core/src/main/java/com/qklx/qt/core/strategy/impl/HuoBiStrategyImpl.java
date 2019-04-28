@@ -65,6 +65,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     //huobi交易手续费
     private BigDecimal fee = new BigDecimal(0.002);
 
+    //亏损次数
+    private int profitTimes;
+
     private Weights weights;
     private TradingApi tradingApi;
     private MarketConfig marketConfig;
@@ -234,6 +237,13 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
                         break;
                     }
+
+                    if (profitTimes >= this.baseInfo.getProfit()) {
+                        //如果亏损次数已经达到预设值 机器人退出线程
+                        redisMqService.sendMsg("=======当前亏损次数" + profitTimes + "==已经达到预设值,机器人退出任务ing,请修改此策略重新来！！");
+                        break;
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     /**
@@ -397,6 +407,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         isProfit = 1;
                     } else {
                         isProfit = 0;
+                        profitTimes++;
                     }
 
                 } else {
@@ -415,6 +426,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         isProfit = 1;
                     } else {
                         isProfit = 0;
+                        profitTimes++;
                     }
                 }
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额

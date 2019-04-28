@@ -57,6 +57,10 @@ public class Strategy extends Model<Strategy> {
     private Integer sellAllWeights;
     @TableField("buy_all_weights")
     private Integer buyAllWeights;
+    /**
+     * 亏损次数
+     */
+    private Integer profit;
     private Integer sleep;
     private String setting1;
     private String setting2;
@@ -169,6 +173,14 @@ public class Strategy extends Model<Strategy> {
         this.buyAllWeights = buyAllWeights;
     }
 
+    public Integer getProfit() {
+        return profit;
+    }
+
+    public void setProfit(Integer profit) {
+        this.profit = profit;
+    }
+
     public Integer getSleep() {
         return sleep;
     }
@@ -238,6 +250,7 @@ public class Strategy extends Model<Strategy> {
         ", isLimitPrice=" + isLimitPrice +
         ", sellAllWeights=" + sellAllWeights +
         ", buyAllWeights=" + buyAllWeights +
+        ", profit=" + profit +
         ", sleep=" + sleep +
         ", setting1=" + setting1 +
         ", setting2=" + setting2 +

@@ -38,7 +38,6 @@ public class BalanceTask {
     @Async
     @Scheduled(fixedDelay = 60000, initialDelay = 5000)
     public void updateBalance() {
-        log.info("更新数据库账户余额=============");
         Account account = new Account();
         List<Account> accounts = account.selectAll();
         for (Account a : accounts) {
@@ -54,7 +53,6 @@ public class BalanceTask {
     @Async
     @Scheduled(fixedDelay = 10000, initialDelay = 5000)
     public void updateRedisBalance() {
-        log.info("更新redis账户余额=============");
         Account account = new Account();
         List<Account> accounts = account.selectAll();
         for (Account a : accounts) {

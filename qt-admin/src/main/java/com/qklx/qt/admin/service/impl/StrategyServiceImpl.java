@@ -7,9 +7,9 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.qklx.qt.admin.dao.StrategyMapper;
 import com.qklx.qt.admin.entity.Strategy;
 import com.qklx.qt.admin.service.StrategyService;
+import com.qklx.qt.core.api.ApiResult;
 import com.qklx.qt.core.enums.Status;
 import com.qklx.qt.core.vo.StrategyVo;
-import com.qklx.qt.core.api.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +48,7 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
             strategy.setBuyAllWeights(baseInfo.getBuyAllWeights());
             strategy.setSellAllWeights(baseInfo.getSellAllWeights());
             strategy.setSleep(baseInfo.getSleep());
+            strategy.setProfit(baseInfo.getProfit());
             strategy.setBuyQuotaPrice(baseInfo.getBuyQuotaPrice());
         }
         StrategyVo.Setting1Entity setting1 = strategyVo.getSetting1();

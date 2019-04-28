@@ -155,6 +155,7 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
             baseInfoEntity.setBuyAllWeights(strategyOne.getBuyAllWeights());
             baseInfoEntity.setBuyAmount(strategyOne.getBuyAmount());
             baseInfoEntity.setBuyPrice(strategyOne.getBuyPrice());
+            baseInfoEntity.setProfit(strategyOne.getProfit());
             baseInfoEntity.setSleep(strategyOne.getSleep());
             baseInfoEntity.setIsAllBuy(strategyOne.getIsAllBuy());
             baseInfoEntity.setIsLimitPrice(strategyOne.getIsLimitPrice());

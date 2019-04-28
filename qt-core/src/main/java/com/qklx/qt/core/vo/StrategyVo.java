@@ -25,23 +25,6 @@ public class StrategyVo {
 
     @Data
     public static class BaseInfoEntity {
-        @Override
-        public String toString() {
-            return "BaseInfoEntity{" +
-                    "buyPrice=" + buyPrice +
-                    ", sleep=" + sleep +
-                    ", strategyName='" + strategyName + '\'' +
-                    ", buyAmount=" + buyAmount +
-                    ", buyAllWeights=" + buyAllWeights +
-                    ", sellAmount=" + sellAmount +
-                    ", isAllBuy=" + isAllBuy +
-                    ", sellPrice=" + sellPrice +
-                    ", isAllSell=" + isAllSell +
-                    ", isLimitPrice=" + isLimitPrice +
-                    ", sellAllWeights=" + sellAllWeights +
-                    '}';
-        }
-
         /**
          * buyPrice : 1.0E-8
          * sleep : 3
@@ -67,7 +50,7 @@ public class StrategyVo {
         private int isAllSell;
         private int isLimitPrice;
         private int sellAllWeights;
-
+        private int profit;
 
     }
 

@@ -1,8 +1,8 @@
 package com.qklx.qt.admin.task;
 
 import com.qklx.qt.common.config.RedisUtil;
-import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
+import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.core.response.Symbol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,6 @@ public class SymbolTask {
             if (symbol.insertOrUpdate()) {
                 //将交易对的quote保存redis
                 redisUtil.set(RobotRedisKeyConfig.getSymbol() + symbol.getSymbol(), symbol.getBaseCurrency() + "_" + symbol.getQuoteCurrency() + "_" + symbol.getPricePrecision() + "_" + symbol.getAmountPrecision());
-                logger.info("交易对{}成功插入或者更新", symbol.getSymbol());
             }
         }
 

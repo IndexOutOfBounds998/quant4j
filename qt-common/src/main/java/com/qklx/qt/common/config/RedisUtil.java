@@ -508,6 +508,27 @@ public class RedisUtil {
         }
     }
 
+
+    public boolean lPush(String key, Object value) {
+        try {
+            redisTemplate.opsForList().leftPush(key, value);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    public Object lPop(String key) {
+        try {
+            return redisTemplate.opsForList().leftPop(key);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /**
      * 将list放入缓存
      *

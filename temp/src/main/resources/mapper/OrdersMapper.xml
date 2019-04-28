@@ -4,8 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.qklx.temp.entity.Orders">
-        <id column="id" property="id" />
-        <result column="order_id" property="orderId" />
+        <id column="order_id" property="orderId" />
         <result column="symbol" property="symbol" />
         <result column="robot_id" property="robotId" />
         <result column="account_id" property="accountId" />
@@ -22,7 +21,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, order_id AS orderId, symbol, robot_id AS robotId, account_id AS accountId, amount, price, order_state AS orderState, order_type AS orderType, create_time AS createTime, finished_time AS finishedTime, field_fees AS fieldFees, field_amount AS fieldAmount, field_cash_amount AS fieldCashAmount
+        order_id AS orderId, symbol, robot_id AS robotId, account_id AS accountId, amount, price, order_state AS orderState, order_type AS orderType, create_time AS createTime, finished_time AS finishedTime, field_fees AS fieldFees, field_amount AS fieldAmount, field_cash_amount AS fieldCashAmount
     </sql>
 
 </mapper>

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.qklx.qt.core.to.RobotRunMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Component;
 
 import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
 

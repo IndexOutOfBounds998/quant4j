@@ -1,7 +1,9 @@
 package com.qklx.qt.core.exchangeAdapter;
 
 import com.qklx.qt.common.config.RedisUtil;
+import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.api.ApiClient;
+import com.qklx.qt.core.api.ApiException;
 import com.qklx.qt.core.config.AccountConfig;
 import com.qklx.qt.core.config.KlineConfig;
 import com.qklx.qt.core.config.MarketConfig;
@@ -127,7 +129,9 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             createOrderRequest.setAmount(quantity.toPlainString());
             createOrderRequest.setAccountId(accountId);
             createOrderRequest.setSource("api");
-            createOrderRequest.setPrice(price.toPlainString());
+            if (!orderType.getTyoe().equals(OrderType.SELL_MARKET.getTyoe()) || !orderType.getTyoe().equals(OrderType.BUY_MARKET.getTyoe())) {
+                createOrderRequest.setPrice(price.toPlainString());
+            }
             createOrderRequest.setSymbol(marketId);
             createOrderRequest.setType(orderType.getTyoe());
             return apiClient.createOrder(createOrderRequest);
@@ -157,6 +161,21 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
         }
         return false;
     }
+
+    @Override
+    public OrdersDetail orderDetail(Long orderId) {
+        try {
+            OrdersDetailResponse<OrdersDetail> detail = apiClient.ordersDetail(orderId.toString());
+            if (detail.getStatus().equals(RobotRedisKeyConfig.ok)) {
+                return detail.getData();
+            }
+        } catch (Exception e) {
+            logger.error("获取订单详情失败====" + e.getMessage());
+            throw new ApiException(e);
+        }
+        return null;
+    }
+
 
     /**
      * 获取市场最新价格

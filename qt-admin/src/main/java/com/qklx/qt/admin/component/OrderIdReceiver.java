@@ -3,7 +3,6 @@ package com.qklx.qt.admin.component;
 import com.alibaba.fastjson.JSON;
 import com.qklx.qt.admin.entity.Orders;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
-import com.qklx.qt.common.utils.DateUtils;
 import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.core.response.OrdersDetail;
 import com.qklx.qt.core.response.OrdersDetailResponse;
@@ -11,6 +10,7 @@ import com.qklx.qt.core.vo.OrderTaskMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
 
@@ -47,26 +47,27 @@ public class OrderIdReceiver {
             if (detail.getStatus().equals(RobotRedisKeyConfig.ok)) {
                 OrdersDetail data = detail.getData();
                 Orders order = new Orders();
+                order.setOrderId(Long.parseLong(data.getId()));
                 order.setAccountId(Long.parseLong(data.getAccountId()));
                 order.setAmount(new BigDecimal(data.getAmount()));
                 order.setCreateTime(data.getCreatedAt());
                 order.setFieldAmount(new BigDecimal(data.getFieldAmount()));
-
-                order.setFieldCashAmount(new BigDecimal(data.getFieldCashAmount()));
-
+                order.setFieldCashAmount(new BigDecimal(data.getFieldCashAmount()).setScale(8, RoundingMode.DOWN));
                 order.setFinishedTime(data.getFinishedAt());
-
                 order.setOrderState(data.getState());
-
                 order.setFieldFees(new BigDecimal(data.getFieldFees()));
 
-                order.setOrderId(Long.parseLong(data.getId()));
-                order.setPrice(new BigDecimal(data.getPrice()));
                 order.setSymbol(data.getSymbol());
                 order.setOrderType(data.getType());
                 order.setRobotId((msg.getRobotId()));
+                if (data.getType().contains("market")) {
+                    BigDecimal price = new BigDecimal(data.getFieldCashAmount()).divide(new BigDecimal(data.getFieldAmount()), 8, RoundingMode.DOWN);
+                    order.setPrice(price);
+                } else {
+                    order.setPrice(new BigDecimal(data.getPrice()));
+                }
                 if (order.insertOrUpdate()) {
-                    log.info("订单{}插入成功", msg.getOrderId());
+                    log.info("订单id{}插入或更新成功", msg.getOrderId());
                 }
 
             }

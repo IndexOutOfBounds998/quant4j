@@ -1,11 +1,11 @@
 package com.qklx.qt.admin.entity;
 
-import com.baomidou.mybatisplus.enums.IdType;
-import java.math.BigDecimal;
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
+import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableId;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -13,15 +13,13 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-25
+ * @since 2019-04-28
  */
 public class Orders extends Model<Orders> {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-    @TableField("order_id")
+    @TableId("order_id")
     private Long orderId;
     private String symbol;
     @TableField("robot_id")
@@ -45,14 +43,6 @@ public class Orders extends Model<Orders> {
     @TableField("field_cash_amount")
     private BigDecimal fieldCashAmount;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public Long getOrderId() {
         return orderId;
@@ -160,13 +150,12 @@ public class Orders extends Model<Orders> {
 
     @Override
     protected Serializable pkVal() {
-        return this.id;
+        return this.orderId;
     }
 
     @Override
     public String toString() {
         return "Orders{" +
-        ", id=" + id +
         ", orderId=" + orderId +
         ", symbol=" + symbol +
         ", robotId=" + robotId +

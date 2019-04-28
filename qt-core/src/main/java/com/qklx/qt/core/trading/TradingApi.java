@@ -28,6 +28,7 @@ import com.qklx.qt.core.config.AccountConfig;
 import com.qklx.qt.core.config.KlineConfig;
 import com.qklx.qt.core.config.MarketConfig;
 import com.qklx.qt.core.response.Kline;
+import com.qklx.qt.core.response.OrdersDetail;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -128,6 +129,13 @@ public interface TradingApi {
      */
     boolean cancelOrder(String orderId, String marketId) throws ExchangeNetworkException, TradingApiException;
 
+
+    /**
+     * 获取订单详情
+     * @param orderId
+     * @return
+     */
+    OrdersDetail orderDetail(Long orderId);
     /**
      * Fetches the latest price for a given market.
      * This is usually in BTC for altcoin markets and USD for BTC/USD markets - see the Exchange Adapter documentation.

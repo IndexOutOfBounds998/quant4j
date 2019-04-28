@@ -6,18 +6,18 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.qklx.qt.admin.dao.RobotMapper;
 import com.qklx.qt.admin.entity.Account;
-import com.qklx.qt.admin.model.RobotListModel;
-import com.qklx.qt.admin.rest.RobotClientService;
 import com.qklx.qt.admin.entity.Robot;
 import com.qklx.qt.admin.entity.Strategy;
+import com.qklx.qt.admin.model.RobotListModel;
+import com.qklx.qt.admin.rest.RobotClientService;
 import com.qklx.qt.admin.service.RobotService;
 import com.qklx.qt.common.config.RedisUtil;
+import com.qklx.qt.common.constans.RobotRedisKeyConfig;
+import com.qklx.qt.core.api.ApiResult;
 import com.qklx.qt.core.enums.RobotState;
 import com.qklx.qt.core.enums.Status;
-import com.qklx.qt.core.vo.RobotVo;
-import com.qklx.qt.core.api.ApiResult;
-import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.vo.RobotStrategyVo;
+import com.qklx.qt.core.vo.RobotVo;
 import com.qklx.qt.core.vo.StrategyVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +107,11 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
             boolean flag = redisUtil.set(isStartKey, false);
             if (flag) {
                 log.info("机器人id{}被关闭", id);
+                //修改机器人的状态
+                Robot robot = new Robot();
+                robot.setId(id);
+                robot.setIsRun(0);
+                robot.updateById();
             } else {
                 log.info("机器人id{}关闭失败了", id);
             }

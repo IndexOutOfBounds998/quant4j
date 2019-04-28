@@ -31,7 +31,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         try {
             Wrapper<Orders> ordersWrapper = new EntityWrapper<>();
             ordersWrapper.eq("robot_id", rid);
-            ordersWrapper.orderDesc(Collections.singleton("create_time"));
+            ordersWrapper.orderDesc(Collections.singleton("order_id"));
             Orders orders = new Orders();
             Page<Orders> ordersPage = orders.selectPage(new Page<>(page, limit), ordersWrapper);
             return new ApiResult(Status.SUCCESS, ordersPage);

@@ -37,8 +37,11 @@ public class RobotCheckTask {
             } else {
                 r.setIsRun(1);
             }
-            if (r.updateById()) {
-                log.info("更新机器人{}状态成功", r.getRobotName());
+            try {
+                r.updateById();
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("更新机器人状态失败");
             }
         }
 

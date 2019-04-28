@@ -135,7 +135,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     public void execute() throws StrategyException {
         try {
             //设置机器人已经启动状态
-            logger.info("机器人启动了=========机器人启动了=========机器人启动了============================");
             redisUtil.set(startkey, true);
             //加载获取当前机器人的基础币种 配额币种 价格的精度 数量的精度
             boolean quotaPriceAndPrecision = getQuotaPriceAndPrecision();
@@ -147,8 +146,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 redisMqService.sendMsg("获取当前机器人的基础币种 配额币种 价格的精度 数量的精度失败！！！");
                 return;
             }
-            //检查最后一次状态
-
             //记录当前机器人的最后一次状态
             Object o = redisUtil.get(lastOrderState + robotId);
             if (o != null) {
@@ -363,7 +360,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     isProfit = 0;
                 }
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额
-                BigDecimal diff = currentAllBalance.subtract(lastAllBalance);
+                BigDecimal diff = currentAllBalance.subtract(lastAllBalance).setScale(pricePrecision, RoundingMode.DOWN);
                 BigDecimal divide = diff.divide(lastAllBalance, pricePrecision, RoundingMode.DOWN);
                 logger.info("盈亏率:{}", divide);
                 redisMqService.sendMsg("盈亏率" + divide);

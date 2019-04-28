@@ -32,10 +32,10 @@ public class SymbolTask {
      * 收集交易对信息存到数据库 /v1/common/symbols
      */
     @Async
-    @Scheduled(fixedDelay = 1000 * 60, initialDelay = 5000)
+    @Scheduled(fixedDelay = 1000 * 60 * 60 * 24, initialDelay = 5000)
     public void symbolCollects() {
         logger.info("=========数据 redis 同步交易对信息开始=========");
-        ApiClient apiClient = new ApiClient(ip,port);
+        ApiClient apiClient = new ApiClient(ip, port);
         List<Symbol> symbols = apiClient.getSymbols();
         //获取到交易对 进行排序操作 防止每次都插入不一致
         symbols = symbols.stream().sorted(Comparator.comparing(Symbol::getSymbol)).collect(Collectors.toList());

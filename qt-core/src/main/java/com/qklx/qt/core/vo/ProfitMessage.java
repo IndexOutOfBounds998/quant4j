@@ -17,6 +17,9 @@ public class ProfitMessage {
 
     BigDecimal buyAmount;
     BigDecimal sellAmount;
+
+    BigDecimal buyCashAmount;
+    BigDecimal sellCashAmount;
     //是否盈利
     int isProfit;
 

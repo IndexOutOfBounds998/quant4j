@@ -171,6 +171,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 try {
                     //设置机器人的运行状态 在休眠+15s之后没响应 就认为该机器人已经死亡
                     redisUtil.set(isRunKey, "isRuning", baseInfo.getSleep() + 15);
+
                     //重置权重
                     weights.reSet();
                     //获取市场订单
@@ -231,24 +232,25 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (checkIsStop(startkey)) {
-                        redisMqService.sendMsg("机器人" + robotId + "已经被取消了任务 退出ing");
-                        //记录当前机器人的最后一次状态
-                        redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
-                        break;
-                    }
 
                     if (profitTimes >= this.baseInfo.getProfit()) {
                         //如果亏损次数已经达到预设值 机器人退出线程
                         redisMqService.sendMsg("=======当前亏损次数" + profitTimes + "==已经达到预设值,机器人退出任务ing,请修改此策略重新来！！");
+                        logger.info("当前亏损次数达到了！结束任务。。。");
+                        checkAndSet();
+                        break;
+                    }
+
+                    if (checkIsStop(startkey)) {
+                        redisMqService.sendMsg("机器人" + robotId + "已经被取消了任务 退出ing");
+                        logger.info("机器人{}已经被取消了任务", robotId);
+                        checkAndSet();
                         break;
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    /**
-                     * 发生异常 可能是网络超时等产生的问题
-                     */
+
                     logger.error("机器人运行中发生异常：异常信息{}", e.getMessage());
                     redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
                 }
@@ -257,6 +259,13 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             e.printStackTrace();
             redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
         }
+    }
+
+
+    private void checkAndSet() {
+        checkOrder(this.tradingApi);
+        //记录当前机器人的最后一次状态
+        redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
     }
 
     /**
@@ -322,7 +331,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             } else {
                 //将成功的订单信息传回admin
                 orderMqService.sendMsg(this.orderState.id);
-                CalculateProfit();
+                this.CalculateProfit();
                 return true;
             }
         } catch (ExchangeNetworkException | TradingApiException e) {
@@ -446,6 +455,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 profitMessage.setIsProfit(isProfit);
                 profitMessage.setBuyPrice(buyPrice);
                 profitMessage.setSellPrice(sellPrice);
+                profitMessage.setBuyCashAmount(new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
+                profitMessage.setSellCashAmount(new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
                 orderProfitService.sendMsg(profitMessage);
 
             }

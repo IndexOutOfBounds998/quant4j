@@ -32,6 +32,8 @@ public class ProfitReceiver {
         orderProfit.setBuyPrice(msg.getBuyPrice());
         orderProfit.setSellAmount(msg.getSellAmount());
         orderProfit.setSellPrice(msg.getSellPrice());
+        orderProfit.setBuyCashAmount(msg.getBuyCashAmount());
+        orderProfit.setSellCashAmount(msg.getSellCashAmount());
         orderProfit.setDiff(msg.getDiff());
         orderProfit.setDivide(msg.getDivide());
         orderProfit.setIsProfit(msg.getIsProfit());

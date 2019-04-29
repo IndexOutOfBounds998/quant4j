@@ -16,7 +16,7 @@ import java.util.Date;
  * </p>
  *
  * @author yang
- * @since 2019-04-26
+ * @since 2019-04-29
  */
 @TableName("order_profit")
 public class OrderProfit extends Model<OrderProfit> {
@@ -35,6 +35,10 @@ public class OrderProfit extends Model<OrderProfit> {
     private BigDecimal buyPrice;
     @TableField("sell_price")
     private BigDecimal sellPrice;
+    @TableField("buy_cash_amount")
+    private BigDecimal buyCashAmount;
+    @TableField("sell_cash_amount")
+    private BigDecimal sellCashAmount;
     @TableField("buy_amount")
     private BigDecimal buyAmount;
     @TableField("sell_amount")
@@ -93,6 +97,22 @@ public class OrderProfit extends Model<OrderProfit> {
 
     public void setSellPrice(BigDecimal sellPrice) {
         this.sellPrice = sellPrice;
+    }
+
+    public BigDecimal getBuyCashAmount() {
+        return buyCashAmount;
+    }
+
+    public void setBuyCashAmount(BigDecimal buyCashAmount) {
+        this.buyCashAmount = buyCashAmount;
+    }
+
+    public BigDecimal getSellCashAmount() {
+        return sellCashAmount;
+    }
+
+    public void setSellCashAmount(BigDecimal sellCashAmount) {
+        this.sellCashAmount = sellCashAmount;
     }
 
     public BigDecimal getBuyAmount() {
@@ -157,6 +177,8 @@ public class OrderProfit extends Model<OrderProfit> {
         ", buyOrderId=" + buyOrderId +
         ", buyPrice=" + buyPrice +
         ", sellPrice=" + sellPrice +
+        ", buyCashAmount=" + buyCashAmount +
+        ", sellCashAmount=" + sellCashAmount +
         ", buyAmount=" + buyAmount +
         ", sellAmount=" + sellAmount +
         ", isProfit=" + isProfit +

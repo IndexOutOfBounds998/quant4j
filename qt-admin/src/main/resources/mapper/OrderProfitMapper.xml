@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qklx.qt.admin.dao.OrderProfitMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.qklx.qt.admin.entity.OrderProfit">
+        <id column="id" property="id" />
+        <result column="robot_id" property="robotId" />
+        <result column="sell_order_id" property="sellOrderId" />
+        <result column="buy_order_id" property="buyOrderId" />
+        <result column="buy_price" property="buyPrice" />
+        <result column="sell_price" property="sellPrice" />
+        <result column="buy_cash_amount" property="buyCashAmount" />
+        <result column="sell_cash_amount" property="sellCashAmount" />
+        <result column="buy_amount" property="buyAmount" />
+        <result column="sell_amount" property="sellAmount" />
+        <result column="is_profit" property="isProfit" />
+        <result column="diff" property="diff" />
+        <result column="divide" property="divide" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, robot_id AS robotId, sell_order_id AS sellOrderId, buy_order_id AS buyOrderId, buy_price AS buyPrice, sell_price AS sellPrice, buy_cash_amount AS buyCashAmount, sell_cash_amount AS sellCashAmount, buy_amount AS buyAmount, sell_amount AS sellAmount, is_profit AS isProfit, diff, divide, create_time AS createTime
+    </sql>
+
+</mapper>

@@ -83,9 +83,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private int runTimes = 0;
 
     //标志机器人已经启动
-    private final String startkey;
+    private volatile String startkey;
     //标志机器人是否在运行
-    private final String isRunKey;
+    private volatile String isRunKey;
 
     private String quotaBalanceKey;
 
@@ -189,6 +189,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     executeor();
                     //判断买卖
                     if (orderState.type == OrderType.BUY) {
+                        if (profitArrive) {
+                            break;
+                        }
                         //查看是否达到卖的信号
                         if (this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
                                 && orderState.type == OrderType.BUY) {
@@ -203,6 +206,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             redisMqService.sendMsg("当前策略计算卖出权重:" + this.weights.getSellTotal() + ",未达到策略卖出总权重【" + baseInfo.getSellAllWeights() + "】不进行操作。。。");
                         }
                     } else if (orderState.type == OrderType.SELL) {
+                        if (profitArrive) {
+                            break;
+                        }
                         //查看是否到达买的信号
                         if (this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
                                 && orderState.type == OrderType.SELL) {
@@ -220,6 +226,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         }
 
                     } else if (orderState.type == null) {
+                        if (profitArrive) {
+                            break;
+                        }
                         //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
                         if (this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()) {
                             createBuyOrder();
@@ -227,9 +236,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
                         }
                     }
-                    if (profitArrive) {
-                        break;
-                    }
+
                     try {
                         ++runTimes;
                         logger.info("机器人{}已经运行了{}次", robotId, runTimes);
@@ -330,6 +337,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             } else {
                 //将成功的订单信息传回admin
                 orderMqService.sendMsg(this.orderState.id);
+                String result = this.orderState.id + "_" + this.orderState.type.getStringValue();
+                this.redisUtil.lPush(orderProfitIds + robotId, result);
                 this.CalculateProfit();
                 return true;
             }
@@ -391,10 +400,15 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     logger.info("获取购买订单为null");
                     return;
                 }
-
+                if (new BigDecimal(ordersBuyDetail.getFieldCashAmount()).compareTo(BigDecimal.ZERO) == 0) {
+                    return;
+                }
                 ordersSellDetail = getOrderDetail(sellOrderId);
                 if (ordersSellDetail == null) {
                     logger.info("获取出售订单为null");
+                    return;
+                }
+                if (new BigDecimal(ordersSellDetail.getFieldCashAmount()).compareTo(BigDecimal.ZERO) == 0) {
                     return;
                 }
                 //如果是市价的情况
@@ -428,13 +442,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 logger.info("当前的订单状态{},计算后的差价{}", this.orderState.type.getStringValue(), diff);
                 divide = diff.divide(allBuyBalance, pricePrecision, RoundingMode.DOWN);
                 logger.info("盈亏率:{}", divide);
-
-                if (diff.compareTo(BigDecimal.ZERO) > 0) {
-                    //盈利
-                } else {
+                if (diff.compareTo(BigDecimal.ZERO) < 0) {
                     profitTimes++;
                 }
-
                 ProfitMessage profitMessage = new ProfitMessage();
                 profitMessage.setBuyOrderId(buyOrderId);
                 profitMessage.setSellOrderId(sellOrderId);
@@ -525,8 +535,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             redisMqService.sendMsg("叮叮叮>>>开始下单,下单信息 价格:" + price + "数量:" + amount + "订单类型:" + orderType.getTyoe());
             this.orderState.id = tradingApi.createOrder(this.marketConfig.markName(), this.accountConfig.accountId(), orderType, amount, price);
             if (this.orderState.id != null) {
-                String result = this.orderState.id + "_" + this.orderState.type.getStringValue();
-                this.redisUtil.lPush(orderProfitIds + robotId, result);
                 redisMqService.sendMsg("下单成功>>>订单信息【" + this.orderState.toString() + "】");
                 Thread.sleep(1000);
             }

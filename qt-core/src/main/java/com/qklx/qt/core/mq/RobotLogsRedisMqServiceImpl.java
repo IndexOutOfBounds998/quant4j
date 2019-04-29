@@ -7,8 +7,13 @@ import com.qklx.qt.core.to.RobotRunMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RobotLogsRedisMqServiceImpl implements RedisMqService {
+
+    private ExecutorService executorService = Executors.newFixedThreadPool(3);
+
     private RedisUtil redisUtil;
     private int robotId;
     private int userId;
@@ -19,19 +24,32 @@ public class RobotLogsRedisMqServiceImpl implements RedisMqService {
         this.userId = userId;
     }
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private ThreadLocal<SimpleDateFormat> simpleDateFormatThreadLocal = new ThreadLocal<>();
 
+
+    /**
+     * 异步方式提交
+     *
+     * @param msg
+     */
     @Override
     public void sendMsg(Object msg) {
-        try {
-            RobotRunMessage robotRunMessage = new RobotRunMessage();
-            robotRunMessage.setMsg(msg.toString());
-            robotRunMessage.setRobotId(robotId);
-            robotRunMessage.setDate(simpleDateFormat.format(new Date()));
-            robotRunMessage.setUserId(userId);
-            redisUtil.convertAndSend(RobotRedisKeyConfig.getRobot_msg_queue(), JSON.toJSONString(robotRunMessage));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        executorService.execute(() -> {
+            if (simpleDateFormatThreadLocal.get() == null) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                simpleDateFormatThreadLocal.set(simpleDateFormat);
+            }
+            try {
+                RobotRunMessage robotRunMessage = new RobotRunMessage();
+                robotRunMessage.setMsg(msg.toString());
+                robotRunMessage.setRobotId(robotId);
+                robotRunMessage.setDate(simpleDateFormatThreadLocal.get().format(new Date()));
+                robotRunMessage.setUserId(userId);
+                redisUtil.convertAndSend(RobotRedisKeyConfig.getRobot_msg_queue(), JSON.toJSONString(robotRunMessage));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 }

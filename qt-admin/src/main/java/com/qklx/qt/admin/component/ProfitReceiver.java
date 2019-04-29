@@ -36,7 +36,6 @@ public class ProfitReceiver {
         orderProfit.setSellCashAmount(msg.getSellCashAmount());
         orderProfit.setDiff(msg.getDiff());
         orderProfit.setDivide(msg.getDivide());
-        orderProfit.setIsProfit(msg.getIsProfit());
         if (orderProfit.insert()) {
             log.info("插入盈利数据成功");
         }

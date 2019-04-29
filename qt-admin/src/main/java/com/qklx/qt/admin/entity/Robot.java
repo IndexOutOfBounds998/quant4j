@@ -45,20 +45,19 @@ public class Robot extends Model<Robot> {
     @TableField("is_delete")
     private Integer isDelete;
 
-
-    public int getAccountId() {
+    public Integer getAccountId() {
         return accountId;
     }
 
-    public void setAccountId(int accountId) {
+    public void setAccountId(Integer accountId) {
         this.accountId = accountId;
     }
 
-    public int getIsRun() {
+    public Integer getIsRun() {
         return isRun;
     }
 
-    public void setIsRun(int isRun) {
+    public void setIsRun(Integer isRun) {
         this.isRun = isRun;
     }
 

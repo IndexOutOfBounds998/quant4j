@@ -2,8 +2,8 @@ package com.qklx.qt.admin.service;
 
 import com.baomidou.mybatisplus.service.IService;
 import com.qklx.qt.admin.entity.Robot;
-import com.qklx.qt.core.vo.RobotVo;
 import com.qklx.qt.core.api.ApiResult;
+import com.qklx.qt.core.vo.RobotVo;
 
 /**
  * <p>
@@ -22,4 +22,7 @@ public interface RobotService extends IService<Robot> {
     ApiResult operatingRobot(Integer id,Integer state, String uid);
 
     ApiResult deleteRobot(String uid,int id);
+
+    boolean editRobotRunState(int runState);
+
 }

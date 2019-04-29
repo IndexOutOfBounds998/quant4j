@@ -106,12 +106,14 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
             String isStartKey = RobotRedisKeyConfig.getRobotIsStartStateKey() + id;
             boolean flag = redisUtil.set(isStartKey, false);
             if (flag) {
-                log.info("机器人id{}被关闭", id);
                 //修改机器人的状态
                 Robot robot = new Robot();
                 robot.setId(id);
                 robot.setIsRun(0);
-                robot.updateById();
+                boolean byId = robot.updateById();
+                if (byId) {
+                    log.info("机器人{}状态被修改为关闭", id);
+                }
             } else {
                 log.info("机器人id{}关闭失败了", id);
             }
@@ -211,5 +213,10 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
             log.error("删除机器人异常{}", e.getMessage());
         }
         return new ApiResult(Status.ERROR);
+    }
+
+    @Override
+    public boolean editRobotRunState(int runState) {
+        return false;
     }
 }

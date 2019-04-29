@@ -1,14 +1,12 @@
 package com.qklx.qt.admin.entity;
 
+import com.baomidou.mybatisplus.activerecord.Model;
+import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.enums.IdType;
 
-import java.util.Date;
-
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.activerecord.Model;
-
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -30,14 +28,14 @@ public class Robot extends Model<Robot> {
     @TableField("user_id")
     private String userId;
     @TableField("account_id")
-    private int accountId;
+    private Integer accountId;
     @TableField("strategy_id")
     private Integer strategyId;
     @TableField("client_address")
     private String clientAddress;
 
     @TableField("is_run")
-    private int isRun;
+    private Integer isRun;
 
     @TableField("create_time")
     private Date createTime;

@@ -86,6 +86,9 @@ public class BalanceTask {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        if (response == null) {
+            return;
+        }
         if (response.getStatus().equals("ok")) {
             CopyOnWriteArrayList<BalanceBean> balances = new CopyOnWriteArrayList<>(response.getData().getList());
             if (!balances.isEmpty()) {

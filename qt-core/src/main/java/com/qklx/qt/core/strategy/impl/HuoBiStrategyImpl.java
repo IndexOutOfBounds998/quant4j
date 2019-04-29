@@ -463,7 +463,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     //如果亏损次数已经达到预设值 机器人退出线程
                     redisMqService.sendMsg("=======当前亏损次数【" + profitTimes + "】==已经达到预设值,机器人退出任务ing,请修改此策略重新来！！");
                     logger.info("当前亏损次数达到了！结束任务。。。");
-                    checkAndSet();
+                    //记录当前机器人的最后一次状态
+                    redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
                     this.profitArrive = true;
                 }
             }

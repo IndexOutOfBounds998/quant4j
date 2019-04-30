@@ -138,6 +138,10 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
         orderMqService = new OrderIdRedisMqServiceImpl(this.redisUtil, accountConfig, robotId);
         orderProfitService = new OrderProfitRedisMqServiceImpl(this.redisUtil);
+        //限价 市价方式
+        lastOrderState = lastOrderState + "type_" + this.baseInfo.getIsLimitPrice() + "_";
+        orderProfitIds = orderProfitIds + "type_" + this.baseInfo.getIsLimitPrice() + "_";
+
     }
 
     @Override
@@ -327,16 +331,21 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     }
                     //计算盈亏率(忽略相同数量的情况下 只对价格做盈亏率计算)
                     diff = sellPrice.subtract(buyPrice).divide(buyPrice, 4, RoundingMode.DOWN);
+                    logger.info("当前参与计算的buyPrice:{},sellPrice:{}", buyPrice, sellPrice);
                     logger.info("diff{}", diff);
                     redisMqService.sendMsg("当前的止盈止损,盈亏计算得到的百分比为" + diff.toPlainString() + "%");
                 }
                 if (diff.compareTo(BigDecimal.ZERO) > 0) {
                     //盈利
                     if (this.setting6.getTakeProfit().compareTo(BigDecimal.ZERO) != 0) {
-
-                        if (this.setting6.getTakeProfit().compareTo(diff) > 0) {
+                        logger.info("策略设置的盈利点为{}", this.setting6.getTakeProfit());
+                        int i = diff.compareTo(this.setting6.getTakeProfit());
+                        logger.info("策略比较后的i值{}", i);
+                        if (i >= 0) {
+                            logger.info("设置的策略赢利点大于diff,开始卖出");
                             redisMqService.sendMsg("达到设置的止盈点,开始卖出");
-                            //止盈的百分比达到 设置的值 需要卖出
+                            logger.info("达到设置的止盈点,开始卖出");
+                            //止盈的百分比达到,设置的值,需要卖出
                             createSellOrder();
                             return true;
                         } else {
@@ -347,7 +356,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     //亏损
                     if (this.setting6.getStopLoss().compareTo(BigDecimal.ZERO) != 0) {
 
-                        if (this.setting6.getStopLoss().compareTo(diff.abs()) > 0) {
+                        if (diff.abs().compareTo(this.setting6.getStopLoss()) >= 0) {
                             //止损的百分比达到 设置的值 需要卖出
                             redisMqService.sendMsg("达到设置的止损点,开始卖出");
                             createSellOrder();

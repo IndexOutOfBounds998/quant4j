@@ -145,4 +145,24 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
         }
     }
 
+    @Override
+    public ApiResult deleteStrategy(int id, String uid) {
+
+        try {
+            Strategy strategy = new Strategy();
+            Wrapper<Strategy> strategyWrapper = new EntityWrapper<>();
+            strategyWrapper.eq("id", id);
+            strategyWrapper.eq("user_id", uid);
+            boolean delete = strategy.delete(strategyWrapper);
+            if (delete) {
+                return new ApiResult(Status.SUCCESS, "删除成功");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("删除策略异常{}", e.getMessage());
+        }
+
+        return new ApiResult(Status.ERROR, "删除失败");
+    }
+
 }

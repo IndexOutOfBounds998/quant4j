@@ -1,9 +1,9 @@
 package com.qklx.qt.admin.controller;
 
 import com.qklx.qt.admin.service.StrategyService;
+import com.qklx.qt.core.api.ApiResult;
 import com.qklx.qt.core.enums.Status;
 import com.qklx.qt.core.vo.StrategyVo;
-import com.qklx.qt.core.api.ApiResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,4 +70,14 @@ public class StrategyController extends BaseController{
            return strategyService.getStrategyById(id,uid);
        }
    }
+
+    @GetMapping("/deleteStrategy")
+    public ApiResult deleteStrategy(HttpServletRequest httpRequest,int id) {
+        String uid = getUid(httpRequest);
+        if (uid == null) {
+            return new ApiResult(Status.Login_out);
+        } else {
+            return strategyService.deleteStrategy(id,uid);
+        }
+    }
 }

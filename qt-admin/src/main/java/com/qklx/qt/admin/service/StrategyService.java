@@ -2,8 +2,8 @@ package com.qklx.qt.admin.service;
 
 import com.baomidou.mybatisplus.service.IService;
 import com.qklx.qt.admin.entity.Strategy;
-import com.qklx.qt.core.vo.StrategyVo;
 import com.qklx.qt.core.api.ApiResult;
+import com.qklx.qt.core.vo.StrategyVo;
 
 /**
  * <p>
@@ -22,4 +22,6 @@ public interface StrategyService extends IService<Strategy> {
     ApiResult simpleStrategyList(String uid);
 
     ApiResult getStrategyById(int id, String uid);
+
+    ApiResult deleteStrategy(int id, String uid);
 }

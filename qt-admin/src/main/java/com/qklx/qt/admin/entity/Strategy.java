@@ -62,7 +62,7 @@ public class Strategy extends Model<Strategy> {
      * 亏损次数
      */
     private Integer profit;
-    private Integer sleep;
+    private Double sleep;
     private String setting1;
     private String setting2;
     private String setting3;
@@ -183,11 +183,11 @@ public class Strategy extends Model<Strategy> {
         this.profit = profit;
     }
 
-    public Integer getSleep() {
+    public Double getSleep() {
         return sleep;
     }
 
-    public void setSleep(Integer sleep) {
+    public void setSleep(Double sleep) {
         this.sleep = sleep;
     }
 

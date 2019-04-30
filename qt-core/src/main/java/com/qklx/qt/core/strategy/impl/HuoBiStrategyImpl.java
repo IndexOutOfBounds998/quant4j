@@ -202,7 +202,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             continue;
                         }
                         //查看是否达到卖的信号
-                        if (this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
+                        if (this.weights.getSellTotal() > this.baseInfo.getSellAllWeights()
                                 && orderState.type == OrderType.BUY) {
                             try {
                                 createSellOrder();
@@ -219,7 +219,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             break;
                         }
                         //查看是否到达买的信号
-                        if (this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
+                        if (this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()
                                 && orderState.type == OrderType.SELL) {
                             try {
                                 createBuyOrder();
@@ -239,7 +239,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             break;
                         }
                         //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
-                        if (this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()) {
+                        if (this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()) {
                             createBuyOrder();
                         } else {
                             redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
@@ -296,6 +296,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     //买入的价格
                     BigDecimal buyPrice = this.orderState.price;
                     //计算盈亏率
+
+                    if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
+                        return false;
+                    }
+
                     diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN);
 
                 } else {
@@ -306,6 +311,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     try {
                         OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);
                         buyPrice = new BigDecimal(ordersDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
+
+                        if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
+                            return false;
+                        }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         //获取失败

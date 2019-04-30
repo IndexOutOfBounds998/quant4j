@@ -13,7 +13,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-29
+ * @since 2019-04-30
  */
 public class Robot extends Model<Robot> {
 

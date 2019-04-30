@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +80,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private StrategyVo.Setting3Entity setting3;
     private StrategyVo.Setting4Entity setting4;
     private StrategyVo.Setting5Entity setting5;
-
+    private StrategyVo.Setting6Entity setting6;
     private int runTimes = 0;
 
     //标志机器人已经启动
@@ -131,6 +132,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         this.setting3 = config.getStrategyVo().getSetting3();
         this.setting4 = config.getStrategyVo().getSetting4();
         this.setting5 = config.getStrategyVo().getSetting5();
+        this.setting6 = config.getStrategyVo().getSetting6();
+
         this.orderState = new OrderState();
         this.weights = new Weights();
         redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
@@ -171,7 +174,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             while (true) {
                 try {
                     //设置机器人的运行状态 在休眠+15s之后没响应 就认为该机器人已经死亡
-                    redisUtil.set(isRunKey, "isRunning", baseInfo.getSleep() + 15);
+                    redisUtil.set(isRunKey, "isRunning", (long) (baseInfo.getSleep() + 15));
                     //重置权重
                     weights.reSet();
                     //获取市场订单
@@ -191,6 +194,13 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     if (orderState.type == OrderType.BUY) {
                         if (profitArrive) {
                             break;
+                        }
+                        //卖的情况下 先判断是否开启了止盈止损
+                        boolean takeProfitStopLoss = takeProfitStopLoss();
+                        if (takeProfitStopLoss) {
+                            long v = (long) (this.baseInfo.getSleep() * 1000L);
+                            Thread.sleep(v);
+                            continue;
                         }
                         //查看是否达到卖的信号
                         if (this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
@@ -242,7 +252,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         logger.info("机器人{}已经运行了{}次", robotId, runTimes);
                         logger.info("=========================================");
                         //休眠几秒
-                        Thread.sleep(baseInfo.getSleep() * 1000);
+                        Thread.sleep((long) (baseInfo.getSleep() * 1000));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -267,6 +277,77 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         }
     }
 
+    /**
+     * 针对策略6的计算方法
+     * 止盈止损
+     *
+     * @return true 需要直接卖 不走其他流程
+     */
+    private boolean takeProfitStopLoss() {
+
+        if (this.setting6.getIsAble() == 1) {//开启状态下
+
+            if (this.orderState.type == OrderType.BUY) {//当前订单是买入 计算卖出的盈利率
+                BigDecimal diff;
+                if (this.baseInfo.getIsLimitPrice() == 1) {//限价方式\
+
+                    //只拿当前的卖出价格
+                    BigDecimal sellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                    //买入的价格
+                    BigDecimal buyPrice = this.orderState.price;
+                    //计算盈亏率
+                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN);
+
+                } else {
+                    //市价方式
+                    //当前卖出价格计算 深度最多的 作为卖出价格
+                    BigDecimal sellPrice, buyPrice;
+                    try {
+                        sellPrice = this.marketOrder.getSell().stream()
+                                .limit(20)
+                                .max(Comparator.comparing(TradeBean::getAmount))
+                                .get().getPrice();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                    //当前价格 通过获取订单详情来获取
+                    try {
+                        OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);
+                        buyPrice = new BigDecimal(ordersDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        //获取失败
+                        return false;
+                    }
+                    //计算盈亏率(忽略相同数量的情况下 只对价格做盈亏率计算)
+                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN);
+                }
+                if (diff.compareTo(BigDecimal.ZERO) > 0) {
+                    //盈利
+                    if (this.setting6.getTakeProfit().compareTo(BigDecimal.ZERO) != 0) {
+
+                        if (this.setting6.getTakeProfit().compareTo(diff) > 0) {
+                            //止盈的百分比达到 设置的值 需要卖出
+                            createSellOrder();
+                            return true;
+                        }
+                    }
+                } else {
+                    //亏损
+                    if (this.setting6.getStopLoss().compareTo(BigDecimal.ZERO) != 0) {
+
+                        if (this.setting6.getStopLoss().compareTo(diff.abs()) > 0) {
+                            //止损的百分比达到 设置的值 需要卖出
+                            createSellOrder();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     private void checkAndSet() {
         checkOrder(this.tradingApi);

@@ -11,7 +11,8 @@ public class MainTest {
     }
 
     public static void main(String[] args) {
-
+        long v = (long) (0.1 * 1000L);
+        System.out.println(v);
     }
 
 

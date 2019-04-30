@@ -21,7 +21,7 @@ public class StrategyVo {
     private Setting3Entity setting3;
     private Setting4Entity setting4;
     private Setting5Entity setting5;
-
+    private Setting6Entity setting6;
 
     @Data
     public static class BaseInfoEntity {
@@ -39,7 +39,7 @@ public class StrategyVo {
          * sellAllWeights : 1
          */
         private BigDecimal buyPrice;
-        private int sleep;
+        private double sleep;
         private String strategyName;
         private BigDecimal buyAmount;
         private int buyAllWeights;
@@ -140,5 +140,15 @@ public class StrategyVo {
         private double buyPercent;
         private double sellPercent;
 
+    }
+
+    /**
+     * "setting6":{"isAble":true,"takeProfit":0.0001,"stopLoss":0.0002}}
+     */
+    @Data
+    public static class Setting6Entity {
+        private int isAble;
+        private BigDecimal takeProfit;
+        private BigDecimal stopLoss;
     }
 }

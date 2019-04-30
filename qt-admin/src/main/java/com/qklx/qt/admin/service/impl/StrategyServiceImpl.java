@@ -78,6 +78,11 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
             strategy.setSetting5(JSON.toJSONString(setting5));
         }
 
+        StrategyVo.Setting6Entity setting6 = strategyVo.getSetting6();
+        if (setting6 != null) {
+            strategy.setSetting6(JSON.toJSONString(setting6));
+        }
+
         if (strategyVo.getId() != null) {
             //修改
             strategy.setId(strategyVo.getId());

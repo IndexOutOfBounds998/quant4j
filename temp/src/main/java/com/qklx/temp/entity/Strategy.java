@@ -13,7 +13,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-29
+ * @since 2019-04-30
  */
 public class Strategy extends Model<Strategy> {
 
@@ -67,6 +67,7 @@ public class Strategy extends Model<Strategy> {
     private String setting3;
     private String setting4;
     private String setting5;
+    private String setting6;
 
 
     public Integer getId() {
@@ -229,6 +230,14 @@ public class Strategy extends Model<Strategy> {
         this.setting5 = setting5;
     }
 
+    public String getSetting6() {
+        return setting6;
+    }
+
+    public void setSetting6(String setting6) {
+        this.setting6 = setting6;
+    }
+
     @Override
     protected Serializable pkVal() {
         return this.id;
@@ -257,6 +266,7 @@ public class Strategy extends Model<Strategy> {
         ", setting3=" + setting3 +
         ", setting4=" + setting4 +
         ", setting5=" + setting5 +
+        ", setting6=" + setting6 +
         "}";
     }
 }

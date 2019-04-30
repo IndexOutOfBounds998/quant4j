@@ -42,7 +42,6 @@ public class RobotOperate {
         AccountConfig accountConfig = new HuoBiAccountConfigImpl(vo.getAccountConfig());
         huobiStrategy.init(api, marketConfig, strategyConfig, accountConfig);
         try {
-            log.info("开启线程==================================================");
             huobiStrategy.execute();
         } catch (StrategyException e) {
             e.printStackTrace();

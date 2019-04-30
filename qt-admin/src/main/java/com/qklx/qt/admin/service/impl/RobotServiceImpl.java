@@ -182,6 +182,9 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
 
             StrategyVo.Setting5Entity setting5Entity = JSON.parseObject(strategyOne.getSetting5(), StrategyVo.Setting5Entity.class);
             strategyVo.setSetting5(setting5Entity);
+
+            StrategyVo.Setting6Entity setting6Entity = JSON.parseObject(strategyOne.getSetting6(), StrategyVo.Setting6Entity.class);
+            strategyVo.setSetting6(setting6Entity);
             //组装整体机器人vo
             RobotStrategyVo robotStrategyVo = new RobotStrategyVo();
             robotStrategyVo.setRobotId(oneRobot.getId());

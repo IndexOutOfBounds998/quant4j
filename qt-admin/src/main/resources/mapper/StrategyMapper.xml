@@ -4,31 +4,31 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.qklx.qt.admin.entity.Strategy">
-        <id column="id" property="id" />
-        <result column="user_id" property="userId" />
-        <result column="strategy_name" property="strategyName" />
-        <result column="buy_amount" property="buyAmount" />
-        <result column="buy_quota_price" property="buyQuotaPrice" />
-        <result column="sell_amount" property="sellAmount" />
-        <result column="buy_price" property="buyPrice" />
-        <result column="sell_price" property="sellPrice" />
-        <result column="is_all_buy" property="isAllBuy" />
-        <result column="is_all_sell" property="isAllSell" />
-        <result column="is_limit_price" property="isLimitPrice" />
-        <result column="sell_all_weights" property="sellAllWeights" />
-        <result column="buy_all_weights" property="buyAllWeights" />
-        <result column="profit" property="profit" />
-        <result column="sleep" property="sleep" />
-        <result column="setting1" property="setting1" />
-        <result column="setting2" property="setting2" />
-        <result column="setting3" property="setting3" />
-        <result column="setting4" property="setting4" />
-        <result column="setting5" property="setting5" />
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="strategy_name" property="strategyName"/>
+        <result column="buy_amount" property="buyAmount"/>
+        <result column="buy_quota_price" property="buyQuotaPrice"/>
+        <result column="sell_amount" property="sellAmount"/>
+        <result column="buy_price" property="buyPrice"/>
+        <result column="sell_price" property="sellPrice"/>
+        <result column="is_all_buy" property="isAllBuy"/>
+        <result column="is_all_sell" property="isAllSell"/>
+        <result column="is_limit_price" property="isLimitPrice"/>
+        <result column="sell_all_weights" property="sellAllWeights"/>
+        <result column="buy_all_weights" property="buyAllWeights"/>
+        <result column="profit" property="profit"/>
+        <result column="sleep" property="sleep"/>
+        <result column="setting1" property="setting1"/>
+        <result column="setting2" property="setting2"/>
+        <result column="setting3" property="setting3"/>
+        <result column="setting4" property="setting4"/>
+        <result column="setting5" property="setting5"/>
+        <result column="setting6" property="setting6"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id AS userId, strategy_name AS strategyName, buy_amount AS buyAmount, buy_quota_price AS buyQuotaPrice, sell_amount AS sellAmount, buy_price AS buyPrice, sell_price AS sellPrice, is_all_buy AS isAllBuy, is_all_sell AS isAllSell, is_limit_price AS isLimitPrice, sell_all_weights AS sellAllWeights, buy_all_weights AS buyAllWeights, profit, sleep, setting1, setting2, setting3, setting4, setting5
+        id, user_id AS userId, strategy_name AS strategyName, buy_amount AS buyAmount, buy_quota_price AS buyQuotaPrice, sell_amount AS sellAmount, buy_price AS buyPrice, sell_price AS sellPrice, is_all_buy AS isAllBuy, is_all_sell AS isAllSell, is_limit_price AS isLimitPrice, sell_all_weights AS sellAllWeights, buy_all_weights AS buyAllWeights, profit, sleep, setting1, setting2, setting3, setting4, setting5, setting6
     </sql>
-
 </mapper>

@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -288,11 +287,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (this.setting6.getIsAble() == 1) {//开启状态下
 
             if (this.orderState.type == OrderType.BUY) {//当前订单是买入 计算卖出的盈利率
-                BigDecimal diff;
+                BigDecimal diff, sellPrice;
+                //只拿当前的卖出价格
+                sellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+
                 if (this.baseInfo.getIsLimitPrice() == 1) {//限价方式\
 
-                    //只拿当前的卖出价格
-                    BigDecimal sellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
                     //买入的价格
                     BigDecimal buyPrice = this.orderState.price;
                     //计算盈亏率
@@ -301,16 +301,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 } else {
                     //市价方式
                     //当前卖出价格计算 深度最多的 作为卖出价格
-                    BigDecimal sellPrice, buyPrice;
-                    try {
-                        sellPrice = this.marketOrder.getSell().stream()
-                                .limit(20)
-                                .max(Comparator.comparing(TradeBean::getAmount))
-                                .get().getPrice();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    BigDecimal buyPrice;
                     //当前价格 通过获取订单详情来获取
                     try {
                         OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);

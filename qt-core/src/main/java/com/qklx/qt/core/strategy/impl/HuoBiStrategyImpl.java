@@ -295,12 +295,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
                     //买入的价格
                     BigDecimal buyPrice = this.orderState.price;
-                    //计算盈亏率
-
+                    logger.info("buyPrice{}", buyPrice);
                     if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
                         return false;
                     }
-
+                    //计算盈亏率
                     diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN);
 
                 } else {
@@ -310,20 +309,25 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     //当前价格 通过获取订单详情来获取
                     try {
                         OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);
-                        buyPrice = new BigDecimal(ordersDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
-
-                        if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
+                        if (new BigDecimal(ordersDetail.getFieldAmount()).compareTo(BigDecimal.ZERO) == 0) {
+                            logger.info("消费总数量为0");
                             return false;
                         }
+                        buyPrice = new BigDecimal(ordersDetail.getFieldCashAmount()).divide(new BigDecimal(ordersDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
 
+                        if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
+                            logger.info("购买价格为0");
+                            return false;
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        logger.error(e.getMessage());
                         //获取失败
                         return false;
                     }
                     //计算盈亏率(忽略相同数量的情况下 只对价格做盈亏率计算)
                     diff = sellPrice.subtract(buyPrice).divide(buyPrice, 4, RoundingMode.DOWN);
-
+                    logger.info("diff{}", diff);
                     redisMqService.sendMsg("当前的止盈止损,盈亏计算得到的百分比为" + diff.toPlainString() + "%");
                 }
                 if (diff.compareTo(BigDecimal.ZERO) > 0) {
@@ -335,6 +339,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             //止盈的百分比达到 设置的值 需要卖出
                             createSellOrder();
                             return true;
+                        } else {
+                            redisMqService.sendMsg("未达到设置的止盈点");
                         }
                     }
                 } else {
@@ -346,6 +352,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             redisMqService.sendMsg("达到设置的止损点,开始卖出");
                             createSellOrder();
                             return true;
+                        } else {
+                            redisMqService.sendMsg("未达到设置的止损点");
                         }
                     }
                 }

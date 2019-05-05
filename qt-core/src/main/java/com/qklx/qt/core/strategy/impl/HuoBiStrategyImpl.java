@@ -542,7 +542,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额
                 diff = allSellBalance.subtract(allBuyBalance).setScale(pricePrecision, RoundingMode.DOWN);
                 logger.info("当前的订单状态{},计算后的差价{}", this.orderState.type.getStringValue(), diff);
-                divide = diff.divide(allBuyBalance, pricePrecision, RoundingMode.DOWN);
+                divide = diff.divide(allBuyBalance, 4, RoundingMode.DOWN);
                 logger.info("盈亏率:{}", divide);
                 if (diff.compareTo(BigDecimal.ZERO) < 0) {
                     profitTimes++;

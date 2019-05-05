@@ -47,7 +47,7 @@ logging:
       qklx:
         qt:
           admin:
-            dao: debug
+            dao: info
     root: info
   file: /logs/spring.log
 #  mapper-locations: classpath:/mapper/*

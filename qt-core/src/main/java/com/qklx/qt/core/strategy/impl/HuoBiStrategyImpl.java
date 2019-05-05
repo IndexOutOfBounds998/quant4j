@@ -216,7 +216,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                                 createBuyOrder();
                             }
                         } else {
-                            redisMqService.sendMsg("当前策略计算卖出权重:" + this.weights.getSellTotal() + ",未达到策略卖出总权重【" + baseInfo.getSellAllWeights() + "】不进行操作。。。");
+                            redisMqService.sendMsg(this.weights.getSellTotal() == 0 ? "当前策略设置不进行卖出操作!!!" : "当前策略计算卖出权重:" + this.weights.getSellTotal() + ",未达到策略卖出总权重【" + baseInfo.getSellAllWeights() + "】不进行操作。。。");
                         }
                     } else if (orderState.type == OrderType.SELL) {
                         if (profitArrive) {
@@ -235,7 +235,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             }
 
                         } else {
-                            redisMqService.sendMsg("当前策略计算买入权重:" + this.weights.getBuyTotal() + ",未达到策略买入总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
+                            redisMqService.sendMsg(this.weights.getBuyTotal() == 0 ? "当前策略设置不进行买入操作!!!" : "当前策略计算买入权重:" + this.weights.getBuyTotal() + ",未达到策略买入总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
                         }
 
                     } else if (orderState.type == null) {

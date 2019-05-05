@@ -206,7 +206,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             continue;
                         }
                         //查看是否达到卖的信号
-                        if (this.weights.getSellTotal() > this.baseInfo.getSellAllWeights()
+                        if (this.weights.getSellTotal() != 0 && this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
                                 && orderState.type == OrderType.BUY) {
                             try {
                                 createSellOrder();
@@ -223,7 +223,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             break;
                         }
                         //查看是否到达买的信号
-                        if (this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()
+                        if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
                                 && orderState.type == OrderType.SELL) {
                             try {
                                 createBuyOrder();
@@ -243,7 +243,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             break;
                         }
                         //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
-                        if (this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()) {
+                        if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()) {
                             createBuyOrder();
                         } else {
                             redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
@@ -269,7 +269,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
                 } catch (Exception e) {
                     e.printStackTrace();
-
                     logger.error("机器人运行中发生异常：异常信息{}", e.getMessage());
                     redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
                 }

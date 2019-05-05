@@ -292,7 +292,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             if (this.orderState.type == OrderType.BUY) {//当前订单是买入 计算卖出的盈利率
                 BigDecimal diff, sellPrice;
                 //只拿当前的卖出价格
-                sellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(4, RoundingMode.DOWN);
+                sellPrice = this.marketOrder.getSell().get(0).getPrice();
 
                 if (this.baseInfo.getIsLimitPrice() == 1) {//限价方式\
 
@@ -303,7 +303,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         return false;
                     }
                     //计算盈亏率
-                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, 4, RoundingMode.DOWN).multiply(new BigDecimal(100));
+                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, decimalPoint, RoundingMode.DOWN).multiply(new BigDecimal(100));
 
                 } else {
                     //市价方式
@@ -316,7 +316,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                             logger.info("消费总数量为0");
                             return false;
                         }
-                        buyPrice = new BigDecimal(ordersDetail.getFieldCashAmount()).divide(new BigDecimal(ordersDetail.getFieldAmount()), 4, RoundingMode.DOWN);
+                        buyPrice = new BigDecimal(ordersDetail.getFieldCashAmount()).divide(new BigDecimal(ordersDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
                         logger.info("市价buyPrice{}", buyPrice);
                         if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
                             logger.info("购买价格为0");
@@ -329,7 +329,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         return false;
                     }
                     //计算盈亏率(忽略相同数量的情况下 只对价格做盈亏率计算)
-                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, 4, RoundingMode.DOWN).multiply(new BigDecimal(100));
+                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, decimalPoint, RoundingMode.DOWN).multiply(new BigDecimal(100));
                     logger.info("当前参与计算的buyPrice:{},sellPrice:{}", buyPrice, sellPrice);
                     logger.info("diff{}", diff);
                     redisMqService.sendMsg("当前的止盈止损,盈亏计算得到的百分比为" + diff.toPlainString() + "%");
@@ -542,7 +542,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额
                 diff = allSellBalance.subtract(allBuyBalance).setScale(pricePrecision, RoundingMode.DOWN);
                 logger.info("当前的订单状态{},计算后的差价{}", this.orderState.type.getStringValue(), diff);
-                divide = diff.divide(allBuyBalance, 4, RoundingMode.DOWN);
+                divide = diff.divide(allBuyBalance, decimalPoint, RoundingMode.DOWN);
                 logger.info("盈亏率:{}", divide);
                 if (diff.compareTo(BigDecimal.ZERO) < 0) {
                     profitTimes++;
@@ -619,7 +619,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private BigDecimal calculationFallOrRise(TradeBean tradeBeanNow, TradeBean bfTradeBean) {
         return tradeBeanNow.getPrice().subtract(bfTradeBean.getPrice())
-                .divide(bfTradeBean.getPrice(), 4, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+                .divide(bfTradeBean.getPrice(), decimalPoint, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
     }
 
 

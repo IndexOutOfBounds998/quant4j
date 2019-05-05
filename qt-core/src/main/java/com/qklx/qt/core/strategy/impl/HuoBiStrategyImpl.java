@@ -304,7 +304,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         return false;
                     }
                     //计算盈亏率
-                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN);
+                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN).multiply(new BigDecimal(100));
 
                 } else {
                     //市价方式
@@ -330,7 +330,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         return false;
                     }
                     //计算盈亏率(忽略相同数量的情况下 只对价格做盈亏率计算)
-                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, 4, RoundingMode.DOWN);
+                    diff = sellPrice.subtract(buyPrice).divide(buyPrice, pricePrecision, RoundingMode.DOWN).multiply(new BigDecimal(100));
                     logger.info("当前参与计算的buyPrice:{},sellPrice:{}", buyPrice, sellPrice);
                     logger.info("diff{}", diff);
                     redisMqService.sendMsg("当前的止盈止损,盈亏计算得到的百分比为" + diff.toPlainString() + "%");

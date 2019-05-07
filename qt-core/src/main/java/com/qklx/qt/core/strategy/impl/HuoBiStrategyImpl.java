@@ -177,7 +177,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             while (true) {
                 try {
                     //设置机器人的运行状态 在休眠+15s之后没响应 就认为该机器人已经死亡
-                    redisUtil.set(isRunKey, "isRunning", (long) (baseInfo.getSleep() + 15));
+                    redisUtil.set(isRunKey, "isRunning", (long) (baseInfo.getSleep() + 20));
                     //重置权重
                     weights.reSet();
                     //获取市场订单
@@ -271,6 +271,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     e.printStackTrace();
                     logger.error("机器人运行中发生异常：异常信息{}", e.getMessage());
                     redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
+                } finally {
+                    //记录当前机器人的最后一次状态
+                    redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
                 }
             }
         } catch (Exception e) {
@@ -870,7 +873,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 weights.AddBuyTotal(setting1Entity.getBuyWeights());
             }
         }
-        if (this.orderState.type == OrderType.BUY) {
+        if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
             //计算卖
             if (setting1SellCalculation(marketOrder, setting1Entity)) {
                 weights.AddSellTotal(setting1Entity.getSellWeights());
@@ -893,7 +896,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 weights.AddBuyTotal(setting2Entity.getBuyWeights());
             }
         }
-        if (this.orderState.type == OrderType.BUY) {
+        if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
             //计算卖
             if (setting2SellCalculation(marketOrder, setting2)) {
                 weights.AddSellTotal(setting2Entity.getSellWeights());
@@ -936,7 +939,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 }
             }
         }
-        if (this.orderState.type == OrderType.BUY) {
+        if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
             if (!marketOrder.getSell().isEmpty()) {
                 //计算卖出订单
                 TradeBean tradeBeanNow = marketOrder.getSell().get(0);
@@ -998,7 +1001,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 }
             }
         }
-        if (this.orderState.type == OrderType.BUY) {
+        if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
             //计算卖出订单
             tradeBeanNow = marketOrder.getSell().get(0);
             final long sellNow = tradeBeanNow.getTs();
@@ -1031,12 +1034,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         final MarketConfig marketConfig = this.marketConfig;
         //计算买的权重 获取k线
         String buyKline = setting5Entity.getBuyKline();
-        KlineConfig klineConfig = new HuoBiKlineConfigImpl("10", buyKline);
+        KlineConfig klineConfig = new HuoBiKlineConfigImpl("200", buyKline);
         List<Kline> lines = null;
         try {
             lines = tradingApi.getKline(marketConfig, klineConfig);
         } catch (Exception e) {
-            lines = tradingApi.getKline(marketConfig, klineConfig);
+            logger.error("获取k线失败:{}", e.getMessage());
         }
         if (lines != null && !lines.isEmpty()) {
             //当前订单是卖出订单的时候才计算买入的权重
@@ -1058,7 +1061,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 }
             }
             //当前订单是买入的时候 才计算卖出的权重
-            if (this.orderState.type == OrderType.BUY) {
+            if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
                 //卖的权重
                 if (setting5Entity.getSellKlineOption().equals(TraceType.up.getStr())) {
                     //上涨趋势
@@ -1200,7 +1203,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * 订单状态
      */
     @Data
-    private static class OrderState {
+    public static class OrderState {
 
         /**
          * Id - default to null.

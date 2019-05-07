@@ -46,9 +46,9 @@ public class ApiClient {
     /**
      * 定义超时时间
      */
-    private static final int CONN_TIMEOUT = 6;
-    private static final int READ_TIMEOUT = 6;
-    private static final int WRITE_TIMEOUT = 6;
+    private static final int CONN_TIMEOUT = 5;
+    private static final int READ_TIMEOUT = 5;
+    private static final int WRITE_TIMEOUT = 5;
 
     private static final String API_HOST = "api.huobi.pro";
 

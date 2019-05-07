@@ -246,7 +246,6 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             logger.info("获取k线数据symbol{} ,period {} ,size {} 失败", marketConfig.markName(),
                     klineConfig.period(),
                     klineConfig.size());
-            getKline(marketConfig,klineConfig);
         }
         return null;
     }

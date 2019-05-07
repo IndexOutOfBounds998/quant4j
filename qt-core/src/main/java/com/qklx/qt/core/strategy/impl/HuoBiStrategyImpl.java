@@ -913,14 +913,14 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     @Override
     public void executeSetting3(MarketOrder marketOrder) {
-        final StrategyVo.Setting3Entity setting3Entity = this.setting3;
+        final StrategyVo.Setting3Entity config = this.setting3;
         if (this.orderState.type == OrderType.SELL || this.orderState.type == null) {
             //计算几秒前的 时间
             if (!marketOrder.getBuy().isEmpty()) {
                 //计算购买订单
                 TradeBean tradeBeanNow = marketOrder.getBuy().get(0);
                 final long buyNow = tradeBeanNow.getTs();
-                final long buyBefore = buyNow - (setting3Entity.getBuyDownSecond() * 1000);
+                final long buyBefore = buyNow - (config.getBuyDownSecond() * 1000);
                 BigDecimal down;
                 Optional<TradeBean> bfTradeBean = marketOrder.getBuy().stream()
                         .filter(tradeBean -> tradeBean.getTs() <= buyBefore)
@@ -930,11 +930,14 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     if (bfTradeBean.get().getPrice().compareTo(tradeBeanNow.getPrice()) > 0) {
                         //之前的价格大于现在的价格 价格在下跌 计算下跌百分比
                         down = calculationFallOrRise(tradeBeanNow, bfTradeBean.get());
+                        redisMqService.sendMsg("策略3最新购买订单成交记录价格" + tradeBeanNow.getPrice() + "和" + config.getBuyDownSecond() + "秒之前的订单价格" + bfTradeBean.get().getPrice() + "下跌了" + down + "%");
                         //如果下跌超过
-                        if (down.abs().compareTo(new BigDecimal(setting3Entity.getBuyDownPercent())) > 0) {
-                            weights.AddBuyTotal(setting3Entity.getBuyWeights());
+                        if (down.abs().compareTo(new BigDecimal(config.getBuyDownPercent())) > 0) {
+                            weights.AddBuyTotal(config.getBuyWeights());
                         }
-                        logger.info("setting3 buy down:{},buyDownPercent:{}", down, setting3Entity.getBuyDownPercent());
+                        logger.info("setting3 buy down:{},buyDownPercent:{}", down, config.getBuyDownPercent());
+                    } else {
+                        redisMqService.sendMsg("策略3最新购买订单成交记录价格" + tradeBeanNow.getPrice() + "和" + config.getBuyDownSecond() + "秒之前的订单价格" + bfTradeBean.get().getPrice() + "没有下跌");
                     }
                 }
             }
@@ -942,24 +945,25 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
             if (!marketOrder.getSell().isEmpty()) {
                 //计算卖出订单
-                TradeBean tradeBeanNow = marketOrder.getSell().get(0);
-                final long sellNow = tradeBeanNow.getTs();
-                final long sellBefore = sellNow - (setting3Entity.getSellDownSecond() * 1000);
+                TradeBean tradeSellBeanNow = marketOrder.getSell().get(0);
+                final long sellNow = tradeSellBeanNow.getTs();
+                final long sellBefore = sellNow - (config.getSellDownSecond() * 1000);
                 Optional<TradeBean> bfSellTradeBean = marketOrder.getSell().stream().filter(tradeBean -> tradeBean.getTs() <= sellBefore)
                         .findFirst();
                 if (bfSellTradeBean.isPresent()) {
                     //计算是否是跌了
-                    if (bfSellTradeBean.get().getPrice().compareTo(tradeBeanNow.getPrice()) > 0) {
+                    if (bfSellTradeBean.get().getPrice().compareTo(tradeSellBeanNow.getPrice()) > 0) {
                         //之前的价格大于现在的价格 下跌 计算下跌百分比
-                        BigDecimal down = calculationFallOrRise(tradeBeanNow, bfSellTradeBean.get());
+                        BigDecimal down = calculationFallOrRise(tradeSellBeanNow, bfSellTradeBean.get());
+                        redisMqService.sendMsg("策略3最新卖出订单成交记录价格" + tradeSellBeanNow.getPrice() + "和" + config.getSellDownSecond() + "秒之前的订单价格" + bfSellTradeBean.get().getPrice() + "下跌了" + down + "%");
                         //如果下跌超过
-                        if (down.abs().compareTo(new BigDecimal(setting3Entity.getSellDownPercent())) > 0) {
-                            weights.AddSellTotal(setting3Entity.getSellWeights());
+                        if (down.abs().compareTo(new BigDecimal(config.getSellDownPercent())) > 0) {
+                            weights.AddSellTotal(config.getSellWeights());
                         }
-                        logger.info("setting3 sell down:{},buyDownPercent:{}", down, setting3Entity.getSellDownPercent());
-
+                        logger.info("setting3 sell down:{},buyDownPercent:{}", down, config.getSellDownPercent());
+                    } else {
+                        redisMqService.sendMsg("策略3最新卖出订单成交记录价格" + tradeSellBeanNow.getPrice() + "和" + config.getBuyDownSecond() + "秒之前的订单价格" + bfSellTradeBean.get().getPrice() + "没有下跌");
                     }
-
                 }
             }
         }
@@ -974,7 +978,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     @Override
     public void executeSetting4(MarketOrder marketOrder) {
-        final StrategyVo.Setting4Entity setting4Entity = this.setting4;
+        final StrategyVo.Setting4Entity config = this.setting4;
         //计算几秒前的 时间
         TradeBean tradeBeanNow;
         BigDecimal down;
@@ -983,7 +987,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 //计算购买订单
                 tradeBeanNow = marketOrder.getBuy().get(0);
                 final long now = tradeBeanNow.getTs();
-                final long before = now - (setting4Entity.getBuyUpSecond() * 1000);
+                final long before = now - (config.getBuyUpSecond() * 1000);
 
                 Optional<TradeBean> bfTradeBean = marketOrder.getBuy().stream()
                         .filter(tradeBean -> tradeBean.getTs() <= before)
@@ -993,10 +997,13 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     if (bfTradeBean.get().getPrice().compareTo(tradeBeanNow.getPrice()) < 0) {
                         //之前的价格小于现在的价格 上涨 计算上涨百分比
                         down = calculationFallOrRise(tradeBeanNow, bfTradeBean.get());
+                        redisMqService.sendMsg("策略4最新买入订单成交记录价格" + tradeBeanNow.getPrice() + "和" + config.getBuyUpSecond() + "秒之前的订单价格" + bfTradeBean.get().getPrice() + "下跌了" + down + "%");
                         //如果下跌超过
-                        if (down.abs().compareTo(new BigDecimal(setting4Entity.getBuyUpPercent())) > 0) {
-                            weights.AddBuyTotal(setting4Entity.getBuyWeights());
+                        if (down.abs().compareTo(new BigDecimal(config.getBuyUpPercent())) > 0) {
+                            weights.AddBuyTotal(config.getBuyWeights());
                         }
+                    } else {
+                        redisMqService.sendMsg("策略4最新买入订单成交记录价格" + tradeBeanNow.getPrice() + "和" + config.getBuyUpSecond() + "秒之前的订单价格" + bfTradeBean.get().getPrice() + "没有下跌");
                     }
                 }
             }
@@ -1005,7 +1012,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             //计算卖出订单
             tradeBeanNow = marketOrder.getSell().get(0);
             final long sellNow = tradeBeanNow.getTs();
-            final long sellBefore = sellNow - (setting4Entity.getSellUpSecond() * 1000);
+            final long sellBefore = sellNow - (config.getSellUpSecond() * 1000);
             Optional<TradeBean> bfSellTradeBean = marketOrder.getSell().stream().filter(tradeBean -> tradeBean.getTs() <= sellBefore)
                     .findFirst();
             if (bfSellTradeBean.isPresent()) {
@@ -1013,10 +1020,13 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 if (bfSellTradeBean.get().getPrice().compareTo(tradeBeanNow.getPrice()) > 0) {
                     //之前的价格大于现在的价格 下跌 计算下跌百分比
                     down = calculationFallOrRise(tradeBeanNow, bfSellTradeBean.get());
+                    redisMqService.sendMsg("策略4最新卖出订单成交记录价格" + tradeBeanNow.getPrice() + "和" + config.getSellUpSecond() + "秒之前的订单价格" + bfSellTradeBean.get().getPrice() + "下跌了" + down + "%");
                     //如果下跌超过
-                    if (down.abs().compareTo(new BigDecimal(setting4Entity.getSellUpPercent())) > 0) {
-                        weights.AddSellTotal(setting4Entity.getSellWeights());
+                    if (down.abs().compareTo(new BigDecimal(config.getSellUpPercent())) > 0) {
+                        weights.AddSellTotal(config.getSellWeights());
                     }
+                } else {
+                    redisMqService.sendMsg("策略4最新卖出订单成交记录价格" + tradeBeanNow.getPrice() + "和" + config.getSellUpSecond() + "秒之前的订单价格" + bfSellTradeBean.get().getPrice() + "没有下跌");
                 }
 
             }
@@ -1029,52 +1039,61 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     @Override
     protected void executeSetting5() {
-        final StrategyVo.Setting5Entity setting5Entity = this.setting5;
+        final StrategyVo.Setting5Entity config = this.setting5;
         final TradingApi tradingApi = this.tradingApi;
         final MarketConfig marketConfig = this.marketConfig;
         //计算买的权重 获取k线
-        String buyKline = setting5Entity.getBuyKline();
+        String buyKline = config.getBuyKline();
         KlineConfig klineConfig = new HuoBiKlineConfigImpl("200", buyKline);
         List<Kline> lines = null;
         try {
             lines = tradingApi.getKline(marketConfig, klineConfig);
         } catch (Exception e) {
             logger.error("获取k线失败:{}", e.getMessage());
+            redisMqService.sendMsg("获取k线数据失败,策略5失效!");
         }
         if (lines != null && !lines.isEmpty()) {
             //当前订单是卖出订单的时候才计算买入的权重
             if (this.orderState.type == OrderType.SELL || this.orderState.type == null) {
                 //买的权重
-                if (setting5Entity.getBuyKlineOption().equals(TraceType.up.getStr())) {
+                if (config.getBuyKlineOption().equals(TraceType.up.getStr())) {
                     //如果当前收盘价大于上一个线的收盘价 则有上升趋势（simple》？）
                     if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) > 0) {
                         //计算上涨的百分比 (当前最新成交价（或收盘价）-开盘参考价)÷开盘参考价×100%
-                        absBuyCompare(setting5Entity, lines);
+                        absBuyCompare(config, lines);
+                    } else {
+                        redisMqService.sendMsg(buyKline + "暂无上涨趋势!");
                     }
                 }
-                if (setting5Entity.getBuyKlineOption().equals(TraceType.down.getStr())) {
+                if (config.getBuyKlineOption().equals(TraceType.down.getStr())) {
                     //如果当前收盘价小于上一个线的收盘价 则有下降趋势（simple》？）
                     if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) < 0) {
                         //计算下架的百分比 (当前最新成交价（或收盘价）-开盘参考价)÷开盘参考价×100%
-                        absBuyCompare(setting5Entity, lines);
+                        absBuyCompare(config, lines);
+                    } else {
+                        redisMqService.sendMsg(buyKline + "暂无下降趋势!");
                     }
                 }
             }
             //当前订单是买入的时候 才计算卖出的权重
             if (this.orderState.type == OrderType.BUY && this.baseInfo.getSellAllWeights() != 0) {
                 //卖的权重
-                if (setting5Entity.getSellKlineOption().equals(TraceType.up.getStr())) {
+                if (config.getSellKlineOption().equals(TraceType.up.getStr())) {
                     //上涨趋势
                     if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) > 0) {
                         //计算上涨的涨幅
-                        absSellCompare(setting5Entity, lines);
+                        absSellCompare(config, lines);
+                    } else {
+                        redisMqService.sendMsg(buyKline + "暂无上涨趋势!");
                     }
                 }
-                if (setting5Entity.getSellKlineOption().equals(TraceType.down.getStr())) {
+                if (config.getSellKlineOption().equals(TraceType.down.getStr())) {
                     //如果当前收盘价小于上一个线的收盘价 则有下降趋势（simple》？）
                     if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) < 0) {
                         //计算跌幅
-                        absSellCompare(setting5Entity, lines);
+                        absSellCompare(config, lines);
+                    } else {
+                        redisMqService.sendMsg(buyKline + "暂无下降趋势!");
                     }
                 }
             }
@@ -1087,32 +1106,34 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * 计算公式 (当前的close-上一个close)/上一个close * 100%
      * 计算的方式是将幅度转成绝对值进行比较
      *
-     * @param setting5Entity
+     * @param config
      * @param lines
      */
-    private void absBuyCompare(StrategyVo.Setting5Entity setting5Entity, List<Kline> lines) {
+    private void absBuyCompare(StrategyVo.Setting5Entity config, List<Kline> lines) {
         BigDecimal quoteChange = (lines.get(0).getClose().subtract(lines.get(1).getClose())).divide(lines.get(1).getClose(), decimalPoint, RoundingMode.DOWN);
         BigDecimal abs = quoteChange.abs().multiply(new BigDecimal(100));
-        if (abs.compareTo(new BigDecimal(setting5Entity.getBuyPercent())) > 0) {
+        if (abs.compareTo(new BigDecimal(config.getBuyPercent())) > 0) {
             //涨跌幅大于设置值后
-            this.weights.AddBuyTotal(setting5Entity.getBuyWeights());
+            this.weights.AddBuyTotal(config.getBuyWeights());
         }
+        redisMqService.sendMsg(config.getBuyKline() + "k线计算后的涨跌幅为:" + quoteChange + "%");
         logger.info("setting5 buy k线的跌幅计算:计算后的百分比{}%", quoteChange);
     }
 
     /**
      * 卖：上涨or下架幅度
      *
-     * @param setting5Entity
+     * @param config
      * @param lines
      */
-    private void absSellCompare(StrategyVo.Setting5Entity setting5Entity, List<Kline> lines) {
+    private void absSellCompare(StrategyVo.Setting5Entity config, List<Kline> lines) {
         BigDecimal quoteChange = (lines.get(0).getClose().subtract(lines.get(1).getClose())).divide(lines.get(1).getClose(), decimalPoint, RoundingMode.DOWN);
         BigDecimal abs = (quoteChange.abs().multiply(new BigDecimal(100)));
-        if (abs.compareTo(new BigDecimal(setting5Entity.getSellPercent())) > 0) {
+        if (abs.compareTo(new BigDecimal(config.getSellPercent())) > 0) {
             //计算卖的权重
-            this.weights.AddSellTotal(setting5Entity.getSellWeights());
+            this.weights.AddSellTotal(config.getSellWeights());
         }
+        redisMqService.sendMsg(config.getSellKline() + "k线计算后的涨跌幅为:" + quoteChange + "%");
         logger.info("setting5 sell k线的跌幅计算:计算后的百分比{}%", quoteChange);
     }
 
@@ -1133,9 +1154,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     .filter(m -> m.getPrice().compareTo(config.getBuyOrdersUsdt()) > 0)
                     .findFirst();
             if (res.isPresent()) {
-                logger.info("策略1 配置的buy usdt 价格:{},前20位购买订单中有大于这个价格的订单,订单价格为:{}", config.getSellOrdersUsdt(), res.get().getPrice());
+                logger.info("策略1 配置的buy usdt 价格:{},前20位购买订单中有大于这个价格的订单,订单价格为:{}", config.getBuyOrdersUsdt(), res.get().getPrice());
+                redisMqService.sendMsg("前20位购买订单中出现的价格" + res.get().getPrice() + "大于策略1 配置的价格" + config.getBuyOrdersUsdt());
                 return true;
             }
+            redisMqService.sendMsg("前20位购买订单中未出现大于策略1配置的价格" + config.getBuyOrdersUsdt() + "策略1不生效!");
         }
         return false;
     }
@@ -1148,7 +1171,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @return 存在并返回当前卖的价格
      */
     public Boolean setting1SellCalculation(MarketOrder marketOrder, StrategyVo.Setting1Entity config) {
-
         if (marketOrder != null && !marketOrder.getSell().isEmpty()) {
             logger.info("当前市场卖出订单的价格为:{}", marketOrder.getSell().get(0).getPrice());
             Optional<TradeBean> res = marketOrder.getSell()
@@ -1158,8 +1180,10 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     .findFirst();
             if (res.isPresent()) {
                 logger.info("策略1 配置的sell usdt 价格:{},前20位出售订单中有大于这个价格的订单,订单价格为:{}", config.getSellOrdersUsdt(), res.get().getPrice());
+                redisMqService.sendMsg("前20位卖出订单中出现的价格" + res.get().getPrice() + "大于策略1 配置的价格" + config.getSellOrdersUsdt() + "策略1生效");
                 return true;
             }
+            redisMqService.sendMsg("前20位卖出订单中未出现大于策略1配置的价格" + config.getSellOrdersUsdt() + "策略1不生效!");
         }
         return false;
     }
@@ -1174,9 +1198,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (marketOrder != null && !marketOrder.getBuy().isEmpty()) {
             BigDecimal currentBuyPrice = marketOrder.getBuy().get(0).getPrice();
             if (currentBuyPrice.compareTo(config.getBuyOrderUsdt()) > 0) {
+                logger.info("当前最新购买订单价格{}超过配置2的价格{},策略2生效", currentBuyPrice, config.getBuyOrderUsdt());
+                redisMqService.sendMsg("当前最新购买订单价格" + currentBuyPrice + "超过配置2的价格" + config.getBuyOrderUsdt() + ",策略2生效");
                 return true;
             }
         }
+        redisMqService.sendMsg("当前最新购买订单价格未超过配置2的价格" + config.getBuyOrderUsdt() + ",策略2不生效");
         return false;
     }
 
@@ -1188,13 +1215,15 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @return 返回当前买的价格
      */
     public Boolean setting2SellCalculation(MarketOrder marketOrder, StrategyVo.Setting2Entity config) {
-
         if (marketOrder != null && !marketOrder.getSell().isEmpty()) {
             BigDecimal currentSellPrice = marketOrder.getSell().get(0).getPrice();
             if (currentSellPrice.compareTo(config.getSellOrderUsdt()) > 0) {
+                logger.info("当前最新卖出订单价格{}超过配置2的价格{},策略2生效", currentSellPrice, config.getBuyOrderUsdt());
+                redisMqService.sendMsg("当前最新卖出订单价格" + currentSellPrice + "超过配置2的价格" + config.getSellOrderUsdt() + ",策略2生效");
                 return true;
             }
         }
+        redisMqService.sendMsg("当前最新卖出订单价格未超过配置2的价格" + config.getSellOrderUsdt() + ",策略2不生效");
         return false;
     }
 

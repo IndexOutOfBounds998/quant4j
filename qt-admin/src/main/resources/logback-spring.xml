@@ -6,7 +6,7 @@
                     defaultValue="/data/logs/admin-logback"/>
 
     <!-- 日志级别 -->
-    <springProperty scope="context" name="LOG_ROOT_LEVEL" source="logging.level.root" defaultValue="DEBUG"/>
+    <springProperty scope="context" name="LOG_ROOT_LEVEL" source="logging.level.root" defaultValue="INFO"/>
 
     <!--  标识这个"STDOUT" 将会添加到这个logger -->
     <springProperty scope="context" name="STDOUT" source="log.stdout" defaultValue="STDOUT"/>

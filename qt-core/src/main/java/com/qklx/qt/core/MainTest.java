@@ -16,9 +16,11 @@ public class MainTest {
 
     public static void main(String[] args) {
 
-        BigDecimal buyPrice = new BigDecimal(164.06);
-        BigDecimal sellPrice = new BigDecimal(163.53).setScale(4,RoundingMode.DOWN);
+        BigDecimal buyPrice = new BigDecimal(164.0001);
+        BigDecimal sellPrice = new BigDecimal(162.0002);
         BigDecimal diff = sellPrice.subtract(buyPrice).divide(buyPrice, 4, RoundingMode.DOWN).multiply(new BigDecimal(100));
+        System.out.println("abs " + diff.abs());
+
         System.out.println(diff.toPlainString());
 
     }

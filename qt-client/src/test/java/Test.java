@@ -1,15 +1,18 @@
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import com.alibaba.fastjson.JSON;
+import com.qklx.qt.core.enums.OrderType;
+import com.qklx.qt.core.strategy.impl.HuoBiStrategyImpl;
 
 public class Test {
 
     public static void main(String[] args) {
 
-        BigDecimal a = new BigDecimal(0.013520);
-        BigDecimal b = new BigDecimal(982.54509400);
+        HuoBiStrategyImpl.OrderState orderState=new HuoBiStrategyImpl.OrderState();
+        orderState.setId(31862982431l);
+        orderState.setOrderType(OrderType.BUY_MARKET);
+        orderState.setType(com.qklx.qt.core.trading.OrderType.BUY);
 
-        BigDecimal c =b.divide(a,4,RoundingMode.DOWN);
-        System.out.println(c);
 
+        String s = JSON.toJSONString(orderState);
+        System.out.println(s);
     }
 }

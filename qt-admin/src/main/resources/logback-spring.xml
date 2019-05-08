@@ -27,7 +27,10 @@
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
+                !-- 单个日志文件最大50MB, 保存30天的日志, 日志文件空间为10GB -->
+                <maxFileSize>50MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>10GB</totalSizeCap>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>

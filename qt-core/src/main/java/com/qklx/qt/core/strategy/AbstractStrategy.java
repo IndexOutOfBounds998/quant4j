@@ -1,45 +1,69 @@
 package com.qklx.qt.core.strategy;
 
-import com.qklx.qt.core.trading.MarketOrder;
-
-import java.math.BigDecimal;
+import com.qklx.qt.core.strategy.impl.HuoBiStrategyImpl;
+import com.qklx.qt.core.trading.OrderType;
+import com.qklx.qt.core.vo.StrategyVo;
 
 /**
  * 策略基类
  */
 public abstract class AbstractStrategy {
-    protected MarketOrder marketOrder;
+    protected HuoBiStrategyImpl.OrderState orderState;
+    protected StrategyVo.BaseInfoEntity baseInfo;
 
+    /**
+     * 权重计算
+     */
+    protected void weightsCalculation() {
 
-    protected void executeor() {
-        executeSetting1(marketOrder);
-        executeSetting2(marketOrder);
-        executeSetting3(marketOrder);
-        executeSetting4(marketOrder);
-        executeSetting5();
+        if ((this.orderState.getType() == OrderType.SELL || this.orderState.getType() == null) &&
+                this.baseInfo.getBuyAllWeights() != 0) {
+            buyCalculation();
+        }
+
+        if (this.orderState.getType() == OrderType.BUY
+                && this.baseInfo.getSellAllWeights() != 0) {
+            sellCalculation();
+        }
+
     }
 
-    protected abstract void executeSetting5();
-
-    protected abstract void executeSetting4(MarketOrder marketOrder);
-
-    protected abstract void executeSetting3(MarketOrder marketOrder);
+    /**
+     * 买入权重计算
+     */
+    protected abstract void buyCalculation();
 
     /**
-     * 只返回最新的出售订单的价格
-     *
-     * @param marketOrder
-     * @return
+     * 卖出权重计算
      */
-    protected abstract void executeSetting2(MarketOrder marketOrder);
+    protected abstract void sellCalculation();
 
-    /**
-     * 只返回最新的购买订单的价格
-     *
-     * @param marketOrder
-     * @return
-     */
-    protected abstract void executeSetting1(MarketOrder marketOrder);
+    public static class Weights {
+        private volatile Integer buyTotal = 0;
+        private volatile Integer sellTotal = 0;
 
+
+        public Integer getBuyTotal() {
+            return buyTotal;
+        }
+
+        public Integer getSellTotal() {
+            return sellTotal;
+        }
+
+        public void AddBuyTotal(Integer buyTotal) {
+            this.buyTotal += buyTotal;
+        }
+
+        public void AddSellTotal(Integer sellTotal) {
+            this.sellTotal += sellTotal;
+        }
+
+        public void reSet() {
+            this.buyTotal = 0;
+            this.sellTotal = 0;
+        }
+
+    }
 
 }

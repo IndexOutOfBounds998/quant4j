@@ -17,8 +17,6 @@ import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
  */
 @Slf4j
 public class ProfitReceiver {
-
-
     /**
      * 收到通道的消息之后执行的方法
      *
@@ -26,14 +24,12 @@ public class ProfitReceiver {
      */
     public void receiveMessage(String message) {
         ProfitMessage msg = JSON.parseObject(parseJsonToString(message), ProfitMessage.class);
-
         OrderProfit isExist = new OrderProfit();
         Wrapper<OrderProfit> wrapper = new EntityWrapper<>();
         wrapper.eq("sell_order_id", msg.getSellOrderId());
         wrapper.eq("buy_order_id", msg.getBuyOrderId());
-
         OrderProfit one = isExist.selectOne(wrapper);
-
+        log.info("sell_order_id》{},buy_order_id {}, one{}", msg.getSellOrderId(), msg.getBuyOrderId(), one);
         if (one == null) {
             log.info("插入盈利信息，购买订单id{},卖出订单id{}", msg.getBuyOrderId(), msg.getSellOrderId());
             OrderProfit orderProfit = new OrderProfit();

@@ -29,12 +29,9 @@ public class RobotServiceImpl implements RobotService {
     public ApiResult operatingRobot(RobotStrategyVo vo) {
         //启动机器人
         try {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    RobotOperate robotOperate = new RobotOperate(redisUtil, ip, port);
-                    robotOperate.doRobotTask(vo);
-                }
+            executorService.execute(() -> {
+                RobotOperate robotOperate = new RobotOperate(redisUtil, ip, port);
+                robotOperate.doRobotTask(vo);
             });
             return new ApiResult(Status.SUCCESS);
         } catch (Exception e) {

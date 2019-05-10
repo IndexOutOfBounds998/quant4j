@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.to.RobotRunMessage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class RobotLogsRedisMqServiceImpl implements RedisMqService {
 
     private ExecutorService executorService = Executors.newFixedThreadPool(3);
@@ -34,6 +36,7 @@ public class RobotLogsRedisMqServiceImpl implements RedisMqService {
      */
     @Override
     public void sendMsg(Object msg) {
+        log.info("机器人日志:" + msg.toString());
         executorService.execute(() -> {
             if (simpleDateFormatThreadLocal.get() == null) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

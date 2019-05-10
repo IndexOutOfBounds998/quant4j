@@ -3,14 +3,12 @@ package com.qklx.qt.core.mq;
 import com.alibaba.fastjson.JSON;
 import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
-import com.qklx.qt.core.config.AccountConfig;
-import com.qklx.qt.core.vo.OrderTaskMessage;
-import com.qklx.qt.core.vo.ProfitMessage;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class OrderProfitRedisMqServiceImpl implements RedisMqService {
 
     private RedisUtil redisUtil;
-
 
 
     public OrderProfitRedisMqServiceImpl(RedisUtil redisUtil) {
@@ -21,5 +19,6 @@ public class OrderProfitRedisMqServiceImpl implements RedisMqService {
     @Override
     public void sendMsg(Object msg) {
         redisUtil.convertAndSend(RobotRedisKeyConfig.getOrder_profit(), JSON.toJSONString(msg));
+        log.info("机器人盈利信息日志:" + JSON.toJSONString(msg));
     }
 }

@@ -43,8 +43,16 @@ public class OrderIdReceiver {
             OrderTaskMessage msg = JSON.parseObject(parseJsonToString(message), OrderTaskMessage.class);
             //处理成功的订单
             ApiClient apiClient = new ApiClient(msg.getAccessKey(), msg.getSecretKey(), this.ip, this.port);
-            OrdersDetailResponse<OrdersDetail> detail = apiClient.ordersDetail(msg.getOrderId().toString());
-            if (detail.getStatus().equals(RobotRedisKeyConfig.ok)) {
+            OrdersDetailResponse<OrdersDetail> detail = null;
+            try {
+                detail = apiClient.ordersDetail(msg.getOrderId().toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                //重试一次
+                detail = apiClient.ordersDetail(msg.getOrderId().toString());
+            }
+            //只保存已经成功的订单
+            if (detail != null && detail.getStatus().equals(RobotRedisKeyConfig.ok) && detail.getData().getState().contains("filled")) {
                 OrdersDetail data = detail.getData();
                 Orders order = new Orders();
                 order.setOrderId(Long.parseLong(data.getId()));
@@ -54,9 +62,13 @@ public class OrderIdReceiver {
                 order.setFieldAmount(new BigDecimal(data.getFieldAmount()));
                 order.setFieldCashAmount(new BigDecimal(data.getFieldCashAmount()).setScale(8, RoundingMode.DOWN));
                 order.setFinishedTime(data.getFinishedAt());
-                order.setOrderState(data.getState());
+                if (data.getState().equals("filled")) {
+                    order.setOrderState("全部成交");
+                } else {
+                    order.setOrderState("部分成交");
+                }
+//                order.setOrderState(data.getState());
                 order.setFieldFees(new BigDecimal(data.getFieldFees()));
-
                 order.setSymbol(data.getSymbol());
                 order.setOrderType(data.getType());
                 order.setRobotId((msg.getRobotId()));

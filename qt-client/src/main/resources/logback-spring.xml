@@ -107,11 +107,10 @@
     <!--<logger name="org.apache.commons" level="ERROR"/>-->
     <!--<logger name="org.apache.zookeeper" level="ERROR"/>-->
     <!--<logger name="com.alibaba.dubbo.monitor" level="ERROR"/>-->
-    <!--<logger name="com.alibaba.dubbo.remoting" level="ERROR"/>-->
+    <logger name="com.qklx.qt.core" level="INFO"/>
 
     <!-- ${LOG_ROOT_LEVEL} 日志级别 -->
     <root level="${LOG_ROOT_LEVEL}">
-
         <!-- 标识这个"${STDOUT}"将会添加到这个logger -->
         <appender-ref ref="${STDOUT}"/>
 

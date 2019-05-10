@@ -45,11 +45,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.ta4j</groupId>
-            <artifactId>ta4j-core</artifactId>
-            <version>0.12</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.ta4j</groupId>-->
+            <!--<artifactId>ta4j-core</artifactId>-->
+            <!--<version>0.12</version>-->
+        <!--</dependency>-->
         <!--自省和监控的集成功能-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

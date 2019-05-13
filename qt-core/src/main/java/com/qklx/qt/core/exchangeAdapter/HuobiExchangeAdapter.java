@@ -63,7 +63,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
         try {
             historyTradeResponse = apiClient.historyTrade(config.markName(), size);
         } catch (Exception e) {
-            logger.info("请求获取市场买卖订单发生异常........." + e.getMessage());
+            logger.error("请求获取市场买卖订单发生异常........." + e.getMessage());
             return null;
         }
         MarketOrder marketOrder = new MarketOrder();
@@ -100,7 +100,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
         try {
             res = apiClient.openAllOrders(accountConfig.accountId(), config.markName(), size);
         } catch (Exception e) {
-            logger.info("获取个人未完成的订单失败===========" + e.getMessage());
+            logger.error("获取个人未完成的订单失败===========" + e.getMessage());
             return null;
         }
         List<OpenOrder> list = new ArrayList<>();
@@ -136,7 +136,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             createOrderRequest.setType(orderType.getTyoe());
             return apiClient.createOrder(createOrderRequest);
         } catch (Exception e) {
-            logger.info("创建订单发生异常==============" + e.getMessage());
+            logger.error("创建订单发生异常==============" + e.getMessage());
             return null;
         }
     }
@@ -154,7 +154,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
         try {
             submitcancelResponse = apiClient.submitcancel(orderId);
         } catch (Exception e) {
-            logger.info("交易对: " + marketId + " 取消订单: " + orderId + " 失败=========" + e.getMessage());
+            logger.error("交易对: " + marketId + " 取消订单: " + orderId + " 失败=========" + e.getMessage());
         }
         if (submitcancelResponse != null && submitcancelResponse.getStatus().equals("ok")) {
             return true;
@@ -201,6 +201,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
         try {
             response = apiClient.balance(String.valueOf(accountId));
         } catch (Exception e) {
+            logger.error("获取账户余额失败，账户id{}", accountId);
             e.printStackTrace();
         }
         if (response != null && response.getStatus().equals("ok")) {
@@ -242,8 +243,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
                 return klineResponse.getData();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            logger.info("获取k线数据symbol{} ,period {} ,size {} 失败", marketConfig.markName(),
+            logger.error("获取k线数据symbol{} ,period {} ,size {} 失败", marketConfig.markName(),
                     klineConfig.period(),
                     klineConfig.size());
         }

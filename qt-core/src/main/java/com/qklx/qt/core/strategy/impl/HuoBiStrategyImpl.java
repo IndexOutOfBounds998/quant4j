@@ -176,8 +176,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             // 任务循环执行
             while (true) {
                 try {
-                    //设置机器人的运行状态 在休眠+10s之后没响应 就认为该机器人已经死亡
-                    redisUtil.set(isRunKey, "isRunning", (long) (baseInfo.getSleep() + 10));
+                    //设置机器人的运行状态 在休眠+15s之后没响应 就认为该机器人已经死亡
+                    redisUtil.set(isRunKey, "isRunning", (long) (baseInfo.getSleep() + 15));
                     //重置权重
                     weights.reSet();
                     //获取市场订单 最大支持2000条

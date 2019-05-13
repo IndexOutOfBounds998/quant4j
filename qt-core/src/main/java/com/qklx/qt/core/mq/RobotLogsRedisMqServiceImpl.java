@@ -36,7 +36,7 @@ public class RobotLogsRedisMqServiceImpl implements RedisMqService {
      */
     @Override
     public void sendMsg(Object msg) {
-        log.info("机器人日志:" + msg.toString());
+        log.info("机器人{}日志:{}", robotId, msg.toString());
         executorService.execute(() -> {
             if (simpleDateFormatThreadLocal.get() == null) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

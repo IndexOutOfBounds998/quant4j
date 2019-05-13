@@ -33,13 +33,14 @@ public class RobotOperate {
     }
 
     public void doRobotTask(RobotStrategyVo vo) {
-        log.info("启动机器人==================================================");
+        log.info("启动机器人{}>>>>>>", vo.getRobotId());
         TradingStrategy huobiStrategy = new HuoBiStrategyImpl(redisUtil, vo.getRobotId());
         ApiClient apiClient = new ApiClient(vo.getAppKey(), vo.getAppSecret(), this.ip, this.port);
         TradingApi api = new HuobiExchangeAdapter(apiClient);
         MarketConfig marketConfig = new HuoBiMarketConfigImpl(new Market(vo.getSymbol()));
         StrategyConfig strategyConfig = new StrategyConfig(vo.getStrategyVo());
         AccountConfig accountConfig = new HuoBiAccountConfigImpl(vo.getAccountConfig());
+        log.info("加载机器人{}>>>>>>", vo.getRobotId());
         huobiStrategy.init(api, marketConfig, strategyConfig, accountConfig);
         try {
             huobiStrategy.execute();

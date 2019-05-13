@@ -81,7 +81,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private StrategyVo.Setting4Entity setting4;
     private StrategyVo.Setting5Entity setting5;
     private StrategyVo.Setting6Entity setting6;
-    private int runTimes = 0;
+    private long runTimes = 0;
 
     //标志机器人已经启动
     private volatile String startkey;
@@ -117,7 +117,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         this.robotId = robotId;
         this.startkey = RobotRedisKeyConfig.getRobotIsStartStateKey() + robotId;
         this.isRunKey = RobotRedisKeyConfig.getRobotIsRunStateKey() + robotId;
-
     }
 
     @Override
@@ -139,7 +138,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
         orderMqService = new OrderIdRedisMqServiceImpl(this.redisUtil, accountConfig, robotId);
         orderProfitService = new OrderProfitRedisMqServiceImpl(this.redisUtil);
-        //限价 市价方式
+        //限价 市价方式 redis key
         lastOrderState = lastOrderState + "type_" + this.baseInfo.getIsLimitPrice() + "_";
         orderProfitIds = orderProfitIds + "type_" + this.baseInfo.getIsLimitPrice() + "_";
 
@@ -151,28 +150,26 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     public void execute() throws StrategyException {
         try {
             //设置机器人已经启动状态
-            log.info("=========机器人启动了 配置加载============================");
+            log.info("机器人{}启动了 配置加载>>>", robotId);
             redisUtil.set(startkey, true);
             //加载获取当前机器人的基础币种 配额币种 价格的精度 数量的精度
             boolean quotaPriceAndPrecision = getQuotaPriceAndPrecision();
 
             if (!quotaPriceAndPrecision) {
-                log.error("获取当前机器人的基础币种 配额币种 价格的精度 数量的精度失败！！！");
-                Thread.sleep(10);
-                redisMqService.sendMsg("获取当前机器人的基础币种 配额币种 价格的精度 数量的精度失败！机器人退出任务....");
+                redisMqService.sendMsg("获取机器人的基础币种 配额币种 价格的精度 数量的精度失败！机器人退出任务....");
                 return;
             }
             //获取当前机器人的最后一次状态
             Object o = redisUtil.get(lastOrderState + robotId);
             if (o != null) {
                 try {
-                    log.info("==========上一次机器人运行的状态是{}", o.toString());
+                    log.info("机器人{}上一次运行的状态是{}", robotId, o.toString());
                     //恢复上一次的运行状态
                     this.orderState = JSON.parseObject(o.toString(), OrderState.class);
                     redisUtil.set(lastOrderState + robotId, null);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    log.error("恢复机器人状态失败{}", e.getMessage());
+                    log.error("恢复机器人{}状态失败{}", robotId, e.getMessage());
                     redisMqService.sendMsg("机器人上一次的运行状态恢复失败！机器人将以重新的状态启动......");
                 }
             }
@@ -191,18 +188,20 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         Thread.sleep(1000);
                         continue;
                     }
-                    //设置当前买价和当前卖价
-                    this.currentNewBuyPrice = this.marketOrder.getBuy().get(0).getPrice();
-                    this.currentNewSellPrice = this.marketOrder.getSell().get(0).getPrice();
+                    //设置当前买价和当前卖价 (价格设置的位数来自huobi获取的价格小数位)
+                    this.currentNewBuyPrice = this.marketOrder.getBuy().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                    this.currentNewSellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
                     //计算设置买卖权重
                     weightsCalculation();
                     //判断买卖
                     if (orderState.type == OrderType.BUY) {
                         if (profitArrive) {
+                            redisMqService.sendMsg("到达盈亏次数,自动退出ing");
                             break;
                         }
                         //卖的情况下 先判断是否开启了止盈止损
                         if (takeProfitStopLoss()) {
+                            //已经卖出 重新循环
                             long v = (long) (this.baseInfo.getSleep() * 1000L);
                             Thread.sleep(v);
                             continue;
@@ -223,6 +222,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         }
                     } else if (orderState.type == OrderType.SELL) {
                         if (profitArrive) {
+                            redisMqService.sendMsg("到达盈亏次数,自动退出ing");
                             break;
                         }
                         //查看是否到达买的信号
@@ -241,6 +241,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
                     } else if (orderState.type == null) {
                         if (profitArrive) {
+                            redisMqService.sendMsg("到达盈亏次数,自动退出ing");
                             break;
                         }
                         //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
@@ -253,7 +254,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
                     try {
                         ++runTimes;
-                        log.info("机器人{}>>> 已经运行了>>> {}次", robotId, runTimes);
+                        redisMqService.sendMsg("机器人已经运行了>>>" + runTimes + "次");
                         log.info("=========================================");
                         //休眠几秒
                         Thread.sleep((long) (baseInfo.getSleep() * 1000));
@@ -262,15 +263,14 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     }
 
                     if (checkIsStop(startkey)) {
-                        redisMqService.sendMsg("机器人" + robotId + "已经被取消了任务 退出ing");
-                        log.info("机器人{}已经被取消了任务", robotId);
+                        redisMqService.sendMsg("机器人已经被取消了任务 退出ing");
                         checkAndSet();
                         break;
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    log.error("机器人运行中发生异常：异常信息{}", e.getMessage());
+                    log.error("机器人{}运行中发生异常：异常信息{}", robotId, e.getMessage());
                     redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
                 } finally {
                     //记录当前机器人的最后一次状态
@@ -297,39 +297,44 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 if (this.baseInfo.getIsLimitPrice() == 1) {//限价方式\
                     //买入的价格
                     BigDecimal buyPrice = this.orderState.price;
-
                     if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
                         return false;
                     }
                     //计算盈亏率
                     diff = currentNewSellPrice.subtract(buyPrice).divide(buyPrice, decimalPoint, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
                     redisMqService.sendMsg("止盈止损策略：买入订单价格为："
-                            + buyPrice + ",当前卖出价格为：" + currentNewSellPrice + "，计算后的盈亏率为：" + diff + "%");
+                            + buyPrice.setScale(pricePrecision, RoundingMode.DOWN)
+                            + ",当前卖出价格为：" + currentNewSellPrice.setScale(pricePrecision, RoundingMode.DOWN)
+                            + "，计算后的盈亏率为：" + diff + "%");
                 } else {
                     //市价方式
-                    //当前卖出价格计算 深度最多的 作为卖出价格
-                    BigDecimal buyPrice;
+                    //当前卖出价格计算
+                    BigDecimal buyPrice = this.orderState.price;
                     //当前价格 通过获取订单详情来获取
                     try {
-                        OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);
-                        if (new BigDecimal(ordersDetail.getFieldAmount()).compareTo(BigDecimal.ZERO) == 0) {
-                            log.info("消费总数量为0");
-                            return false;
+                        if (this.orderState.price.compareTo(BigDecimal.ZERO) == 0) {
+                            //为0的情况下 算出购买时候的价格 （总的交易额/总的数量）=价格;
+                            OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);
+                            if (new BigDecimal(ordersDetail.getFieldAmount()).compareTo(BigDecimal.ZERO) == 0) {
+                                log.info("消费总数量为0");
+                                return false;
+                            }
+                            buyPrice = new BigDecimal(ordersDetail.getFieldCashAmount()).divide(new BigDecimal(ordersDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
+                            log.info("市价buyPrice{}", buyPrice);
+                            this.orderState.price = buyPrice;
                         }
-                        buyPrice = new BigDecimal(ordersDetail.getFieldCashAmount()).divide(new BigDecimal(ordersDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
-                        log.info("市价buyPrice{}", buyPrice);
                         if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
                             log.info("购买价格为0");
                             return false;
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error(e.getMessage());
+                        log.error("计算市价购买价格错误：{}", e);
                         //获取失败
                         return false;
                     }
                     //计算盈亏率(忽略相同数量的情况下 只对价格做盈亏率计算)
-                    diff = currentNewSellPrice.subtract(buyPrice).divide(buyPrice, decimalPoint, RoundingMode.DOWN)
+                    diff = currentNewSellPrice.subtract(buyPrice)
+                            .divide(buyPrice, decimalPoint, RoundingMode.DOWN)
                             .multiply(new BigDecimal(100));
                     log.info("当前参与计算的buyPrice:{},sellPrice:{},diff{}", buyPrice, currentNewSellPrice, diff);
                     redisMqService.sendMsg("当前止盈止损策略：购买价格计算为:"
@@ -620,13 +625,14 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * 计算公式 (现在的价格-之前的价格)/ 之前的价格 * 100%
      * 保留4位小数
      *
-     * @param now
-     * @param before
+     * @param nowPrice
+     * @param beforePrice
      * @return
      */
-    private BigDecimal calculationFallOrRise(TradeBean now, TradeBean before) {
-        return now.getPrice().subtract(before.getPrice())
-                .divide(before.getPrice(), decimalPoint, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+    private BigDecimal calculationFallOrRise(BigDecimal nowPrice, BigDecimal beforePrice) {
+        return nowPrice.subtract(beforePrice)
+                .divide(beforePrice, decimalPoint, RoundingMode.HALF_UP)
+                .multiply(new BigDecimal(100));
     }
 
 
@@ -1063,21 +1069,26 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     .findFirst();
             //找到相隔多少时间之前的数据
             if (beforeTrade.isPresent()) {
+                //当前的价格
+                BigDecimal nowPrice = nowTrade.getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                //多少秒之前的价格
+                BigDecimal beforePrice = beforeTrade.get().getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+
                 log.info("策略3：find time：{}", beforeTrade.get().getTs());
                 //计算是否是跌了
-                if (beforeTrade.get().getPrice().compareTo(nowTrade.getPrice()) > 0) {
+                if (beforePrice.compareTo(nowPrice) > 0) {
                     //之前的价格大于现在的价格 价格在下跌 计算下跌百分比
-                    BigDecimal down = calculationFallOrRise(nowTrade, beforeTrade.get());
-                    redisMqService.sendMsg("策略3:最新买入订单成交价格:" + nowTrade.getPrice() + "和" + config.getBuyDownSecond() + "秒之前的订单价格:" + beforeTrade.get().getPrice() + "下跌" + down + "%");
+                    BigDecimal down = calculationFallOrRise(nowPrice, beforePrice);
+                    redisMqService.sendMsg("策略3:最新买入订单成交价格:" + nowPrice + " [对比] " + config.getBuyDownSecond() + "秒之前的订单价格:" + beforePrice + "下跌了" + down + "%");
                     //如果下跌超过
                     if (down.abs().compareTo(new BigDecimal(config.getBuyDownPercent())) > 0) {
-                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%,大于配置的百分比:" + config.getBuyDownPercent() + "%,策略3权重生效!");
+                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%, [大于] 配置的百分比:" + config.getBuyDownPercent() + "%,策略3权重生效!");
                         weights.AddBuyTotal(config.getBuyWeights());
                     } else {
-                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%,小于配置的百分比:" + config.getBuyDownPercent() + "%,策略3权重不生效!");
+                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%, [小于] 配置的百分比:" + config.getBuyDownPercent() + "%,策略3权重不生效!");
                     }
                 } else {
-                    redisMqService.sendMsg("策略3最新购买订单成交记录价格" + nowTrade.getPrice() + "对比" + config.getBuyDownSecond() + "秒之前的订单价格" + beforeTrade.get().getPrice() + "对比,没有下跌。");
+                    redisMqService.sendMsg("策略3最新购买订单成交记录价格" + nowPrice + " [对比] " + config.getBuyDownSecond() + "秒之前的订单价格" + beforePrice + ",没有下跌。");
                 }
             }
         }
@@ -1090,20 +1101,26 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             TradeBean tradeSellBeanNow = marketOrder.getSell().get(0);
             Optional<TradeBean> bfSellTradeBean = getBeforeTrade(tradeSellBeanNow, config);
             if (bfSellTradeBean.isPresent()) {
+                //当前的价格
+                BigDecimal nowPrice = tradeSellBeanNow.getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                //多少秒之前的价格
+                BigDecimal beforePrice = bfSellTradeBean.get().getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+
                 //计算是否是跌了
                 if (bfSellTradeBean.get().getPrice().compareTo(tradeSellBeanNow.getPrice()) > 0) {
+
                     //之前的价格大于现在的价格 下跌 计算下跌百分比
-                    BigDecimal down = calculationFallOrRise(tradeSellBeanNow, bfSellTradeBean.get());
-                    redisMqService.sendMsg("策略3最新卖出订单成交记录价格" + tradeSellBeanNow.getPrice() + "和" + config.getSellDownSecond() + "秒之前的订单价格" + bfSellTradeBean.get().getPrice() + "下跌了" + down + "%");
+                    BigDecimal down = calculationFallOrRise(nowPrice, beforePrice);
+                    redisMqService.sendMsg("策略3：最新卖出订单成交记录价格" + nowPrice + " [对比] " + config.getSellDownSecond() + "秒之前的订单价格" + beforePrice + "下跌了" + down + "%");
                     //如果下跌超过
                     if (down.abs().compareTo(new BigDecimal(config.getSellDownPercent())) > 0) {
-                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%,大于配置的百分比:" + config.getSellDownSecond() + "%,策略3权重生效!");
+                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%, [大于] 配置的百分比:" + config.getSellDownSecond() + "%,策略3权重生效!");
                         weights.AddSellTotal(config.getSellWeights());
                     } else {
-                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%,小于配置的百分比:" + config.getSellDownSecond() + "%,策略3权重不生效!");
+                        redisMqService.sendMsg("策略3:计算后的下跌百分比：" + down.abs() + "%, [小于] 配置的百分比:" + config.getSellDownSecond() + "%,策略3权重不生效!");
                     }
                 } else {
-                    redisMqService.sendMsg("策略3最新卖出订单成交记录价格" + tradeSellBeanNow.getPrice() + "和" + config.getSellDownSecond() + "秒之前的订单价格" + bfSellTradeBean.get().getPrice() + "对比,没有下跌");
+                    redisMqService.sendMsg("策略3最新卖出订单成交记录价格" + nowPrice + "[对比]" + config.getSellDownSecond() + "秒之前的订单价格" + beforePrice + ",没有下跌");
                 }
             }
         }
@@ -1124,22 +1141,28 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     .filter(tradeBean -> tradeBean.getTs() <= before)
                     .findFirst();
             if (tradeBefore.isPresent()) {
+
+                //当前的价格
+                BigDecimal nowPrice = tradeNow.getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                //多少秒之前的价格
+                BigDecimal beforePrice = tradeBefore.get().getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+
                 //计算是否是涨了
                 if (tradeBefore.get().getPrice().compareTo(tradeNow.getPrice()) < 0) {
                     //之前的价格小于现在的价格 上涨 计算上涨百分比
-                    BigDecimal down = calculationFallOrRise(tradeNow, tradeBefore.get());
-                    redisMqService.sendMsg("策略4：最新买入订单成交记录价格:" + tradeNow.getPrice()
-                            + "和" + config.getBuyUpSecond() + "秒之前的订单价格" + tradeBefore.get().getPrice() + "上涨了" + down.abs() + "%");
+                    BigDecimal down = calculationFallOrRise(nowPrice, beforePrice);
+                    redisMqService.sendMsg("策略4：最新买入订单成交记录价格:" + nowPrice
+                            + "和" + config.getBuyUpSecond() + "秒之前的订单价格" + beforePrice + "上涨了" + down.abs() + "%");
                     //如果上涨超过
                     if (down.abs().compareTo(new BigDecimal(config.getBuyUpPercent())) > 0) {
                         weights.AddBuyTotal(config.getBuyWeights());
-                        redisMqService.sendMsg("策略4：上涨百分比:" + down.abs() + "%,大于配置的百分比:" + config.getBuyUpPercent() + "%,策略4权重生效!");
+                        redisMqService.sendMsg("策略4：上涨百分比:" + down.abs() + "%, [大于] 配置的百分比:" + config.getBuyUpPercent() + "%,策略4权重生效!");
                     } else {
-                        redisMqService.sendMsg("策略4：上涨百分比:" + down.abs() + "%,小于配置的百分比:" + config.getBuyUpPercent() + "%,策略4权重不生效!");
+                        redisMqService.sendMsg("策略4：上涨百分比:" + down.abs() + "%, [小于] 配置的百分比:" + config.getBuyUpPercent() + "%,策略4权重不生效!");
                     }
                 } else {
-                    redisMqService.sendMsg("策略4：最新买入订单成交记录价格" + tradeNow.getPrice()
-                            + "和" + config.getBuyUpSecond() + "秒之前的订单价格" + tradeBefore.get().getPrice() + "对比,没有上涨!");
+                    redisMqService.sendMsg("策略4：最新买入订单成交记录价格" + nowPrice
+                            + " [对比] " + config.getBuyUpSecond() + "秒之前的订单价格" + beforePrice + ",没有上涨!");
                 }
             }
         }
@@ -1159,13 +1182,19 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 .filter(tradeBean -> tradeBean.getTs() <= sellBefore)
                 .findFirst();
         if (beforeTrade.isPresent()) {
+
+            //当前的价格
+            BigDecimal nowPrice = tradeNow.getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+            //多少秒之前的价格
+            BigDecimal beforePrice = beforeTrade.get().getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+
             //计算是否上涨了
-            if (beforeTrade.get().getPrice().compareTo(tradeNow.getPrice()) < 0) {
+            if (beforePrice.compareTo(nowPrice) < 0) {
                 //之前的价格小于现在的价格 上涨 计算上涨百分比
-                BigDecimal down = calculationFallOrRise(tradeNow, beforeTrade.get());
-                redisMqService.sendMsg("策略4：最新卖出订单价格：" + tradeNow.getPrice()
-                        + "和" + config.getSellUpSecond() + "秒之前的订单价格"
-                        + beforeTrade.get().getPrice() + "上涨了" + down.abs() + "%");
+                BigDecimal down = calculationFallOrRise(nowPrice, beforePrice);
+                redisMqService.sendMsg("策略4：最新卖出订单价格：" + nowPrice
+                        + "[对比]" + config.getSellUpSecond() + "秒之前的订单价格"
+                        + beforePrice + "上涨了" + down.abs() + "%");
                 //如果上涨超过
                 if (down.abs().compareTo(new BigDecimal(config.getSellUpPercent())) > 0) {
                     weights.AddSellTotal(config.getSellWeights());
@@ -1174,9 +1203,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     redisMqService.sendMsg("策略4：上涨百分比:" + down.abs() + "%,小于配置的百分比:" + config.getSellUpPercent() + "%,策略4权重不生效!");
                 }
             } else {
-                redisMqService.sendMsg("策略4：最新卖出订单成交记录价格" + tradeNow.getPrice()
-                        + "和" + config.getSellUpSecond() + "秒之前的订单价格"
-                        + beforeTrade.get().getPrice() + "对比,没有上涨！");
+                redisMqService.sendMsg("策略4：最新卖出订单成交记录价格" + nowPrice
+                        + " [对比] " + config.getSellUpSecond() + "秒之前的订单价格"
+                        + beforePrice + ",没有上涨！");
             }
         }
     }
@@ -1188,26 +1217,32 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param lines
      */
     private void setting5BuyCalculation(StrategyVo.Setting5Entity config, List<Kline> lines) {
+        //当前闭盘价
+        BigDecimal nowClosePrice = lines.get(0).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+        //上一次的闭盘价
+        BigDecimal lastClosePrice = lines.get(1).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+
         if (config.getBuyKlineOption().equals(TraceType.up.getStr())) {
+
             //如果当前收盘价大于上一个线的收盘价 则有上升趋势（simple》？）
-            if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) > 0) {
+            if (nowClosePrice.compareTo(lastClosePrice) > 0) {
                 //计算上涨的百分比 (当前最新成交价（或收盘价）-开盘参考价)÷开盘参考价×100%
                 buyUpPercentageCompare(config, lines);
             } else {
                 redisMqService.sendMsg("策略5：" + config.getBuyKline()
-                        + "k线,当前闭盘价" + lines.get(0).getClose()
-                        + ",上一次的闭盘价" + lines.get(1).getClose() + ",暂无上涨趋势!");
+                        + "k线,当前闭盘价" + nowClosePrice
+                        + "[对比]上一次的闭盘价" + lastClosePrice + ",暂无上涨趋势!");
             }
         }
         if (config.getBuyKlineOption().equals(TraceType.down.getStr())) {
             //如果当前收盘价小于上一个线的收盘价 则有下降趋势（simple》？）
-            if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) < 0) {
+            if (nowClosePrice.compareTo(lastClosePrice) < 0) {
                 //计算下架的百分比 (当前最新成交价（或收盘价）-开盘参考价)÷开盘参考价×100%
                 buyDownPercentageCompare(config, lines);
             } else {
                 redisMqService.sendMsg("策略5：" + config.getBuyKline()
-                        + "k线,当前闭盘价" + lines.get(0).getClose()
-                        + ",上一次的闭盘价" + lines.get(1).getClose() + ",暂无下降趋势!");
+                        + "k线,当前闭盘价" + nowClosePrice
+                        + "[对比]上一次的闭盘价" + lastClosePrice + ",暂无下降趋势!");
             }
         }
     }
@@ -1219,28 +1254,32 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param lines
      */
     private void setting5SellCalculation(StrategyVo.Setting5Entity config, List<Kline> lines) {
+        //当前闭盘价
+        BigDecimal nowClosePrice = lines.get(0).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+        //上一次的闭盘价
+        BigDecimal lastClosePrice = lines.get(1).getClose().setScale(pricePrecision, RoundingMode.DOWN);
 
         //卖的权重
         if (config.getSellKlineOption().equals(TraceType.up.getStr())) {
             //上涨趋势
-            if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) > 0) {
+            if (nowClosePrice.compareTo(lastClosePrice) > 0) {
                 //计算上涨的涨幅
                 sellUpPercentageCompare(config, lines);
             } else {
                 redisMqService.sendMsg("策略5：" + config.getSellKline()
-                        + "k线,当前闭盘价" + lines.get(0).getClose()
-                        + ",上一次的闭盘价" + lines.get(1).getClose() + ",暂无上涨趋势!");
+                        + "k线,当前闭盘价" + nowClosePrice
+                        + " [对比] 上一次的闭盘价" + lastClosePrice + ",暂无上涨趋势!");
             }
         }
         if (config.getSellKlineOption().equals(TraceType.down.getStr())) {
             //如果当前收盘价小于上一个线的收盘价 则有下降趋势（simple》？）
-            if (lines.get(0).getClose().compareTo(lines.get(1).getClose()) < 0) {
+            if (nowClosePrice.compareTo(lastClosePrice) < 0) {
                 //计算跌幅
                 sellDownPercentageCompare(config, lines);
             } else {
                 redisMqService.sendMsg("策略5：" + config.getSellKline()
-                        + "k线,当前闭盘价" + lines.get(0).getClose()
-                        + ",上一次的闭盘价" + lines.get(1).getClose() + ",暂无下降趋势!");
+                        + "k线,当前闭盘价" + nowClosePrice
+                        + " [对比] 上一次的闭盘价" + lastClosePrice + ",暂无下降趋势!");
             }
         }
 
@@ -1282,11 +1321,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (percentage.compareTo(new BigDecimal(config.getBuyPercent())) > 0) {
             //涨跌幅大于设置值后
             redisMqService.sendMsg("策略5：" + config.getBuyKline()
-                    + "k线,涨幅：" + percentage + "%,大于设置值：" + config.getBuyPercent() + "%,策略5权重生效!");
+                    + "k线,涨幅：" + percentage + "%, [大于] 设置值：" + config.getBuyPercent() + "%,策略5权重生效!");
             this.weights.AddBuyTotal(config.getBuyWeights());
         } else {
             redisMqService.sendMsg("策略5：" + config.getBuyKline()
-                    + "k线,涨幅：" + percentage + "%,小于设置值：" + config.getBuyPercent() + "%,策略5权重不生效!");
+                    + "k线,涨幅：" + percentage + "%, [小于] 设置值：" + config.getBuyPercent() + "%,策略5权重不生效!");
         }
     }
 
@@ -1305,11 +1344,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (percentage.compareTo(new BigDecimal(config.getBuyPercent())) > 0) {
             //涨跌幅大于设置值后
             redisMqService.sendMsg("策略5：" + config.getBuyKline()
-                    + "k线,跌幅：" + percentage + "%,大于设置值：" + config.getBuyPercent() + "%,策略5权重生效!");
+                    + "k线,跌幅：" + percentage + "%, [大于] 设置值：" + config.getBuyPercent() + "%,策略5权重生效!");
             this.weights.AddBuyTotal(config.getBuyWeights());
         } else {
             redisMqService.sendMsg("策略5：" + config.getBuyKline()
-                    + "k线,跌幅：" + percentage + "%,小于设置值：" + config.getBuyPercent() + "%,策略5权重不生效!");
+                    + "k线,跌幅：" + percentage + "%, [小于] 设置值：" + config.getBuyPercent() + "%,策略5权重不生效!");
         }
     }
 
@@ -1318,11 +1357,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (percentage.compareTo(new BigDecimal(config.getSellPercent())) > 0) {
             //涨跌幅大于设置值后
             redisMqService.sendMsg("策略5：" + config.getSellKline()
-                    + "k线,涨幅：" + percentage + "%,大于设置值：" + config.getSellPercent() + "%,策略5权重生效!");
+                    + "k线,涨幅：" + percentage + "%, [大于] 设置值：" + config.getSellPercent() + "%,策略5权重生效!");
             this.weights.AddBuyTotal(config.getBuyWeights());
         } else {
             redisMqService.sendMsg("策略5：" + config.getSellKline()
-                    + "k线,涨幅：" + percentage + "%,小于设置值：" + config.getSellPercent() + "%,策略5权重不生效!");
+                    + "k线,涨幅：" + percentage + "%, [小于] 设置值：" + config.getSellPercent() + "%,策略5权重不生效!");
         }
     }
 
@@ -1331,11 +1370,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (percentage.compareTo(new BigDecimal(config.getSellPercent())) > 0) {
             //涨跌幅大于设置值后
             redisMqService.sendMsg("策略5：" + config.getSellKline()
-                    + "k线,跌幅：" + percentage + "%,大于设置值：" + config.getSellPercent() + "%,策略5权重生效!");
+                    + "k线,跌幅：" + percentage + "%, [大于] 设置值：" + config.getSellPercent() + "%,策略5权重生效!");
             this.weights.AddBuyTotal(config.getBuyWeights());
         } else {
             redisMqService.sendMsg("策略5：" + config.getSellKline()
-                    + "k线,跌幅：" + percentage + "%,小于设置值：" + config.getSellPercent() + "%,策略5权重不生效!");
+                    + "k线,跌幅：" + percentage + "%, [小于] 设置值：" + config.getSellPercent() + "%,策略5权重不生效!");
         }
     }
 
@@ -1359,18 +1398,15 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     public Boolean setting1BuyCalculation(MarketOrder marketOrder, StrategyVo.Setting1Entity config) {
         if (marketOrder != null && !marketOrder.getBuy().isEmpty()) {
-            log.info("当前市场最新买入订单的价格为:{}", currentNewBuyPrice);
             Optional<TradeBean> res = marketOrder.getBuy()
                     .stream()
                     .limit(20)
                     .filter(m -> m.getPrice().compareTo(config.getBuyOrdersUsdt()) > 0)
                     .findFirst();
             if (res.isPresent()) {
-                log.info("策略1 配置的价格:{}。前20位购买订单中有大于这个价格的订单,订单价格为:{}", config.getBuyOrdersUsdt(), res.get().getPrice());
-                redisMqService.sendMsg("策略1：前20位购买订单中出现价格" + res.get().getPrice() + "大于策略1 配置的价格" + config.getBuyOrdersUsdt());
+                redisMqService.sendMsg("策略1：前20位购买订单中出现价格" + res.get().getPrice() + " [大于] 策略1 配置的价格" + config.getBuyOrdersUsdt());
                 return true;
             }
-            log.info("策略1：前20位购买订单中未出现大于策略1配置的价格{}策略1不生效!", config.getBuyOrdersUsdt());
             redisMqService.sendMsg("策略1：前20位购买订单中未出现大于策略1配置的价格" + config.getBuyOrdersUsdt() + "策略1不生效!");
             return false;
         }
@@ -1386,18 +1422,15 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     public Boolean setting1SellCalculation(MarketOrder marketOrder, StrategyVo.Setting1Entity config) {
         if (marketOrder != null && !marketOrder.getSell().isEmpty()) {
-            log.info("当前市场最新卖出订单的价格为:{}", currentNewSellPrice);
             Optional<TradeBean> res = marketOrder.getSell()
                     .stream()
                     .limit(20)
                     .filter(m -> m.getPrice().compareTo(config.getSellOrdersUsdt()) > 0)
                     .findFirst();
             if (res.isPresent()) {
-                log.info("策略1 配置的sell价格:{},前20位出售订单中有大于这个价格的订单,订单价格为:{}", config.getSellOrdersUsdt(), res.get().getPrice());
                 redisMqService.sendMsg("策略1：前20位卖出订单中出现的价格" + res.get().getPrice() + "大于策略1 配置的价格" + config.getSellOrdersUsdt() + "策略1生效");
                 return true;
             }
-            log.info("策略1 前20位卖出订单中未出现大于策略1配置的价格{}策略1不生效!", config.getSellOrdersUsdt());
             redisMqService.sendMsg("策略1：前20位卖出订单中未出现大于策略1配置的价格" + config.getSellOrdersUsdt() + "策略1不生效!");
             return false;
         }
@@ -1414,7 +1447,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (marketOrder != null && !marketOrder.getBuy().isEmpty()) {
             this.currentNewBuyPrice = marketOrder.getBuy().get(0).getPrice();
             if (currentNewBuyPrice.compareTo(config.getBuyOrderUsdt()) > 0) {
-                log.info("策略2：当前最新购买订单价格{}超过策略2配置的价格{},策略2生效", currentNewBuyPrice, config.getBuyOrderUsdt());
                 redisMqService.sendMsg("策略2：当前最新购买订单价格" + currentNewBuyPrice + "超过策略2配置的价格:" + config.getBuyOrderUsdt() + ",策略2权重生效！！！");
                 return true;
             }
@@ -1434,7 +1466,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (marketOrder != null && !marketOrder.getSell().isEmpty()) {
             this.currentNewSellPrice = marketOrder.getSell().get(0).getPrice();
             if (currentNewSellPrice.compareTo(config.getSellOrderUsdt()) > 0) {
-                log.info("当前最新卖出订单价格{}超过配置2的价格{},策略2生效", currentNewSellPrice, config.getSellOrderUsdt());
                 redisMqService.sendMsg("策略2：当前最新卖出订单价格" + currentNewSellPrice + "超过策略2的价格" + config.getSellOrderUsdt() + ",策略2权重生效");
                 return true;
             }
@@ -1479,7 +1510,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                    .add("订单id", id)
+                    .add("id", id)
                     .add("type", type)
                     .add("price", price)
                     .add("amount", amount)

@@ -141,9 +141,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         //限价 市价方式 redis key
         lastOrderState = lastOrderState + "type_" + this.baseInfo.getIsLimitPrice() + "_";
         orderProfitIds = orderProfitIds + "type_" + this.baseInfo.getIsLimitPrice() + "_";
-
-        quotaBalanceKey = quotaCurrency + "_balance_" + accountConfig.accountId();
-        baseBalanceKey = baseCurrency + "_balance_" + accountConfig.accountId();
     }
 
     @Override
@@ -396,6 +393,8 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         this.quotaCurrency = split[1];
         this.pricePrecision = Integer.parseInt(split[2]);
         this.amountPrecision = Integer.parseInt(split[3]);
+        quotaBalanceKey = quotaCurrency + "_balance_" + accountConfig.accountId();
+        baseBalanceKey = baseCurrency + "_balance_" + accountConfig.accountId();
         log.info("当前机器人的基础币种{} 配额币种{} 价格的精度{} 数量的精度{}", baseCurrency, quotaCurrency, pricePrecision, amountPrecision);
         redisMqService.sendMsg("当前机器人的基础币种{" + baseCurrency + "} 配额币种{" + quotaCurrency + "} 价格的精度{" + pricePrecision + "} 数量的精度{" + amountPrecision + "}");
         return true;
@@ -857,6 +856,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         try {
             //获取用户的账户余额 knc_balance_6688515
             this.tradingApi.getBalanceInfo(this.accountConfig.accountId(), this.redisUtil);
+//            balanceInfo.getBalancesOnHold().get()
+            log.info("quotaBalanceKey{}", quotaBalanceKey);
+            log.info("baseBalanceKey{}", baseBalanceKey);
+            redisMqService.sendMsg(String.valueOf(redisUtil.get(quotaBalanceKey)));
+            redisMqService.sendMsg(String.valueOf(redisUtil.get(baseBalanceKey)));
+
             this.baseBalance = new BigDecimal(String.valueOf(redisUtil.get(quotaBalanceKey)));
             this.quotaBalance = new BigDecimal(String.valueOf(redisUtil.get(baseBalanceKey)));
             redisMqService.sendMsg("获取当前账户余额：baseBalance" + baseBalance + ",quotaBalance" + quotaBalance);

@@ -8,6 +8,7 @@ import com.qklx.qt.admin.dao.AccountMapper;
 import com.qklx.qt.admin.entity.Account;
 import com.qklx.qt.admin.entity.Balance;
 import com.qklx.qt.admin.service.AccountService;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.core.enums.Status;
 import com.qklx.qt.core.vo.AccountVo;
@@ -15,6 +16,7 @@ import com.qklx.qt.core.response.*;
 import com.qklx.qt.core.api.ApiResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +39,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private static final String type = "spot";
 
 
-    @Value(value = "${landen.ip}")
-    private String ip;
-    @Value(value = "${landen.port}")
-    private int port;
+    @Autowired
+    VpnProxyConfig vpnProxyConfig;
 
 
     @Override
@@ -67,7 +67,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         } else {
             try {
                 //通过访问key 查询用户账户id 检查是否可用
-                client = new ApiClient(account.getAccessKey(), account.getSecretKey(), ip, port);
+                client = new ApiClient(account.getAccessKey(), account.getSecretKey(), vpnProxyConfig);
                 response = client.accounts();
             } catch (Exception e) {
                 logger.error("api 获取账户的基础信息失败=========" + e.getMessage());

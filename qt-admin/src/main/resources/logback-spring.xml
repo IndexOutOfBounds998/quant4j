@@ -107,7 +107,7 @@
     <!--<logger name="org.apache.commons" level="ERROR"/>-->
     <!--<logger name="org.apache.zookeeper" level="ERROR"/>-->
     <!--<logger name="com.alibaba.dubbo.monitor" level="ERROR"/>-->
-    <!--<logger name="com.alibaba.dubbo.remoting" level="ERROR"/>-->
+    <logger name="com.qklx.qt.admin.dao" level="DEBUG"/>
 
     <!-- ${LOG_ROOT_LEVEL} 日志级别 -->
     <root level="${LOG_ROOT_LEVEL}">

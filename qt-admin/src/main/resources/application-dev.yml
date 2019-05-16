@@ -1,12 +1,11 @@
 server:
   port: 8080
-  address: 127.0.0.1
 #添加数据源
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/qt?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://localhost:3306/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: root
     password: root
     druid:
@@ -40,16 +39,6 @@ spring:
         max-idle: 8
         min-idle: 0
     timeout: 15000
-#mybatis-plus:
-logging:
-  level:
-    com:
-      qklx:
-        qt:
-          admin:
-            dao: info
-    root: info
-  file: /logs/spring.log
 #  mapper-locations: classpath:/mapper/*
 eureka:
   client:
@@ -58,6 +47,7 @@ eureka:
 mybatis-plus:
   mapper-locations: classpath*:mapper/*Mapper.xml
 
-landen:
+vpnproxy:
+  enable: true
   ip: 127.0.0.1
-  port: 52565
+  port: 64035

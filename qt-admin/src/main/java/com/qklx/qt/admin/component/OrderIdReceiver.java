@@ -2,6 +2,7 @@ package com.qklx.qt.admin.component;
 
 import com.alibaba.fastjson.JSON;
 import com.qklx.qt.admin.entity.Orders;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.core.response.OrdersDetail;
@@ -24,13 +25,10 @@ import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
 public class OrderIdReceiver {
 
 
-    private String ip;
+    private VpnProxyConfig vpnProxyConfig;
 
-    private int port;
-
-    public OrderIdReceiver(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
+    public OrderIdReceiver(VpnProxyConfig vpnProxyConfig) {
+        this.vpnProxyConfig = vpnProxyConfig;
     }
 
     /**
@@ -42,7 +40,7 @@ public class OrderIdReceiver {
         try {
             OrderTaskMessage msg = JSON.parseObject(parseJsonToString(message), OrderTaskMessage.class);
             //处理成功的订单
-            ApiClient apiClient = new ApiClient(msg.getAccessKey(), msg.getSecretKey(), this.ip, this.port);
+            ApiClient apiClient = new ApiClient(msg.getAccessKey(), msg.getSecretKey(),vpnProxyConfig);
             OrdersDetailResponse<OrdersDetail> detail = null;
             try {
                 detail = apiClient.ordersDetail(msg.getOrderId().toString());

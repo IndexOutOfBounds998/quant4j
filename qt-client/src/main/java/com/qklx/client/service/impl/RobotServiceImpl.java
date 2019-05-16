@@ -3,6 +3,7 @@ package com.qklx.client.service.impl;
 import com.qklx.client.Task.RobotOperate;
 import com.qklx.client.service.RobotService;
 import com.qklx.qt.common.config.RedisUtil;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.core.api.ApiResult;
 import com.qklx.qt.core.enums.Status;
 import com.qklx.qt.core.vo.RobotStrategyVo;
@@ -16,10 +17,8 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Service
 public class RobotServiceImpl implements RobotService {
-    @Value(value = "${landen.ip}")
-    private String ip;
-    @Value(value = "${landen.port}")
-    private int port;
+    @Autowired
+    VpnProxyConfig vpnProxyConfig;
     @Autowired
     RedisUtil redisUtil;
     @Autowired
@@ -30,7 +29,7 @@ public class RobotServiceImpl implements RobotService {
         //启动机器人
         try {
             executorService.execute(() -> {
-                RobotOperate robotOperate = new RobotOperate(redisUtil, ip, port);
+                RobotOperate robotOperate = new RobotOperate(redisUtil, vpnProxyConfig);
                 robotOperate.doRobotTask(vo);
             });
             return new ApiResult(Status.SUCCESS);

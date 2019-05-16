@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.core.request.CreateOrderRequest;
 import com.qklx.qt.core.request.DepthRequest;
 import com.qklx.qt.core.request.IntrustOrdersDetailRequest;
@@ -66,18 +67,27 @@ public class ApiClient {
      * @param accessKeyId     AccessKeyId
      * @param accessKeySecret AccessKeySecret
      */
-    public ApiClient(String accessKeyId, String accessKeySecret, String ip, int port) {
+    public ApiClient(String accessKeyId, String accessKeySecret, VpnProxyConfig vpnProxyConfig) {
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;
         this.assetPassword = null;
-        client = createOkHttpClient(ip, port);
+        if (vpnProxyConfig.getEnable()) {
+            client = createOkHttpClient(vpnProxyConfig.getIp(), vpnProxyConfig.getPort());
+        } else {
+            client = createOkHttpClient();
+        }
+
     }
 
     public ApiClient() {
     }
 
-    public ApiClient(String ip, int port) {
-        client = createOkHttpClient(ip, port);
+    public ApiClient(VpnProxyConfig vpnProxyConfig) {
+        if (vpnProxyConfig.getEnable()) {
+            client = createOkHttpClient(vpnProxyConfig.getIp(), vpnProxyConfig.getPort());
+        } else {
+            client = createOkHttpClient();
+        }
     }
 
     /**
@@ -478,16 +488,20 @@ public class ApiClient {
         }).collect(Collectors.toList()));
     }
 
-    // create OkHttpClient:
+    // create OkHttpClient:with proxy
     static OkHttpClient createOkHttpClient(String ip, int port) {
-
-
         return new Builder().connectTimeout(CONN_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS).writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port)))
                 .build();
     }
 
+    // create OkHttpClient: without proxy
+    static OkHttpClient createOkHttpClient() {
+        return new Builder().connectTimeout(CONN_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS).writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .build();
+    }
 }
 
 

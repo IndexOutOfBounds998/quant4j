@@ -2,6 +2,7 @@ package com.qklx.qt.admin.task;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.admin.entity.Account;
 import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.core.api.ApiClient;
@@ -10,7 +11,6 @@ import com.qklx.qt.core.response.BalanceBean;
 import com.qklx.qt.core.response.BalanceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,10 +29,8 @@ public class BalanceTask {
     @Autowired
     RedisUtil redisUtil;
 
-    @Value(value = "${landen.ip}")
-    private String ip;
-    @Value(value = "${landen.port}")
-    private int port;
+    @Autowired
+    VpnProxyConfig vpnProxyConfig;
 
 
     @Async
@@ -41,7 +39,7 @@ public class BalanceTask {
         Account account = new Account();
         List<Account> accounts = account.selectAll();
         for (Account a : accounts) {
-            ApiClient client = new ApiClient(a.getAccessKey(), a.getSecretKey(), ip, port);
+            ApiClient client = new ApiClient(a.getAccessKey(), a.getSecretKey(),vpnProxyConfig);
             createBalance(client, String.valueOf(a.getId()));
         }
     }
@@ -56,7 +54,7 @@ public class BalanceTask {
         Account account = new Account();
         List<Account> accounts = account.selectAll();
         for (Account a : accounts) {
-            ApiClient client = new ApiClient(a.getAccessKey(), a.getSecretKey(), ip, port);
+            ApiClient client = new ApiClient(a.getAccessKey(), a.getSecretKey(),vpnProxyConfig);
             BalanceResponse<Balance<List<BalanceBean>>> response = null;
             try {
                 response = client.balance(String.valueOf(a.getId()));

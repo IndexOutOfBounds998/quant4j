@@ -1,6 +1,7 @@
 package com.qklx.qt.admin.task;
 
 import com.qklx.qt.common.config.RedisUtil;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.core.response.Symbol;
@@ -20,13 +21,10 @@ import java.util.stream.Collectors;
 public class SymbolTask {
 
     private static Logger logger = LoggerFactory.getLogger(SymbolTask.class);
-
+    @Autowired
+    VpnProxyConfig vpnProxyConfig;
     @Autowired
     RedisUtil redisUtil;
-    @Value(value = "${landen.ip}")
-    private String ip;
-    @Value(value = "${landen.port}")
-    private int port;
 
     /**
      * 收集交易对信息存到数据库 /v1/common/symbols
@@ -35,7 +33,7 @@ public class SymbolTask {
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24, initialDelay = 5000)
     public void symbolCollects() {
         logger.info("=========数据 redis 同步交易对信息开始=========");
-        ApiClient apiClient = new ApiClient(ip, port);
+        ApiClient apiClient = new ApiClient(vpnProxyConfig);
         List<Symbol> symbols = apiClient.getSymbols();
         //获取到交易对 进行排序操作 防止每次都插入不一致
         symbols = symbols.stream().sorted(Comparator.comparing(Symbol::getSymbol)).collect(Collectors.toList());

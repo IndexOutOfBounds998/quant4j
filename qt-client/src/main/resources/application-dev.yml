@@ -1,6 +1,5 @@
 server:
   port: 8024
-  address: 192.168.0.115
 eureka:
   client:
     serviceUrl:
@@ -36,15 +35,8 @@ management:
       exposure:
         include: '*'
       base-path: /
-
-logging:
-  level:
-    org.springframework.web: debug
-  path: logs/
-  file:
-    max-size: 1GB
-
-
-landen:
+vpnproxy:
+  enable: true
   ip: 127.0.0.1
-  port: 52565
+  port: 64035
+

@@ -1,6 +1,7 @@
 package com.qklx.client.Task;
 
 import com.qklx.qt.common.config.RedisUtil;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.core.api.ApiClient;
 import com.qklx.qt.core.config.AccountConfig;
 import com.qklx.qt.core.config.MarketConfig;
@@ -22,20 +23,17 @@ public class RobotOperate {
     private RedisUtil redisUtil;
 
 
-    private String ip;
+    private VpnProxyConfig vpnProxyConfig;
 
-    private int port;
-
-    public RobotOperate(RedisUtil redisUtil, String ip, int port) {
+    public RobotOperate(RedisUtil redisUtil, VpnProxyConfig vpnProxyConfig) {
         this.redisUtil = redisUtil;
-        this.ip = ip;
-        this.port = port;
+        this.vpnProxyConfig = vpnProxyConfig;
     }
 
     public void doRobotTask(RobotStrategyVo vo) {
         log.info("启动机器人{}>>>>>>", vo.getRobotId());
         TradingStrategy huobiStrategy = new HuoBiStrategyImpl(redisUtil, vo.getRobotId());
-        ApiClient apiClient = new ApiClient(vo.getAppKey(), vo.getAppSecret(), this.ip, this.port);
+        ApiClient apiClient = new ApiClient(vo.getAppKey(), vo.getAppSecret(), vpnProxyConfig);
         TradingApi api = new HuobiExchangeAdapter(apiClient);
         MarketConfig marketConfig = new HuoBiMarketConfigImpl(new Market(vo.getSymbol()));
         StrategyConfig strategyConfig = new StrategyConfig(vo.getStrategyVo());

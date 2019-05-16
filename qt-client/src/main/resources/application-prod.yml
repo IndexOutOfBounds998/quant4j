@@ -36,6 +36,8 @@ management:
       exposure:
         include: '*'
       base-path: /
-landen:
+vpnproxy:
+  enable: true
   ip: 127.0.0.1
-  port: 61175
+  port: 64035
+

@@ -3,6 +3,7 @@ package com.qklx.qt.admin.config;
 import com.qklx.qt.admin.component.OrderIdReceiver;
 import com.qklx.qt.admin.component.ProfitReceiver;
 import com.qklx.qt.admin.component.RobotMsgReceiver;
+import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,20 +22,9 @@ import javax.sound.midi.Receiver;
 @AutoConfigureAfter({Receiver.class})
 public class SubscriberConfig {
 
+    @Autowired
+    private VpnProxyConfig vpnProxyConfig;
 
-    private String ip;
-
-    private int port;
-
-    @Value(value = "${landen.ip}")
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    @Value(value = "${landen.port}")
-    public void setPort(int port) {
-        this.port = port;
-    }
 
     private SimpMessagingTemplate simpMessageSendingOperations;//消息发送模板
 
@@ -45,7 +35,7 @@ public class SubscriberConfig {
 
     @Bean
     public MessageListenerAdapter orderIdReceiverAdapter() {
-        return new MessageListenerAdapter(new OrderIdReceiver(ip, port), "receiveMessage"); //当没有继承MessageListener时需要写方法名字
+        return new MessageListenerAdapter(new OrderIdReceiver(vpnProxyConfig), "receiveMessage"); //当没有继承MessageListener时需要写方法名字
     }
 
     @Bean

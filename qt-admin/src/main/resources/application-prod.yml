@@ -40,17 +40,6 @@ spring:
         max-idle: 8
         min-idle: 0
     timeout: 15000
-#mybatis-plus:
-logging:
-  level:
-    com:
-      qklx:
-        qt:
-          admin:
-            dao: info
-    root: info
-  file: /logs/spring.log
-#  mapper-locations: classpath:/mapper/*
 eureka:
   client:
     serviceUrl:
@@ -58,6 +47,7 @@ eureka:
 mybatis-plus:
   mapper-locations: classpath*:mapper/*Mapper.xml
 
-landen:
+vpnproxy:
+  enable: true
   ip: 127.0.0.1
-  port: 61175
+  port: 64035

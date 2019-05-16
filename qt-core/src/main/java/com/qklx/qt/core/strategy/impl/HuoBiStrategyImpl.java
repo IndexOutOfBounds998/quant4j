@@ -212,6 +212,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                                 createSellOrder();
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
                                 redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
                             }
                         } else {
@@ -276,6 +277,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             }
         } catch (Exception e) {
             e.printStackTrace();
+            log.error("机器人运行中发生异常：异常信息{}", e);
             redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
         }
     }
@@ -859,11 +861,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 //            balanceInfo.getBalancesOnHold().get()
             log.info("quotaBalanceKey{}", quotaBalanceKey);
             log.info("baseBalanceKey{}", baseBalanceKey);
-            redisMqService.sendMsg(String.valueOf(redisUtil.get(quotaBalanceKey)));
-            redisMqService.sendMsg(String.valueOf(redisUtil.get(baseBalanceKey)));
-
-            this.baseBalance = new BigDecimal(String.valueOf(redisUtil.get(quotaBalanceKey)));
-            this.quotaBalance = new BigDecimal(String.valueOf(redisUtil.get(baseBalanceKey)));
+            //基础货币和对价货币
+            this.baseBalance = new BigDecimal(String.valueOf(redisUtil.get(baseBalanceKey)));
+            this.quotaBalance = new BigDecimal(String.valueOf(redisUtil.get(quotaBalanceKey)));
             redisMqService.sendMsg("获取当前账户余额：baseBalance" + baseBalance + ",quotaBalance" + quotaBalance);
             return true;
         } catch (Exception e) {

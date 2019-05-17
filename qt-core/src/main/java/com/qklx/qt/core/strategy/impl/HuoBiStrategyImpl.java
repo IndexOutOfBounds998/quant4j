@@ -64,6 +64,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private static final int decimalPoint = 4;
     //市价小数点固定为8
     private static final int marketPoint = 8;
+    private static final int sellmarketPoint = 4;
     //市场买卖信息
     private MarketOrder marketOrder;
     //亏损次数
@@ -648,7 +649,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             BigDecimal amount,
             BigDecimal price,
             com.qklx.qt.core.enums.OrderType orderType,
-            TradingApi tradingApi) {
+            TradingApi tradingApi,OrderType type) {
         //下订单
         try {
             redisMqService.sendMsg("叮叮叮>>>开始下单,下单信息 价格:" + price + "数量:" + amount + "订单类型:" + orderType.getTyoe());
@@ -656,6 +657,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             if (this.orderState.id != null) {
                 redisMqService.sendMsg("下单成功>>>订单信息【" + this.orderState.toString() + "】");
                 Thread.sleep(1000);
+                this.orderState.type = type;
                 //将订单信息传送到后台 此时的订单可能未成功
                 orderMqService.sendMsg(this.orderState.id);
             }
@@ -663,7 +665,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             e.printStackTrace();
             log.error("下订单发生异常{}", e.getMessage());
             redisMqService.sendMsg("下单异常>>>重新尝试下单......");
-            this.order(amount, price, orderType, tradingApi);
         } catch (InterruptedException e) {
             e.printStackTrace();
             log.error("线程异常{}", e.getMessage());
@@ -811,7 +812,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             //市价卖出 价格直接填0 计算交易额度
             if (baseInfo.getIsAllSell() == 1) {
                 //如果市价全部卖出 卖出为币 卖出所有的币 就是价格就是交易额度 quotaBalance;
-                sellAmount = this.baseBalance.setScale(marketPoint, RoundingMode.DOWN);
+                sellAmount = this.baseBalance.setScale(sellmarketPoint, RoundingMode.DOWN);
                 log.info("市价全部卖出,卖出数量{}", sellAmount);
                 redisMqService.sendMsg("市价全部卖出,卖出数量【" + sellAmount + "】");
             } else {
@@ -842,11 +843,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param type
      */
     private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, com.qklx.qt.core.enums.OrderType orderType, OrderType type) {
-        this.orderState.type = type;
+
         this.orderState.amount = sellAmount;
         this.orderState.price = sellPrice;
         this.orderState.orderType = orderType;
-        this.order(sellAmount, sellPrice, orderType, tradingApi);
+        this.order(sellAmount, sellPrice, orderType, tradingApi,type);
     }
 
     /**

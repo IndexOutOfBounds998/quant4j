@@ -1,10 +1,10 @@
 server:
   port: 8024
-  address: 192.168.0.119
+  address: 0.0.0.0
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_ZONE_HOST:192.168.0.119}:${EUREKA_ZONE_PORT:8761}/eureka/
+      defaultZone: http://${EUREKA_ZONE_HOST:localhost}:${EUREKA_ZONE_PORT:8761}/eureka/
 
 spring:
   application:
@@ -37,7 +37,7 @@ management:
         include: '*'
       base-path: /
 vpnproxy:
-  enable: true
+  enable: false
   ip: 127.0.0.1
   port: 64035
 

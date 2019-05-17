@@ -1,5 +1,6 @@
 package com.qklx.qt.core.exchangeAdapter;
 
+import com.alibaba.fastjson.JSON;
 import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.api.ApiClient;
@@ -124,7 +125,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
      */
     @Override
     public Long createOrder(String marketId, String accountId, OrderType orderType, BigDecimal quantity, BigDecimal price) {
-        try {
+
             CreateOrderRequest createOrderRequest = new CreateOrderRequest();
             createOrderRequest.setAmount(quantity.toPlainString());
             createOrderRequest.setAccountId(accountId);
@@ -134,11 +135,9 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             }
             createOrderRequest.setSymbol(marketId);
             createOrderRequest.setType(orderType.getTyoe());
+            logger.info("创建订单详情:{}", JSON.toJSONString(createOrderRequest));
             return apiClient.createOrder(createOrderRequest);
-        } catch (Exception e) {
-            logger.error("创建订单发生异常==============" + e.getMessage());
-            return null;
-        }
+
     }
 
     /**

@@ -13,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class RobotCheckTask {
+public class RobotStatusTask {
 
     @Autowired
     RedisUtil redisUtil;
@@ -22,18 +22,16 @@ public class RobotCheckTask {
      * 更新机器人的运行状态
      */
     @Async
-    @Scheduled(fixedDelay = 5000, initialDelay = 5000)
+    @Scheduled(fixedDelay = 5000, initialDelay = 1000)
     public void updateRobotRunState() {
         Robot robot = new Robot();
         List<Robot> robots = robot.selectAll();
         for (Robot r : robots) {
             String key = RobotRedisKeyConfig.getRobotIsRunStateKey() + r.getId();
-            String startKey = RobotRedisKeyConfig.getRobotIsStartStateKey() + r.getId();
             Object o = redisUtil.get(key);
             if (o == null) {
                 //已经取消了机器人的运行
                 r.setIsRun(0);
-                redisUtil.set(startKey, false);
             } else {
                 r.setIsRun(1);
             }

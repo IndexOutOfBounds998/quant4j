@@ -62,9 +62,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
     //精确到小数点的个数
     private static final int decimalPoint = 4;
-    //市价小数点固定为8
-    private static final int marketPoint = 8;
-    private static final int sellmarketPoint = 4;
     //市场买卖信息
     private MarketOrder marketOrder;
     //亏损次数
@@ -136,12 +133,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
         this.orderState = new OrderState();
         this.weights = new Weights();
-        redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
-        orderMqService = new OrderIdRedisMqServiceImpl(this.redisUtil, accountConfig, robotId);
-        orderProfitService = new OrderProfitRedisMqServiceImpl(this.redisUtil);
+        this.redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
+        this.orderMqService = new OrderIdRedisMqServiceImpl(this.redisUtil, accountConfig, robotId);
+        this.orderProfitService = new OrderProfitRedisMqServiceImpl(this.redisUtil);
         //限价 市价方式 redis key
-        lastOrderState = lastOrderState + "type_" + this.baseInfo.getIsLimitPrice() + "_";
-        orderProfitIds = orderProfitIds + "type_" + this.baseInfo.getIsLimitPrice() + "_";
+        this.lastOrderState = lastOrderState + "type_" + this.baseInfo.getIsLimitPrice() + "_";
+        this.orderProfitIds = orderProfitIds + "type_" + this.baseInfo.getIsLimitPrice() + "_";
     }
 
     @Override
@@ -171,116 +168,116 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     redisMqService.sendMsg("机器人上一次的运行状态恢复失败！机器人将以重新的状态启动......");
                 }
             }
-            // 任务循环执行
-            while (true) {
-                try {
-                    //设置机器人的运行状态 在休眠+15s之后没响应 就认为该机器人已经死亡
-                    redisUtil.set(isRunKey, "isRunning", (long) (baseInfo.getSleep() + 15));
-                    //重置权重
-                    weights.reSet();
-                    //获取市场订单 最大支持2000条
-                    this.marketOrder = this.tradingApi.getMarketOrders(this.marketConfig, "2000");
-                    if (this.marketOrder == null) {
-                        log.info("获取市场订单数据失败。。。重试ing");
-                        redisMqService.sendMsg("获取市场行情数据失败！重试.......");
-                        Thread.sleep(1000);
-                        continue;
-                    }
-                    //设置当前买价和当前卖价 (价格设置的位数来自huobi获取的价格小数位)
-                    this.currentNewBuyPrice = this.marketOrder.getBuy().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
-                    this.currentNewSellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
-                    //计算设置买卖权重
-                    weightsCalculation();
-                    //判断买卖
-                    if (orderState.type == OrderType.BUY) {
-                        if (profitArrive) {
-                            redisMqService.sendMsg("到达盈亏次数,自动退出ing");
-                            break;
-                        }
-                        //卖的情况下 先判断是否开启了止盈止损
-                        if (takeProfitStopLoss()) {
-                            //已经卖出 重新循环
-                            long v = (long) (this.baseInfo.getSleep() * 1000L);
-                            Thread.sleep(v);
-                            continue;
-                        } else {
-                            redisMqService.sendMsg("卖出止盈止损策略：策略未达到设置的盈亏点,执行计算卖出权重策略....");
-                        }
-                        //查看是否达到卖的信号
-                        if (this.weights.getSellTotal() != 0 && this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
-                                && orderState.type == OrderType.BUY) {
-                            try {
-                                createSellOrder();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
-                                redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
-                            }
-                        } else {
-                            redisMqService.sendMsg(this.weights.getSellTotal() == 0 ? "当前策略设置不进行卖出操作!!!" : "当前策略计算卖出权重:" + this.weights.getSellTotal() + ",未达到策略卖出总权重【" + baseInfo.getSellAllWeights() + "】不进行操作。。。");
-                        }
-                    } else if (orderState.type == OrderType.SELL) {
-                        if (profitArrive) {
-                            redisMqService.sendMsg("到达盈亏次数,自动退出ing");
-                            break;
-                        }
-                        //查看是否到达买的信号
-                        if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
-                                && orderState.type == OrderType.SELL) {
-                            try {
-                                createBuyOrder();
-                            } catch (Exception e) {
-                                redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
-                                e.printStackTrace();
-                                log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
-                            }
-                        } else {
-                            redisMqService.sendMsg(this.weights.getBuyTotal() == 0 ? "当前策略设置不进行买入操作!!!" : "当前策略计算买入权重:" + this.weights.getBuyTotal() + ",未达到策略买入总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
-                        }
-
-                    } else if (orderState.type == null) {
-                        if (profitArrive) {
-                            redisMqService.sendMsg("到达盈亏次数,自动退出ing");
-                            break;
-                        }
-                        //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
-                        if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()) {
-                            createBuyOrder();
-                        } else {
-                            redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
-                        }
-                    }
-
-                    try {
-                        ++runTimes;
-                        redisMqService.sendMsg("机器人已经运行了>>>" + runTimes + "次");
-                        log.info("=========================================");
-                        //休眠几秒
-                        Thread.sleep((long) (baseInfo.getSleep() * 1000));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (checkIsStop(startkey)) {
-                        redisMqService.sendMsg("机器人已经被取消了任务 退出ing");
-                        checkAndSet();
-                        break;
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("机器人{}运行中发生异常：异常信息{}", robotId, e.getMessage());
-                    redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
-                } finally {
-                    //记录当前机器人的最后一次状态
-                    redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
-                }
-            }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("机器人运行中发生异常：异常信息{}", e);
             redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
         }
+        // 任务循环执行
+        while (true) {
+            try {
+                //设置机器人的运行状态 在休眠+20s之后没响应 就认为该机器人已经死亡
+                redisUtil.set(isRunKey, "running", (long) (baseInfo.getSleep() + 20));
+                //重置权重
+                weights.reSet();
+                //获取市场订单 最大支持2000条
+                this.marketOrder = this.tradingApi.getMarketOrders(this.marketConfig, "2000");
+                if (this.marketOrder == null) {
+                    log.info("获取市场订单数据失败。。。重试ing");
+                    redisMqService.sendMsg("获取市场行情数据失败！重试.......");
+                    Thread.sleep(100);
+                    continue;
+                }
+                //设置当前买价和当前卖价 (价格设置的位数来自huobi获取的价格小数位)
+                this.currentNewBuyPrice = this.marketOrder.getBuy().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                this.currentNewSellPrice = this.marketOrder.getSell().get(0).getPrice().setScale(pricePrecision, RoundingMode.DOWN);
+                //计算设置买卖权重
+                weightsCalculation();
+                //判断买卖
+                if (orderState.type == OrderType.BUY) {
+                    if (profitArrive) {
+                        redisMqService.sendMsg("到达盈亏次数,自动退出ing");
+                        break;
+                    }
+                    //卖的情况下 先判断是否开启了止盈止损
+                    if (takeProfitStopLoss()) {
+                        //已经卖出 重新循环
+                        redisMqService.sendMsg("止盈止损卖出！");
+                        long v = (long) (this.baseInfo.getSleep() * 1000L);
+                        Thread.sleep(v);
+                        continue;
+                    } else {
+                        redisMqService.sendMsg("卖出止盈止损策略：策略未达到设置的盈亏点,执行计算卖出权重策略....");
+                    }
+                    //查看是否达到卖的信号
+                    if (this.weights.getSellTotal() != 0 && this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
+                            && orderState.type == OrderType.BUY) {
+                        try {
+                            createSellOrder();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                            redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
+                        }
+                    } else {
+                        redisMqService.sendMsg(this.weights.getSellTotal() == 0 ? "当前策略设置不进行卖出操作!!!" : "当前策略计算卖出权重:" + this.weights.getSellTotal() + ",未达到策略卖出总权重【" + baseInfo.getSellAllWeights() + "】不进行操作。。。");
+                    }
+                } else if (orderState.type == OrderType.SELL) {
+                    if (profitArrive) {
+                        redisMqService.sendMsg("到达盈亏次数,自动退出ing");
+                        break;
+                    }
+                    //查看是否到达买的信号
+                    if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
+                            && orderState.type == OrderType.SELL) {
+                        try {
+                            createBuyOrder();
+                        } catch (Exception e) {
+                            redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
+                            e.printStackTrace();
+                            log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                        }
+                    } else {
+                        redisMqService.sendMsg(this.weights.getBuyTotal() == 0 ? "当前策略设置不进行买入操作!!!" : "当前策略计算买入权重:" + this.weights.getBuyTotal() + ",未达到策略买入总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
+                    }
+
+                } else if (orderState.type == null) {
+                    if (profitArrive) {
+                        redisMqService.sendMsg("到达盈亏次数,自动退出ing");
+                        break;
+                    }
+                    //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
+                    if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()) {
+                        createBuyOrder();
+                    } else {
+                        redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
+                    }
+                }
+
+                try {
+                    ++runTimes;
+                    redisMqService.sendMsg("机器人已经运行了>>>" + runTimes + "次");
+                    log.info("=========================================");
+                    //休眠几秒
+                    Thread.sleep((long) (baseInfo.getSleep() * 1000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (!checkRobotIsStop(startkey)) {
+                    redisMqService.sendMsg("机器人被取消任务!!!退出ing");
+                    checkAndSet();
+                    break;
+                }
+
+            } catch (Exception e) {
+                log.error("机器人{}运行中发生异常：异常信息{}", robotId, e.getMessage());
+                redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
+            } finally {
+                //记录当前机器人的最后一次状态
+                redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
+            }
+        }
+
     }
 
     /**
@@ -607,18 +604,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     /**
      * 检查是否已经取消了任务
      *
-     * @param startkey
+     * @param key
      * @return
      */
-    private boolean checkIsStop(String startkey) {
-        Object o = this.redisUtil.get(startkey);
-        if (o == null) {
-            return false;
-        } else if (!((boolean) o)) {
-            return true;
-        } else {
-            return false;
-        }
+    private boolean checkRobotIsStop(String key) {
+        Object o = this.redisUtil.get(key);
+        return (boolean) o;
     }
 
 
@@ -649,7 +640,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             BigDecimal amount,
             BigDecimal price,
             com.qklx.qt.core.enums.OrderType orderType,
-            TradingApi tradingApi,OrderType type) {
+            TradingApi tradingApi, OrderType type) {
         //下订单
         try {
             redisMqService.sendMsg("叮叮叮>>>开始下单,下单信息 价格:" + price + "数量:" + amount + "订单类型:" + orderType.getTyoe());
@@ -734,7 +725,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             if (baseInfo.getIsAllBuy() == 1) {
                 redisMqService.sendMsg("=========当前策略购买方式:全部购买========");
                 //如果市价全部买 就是价格就是交易额度 quotaBalance; 默认固定为8位
-                buyAmount = this.quotaBalance.setScale(marketPoint, RoundingMode.DOWN);
+                buyAmount = this.quotaBalance.setScale(8, RoundingMode.DOWN);
                 if (buyAmount.compareTo(BigDecimal.ONE) < 0) {
                     redisMqService.sendMsg("市价交易,交易额不能低于1个");
                     log.info("市价全部购买交易额不能低于1");
@@ -743,7 +734,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 redisMqService.sendMsg("市价全部购买,交易额为:" + buyAmount);
             } else {
                 //不是全部购买 自定义交易额 购买
-                buyAmount = baseInfo.getBuyQuotaPrice().setScale(marketPoint, RoundingMode.DOWN);
+                buyAmount = baseInfo.getBuyQuotaPrice().setScale(8, RoundingMode.DOWN);
                 if (buyAmount.compareTo(BigDecimal.ONE) < 0) {
                     redisMqService.sendMsg("市价自定义购买数量:账户【" + accountConfig.accountId() + "】余额不足,需要充值......");
                     log.info("市价自定义购买交易额:账户{}的余额不足,需要充值......", accountConfig.accountId());
@@ -812,12 +803,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             //市价卖出 价格直接填0 计算交易额度
             if (baseInfo.getIsAllSell() == 1) {
                 //如果市价全部卖出 卖出为币 卖出所有的币 就是价格就是交易额度 quotaBalance;
-                sellAmount = this.baseBalance.setScale(sellmarketPoint, RoundingMode.DOWN);
+                sellAmount = this.baseBalance.setScale(this.amountPrecision, RoundingMode.DOWN);
                 log.info("市价全部卖出,卖出数量{}", sellAmount);
                 redisMqService.sendMsg("市价全部卖出,卖出数量【" + sellAmount + "】");
             } else {
                 //不是全部购买 自定义交易额 购买
-                sellAmount = sellAmount.add(baseInfo.getSellAmount()).setScale(marketPoint, RoundingMode.DOWN);
+                sellAmount = sellAmount.add(baseInfo.getSellAmount()).setScale(this.amountPrecision, RoundingMode.DOWN);
                 if (sellAmount.compareTo(this.baseBalance) > 0) {
                     log.info("市价自定义卖出:账户id{}的余额不足,需要充值......", this.accountConfig.accountId());
                     redisMqService.sendMsg("市价自定义卖出:账户id【" + this.accountConfig.accountId() + "】的余额不足,需要充值......");
@@ -847,7 +838,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         this.orderState.amount = sellAmount;
         this.orderState.price = sellPrice;
         this.orderState.orderType = orderType;
-        this.order(sellAmount, sellPrice, orderType, tradingApi,type);
+        this.order(sellAmount, sellPrice, orderType, tradingApi, type);
     }
 
     /**

@@ -103,10 +103,9 @@
 
     <!-- additivity 设为false,则logger内容不附加至root ，配置以配置包下的所有类的日志的打印，级别是 ERROR-->
 
-    <!--<logger name="org.springframework" level="ERROR"/>-->
+    <logger name="org.springframework" level="ERROR"/>
     <!--<logger name="org.apache.commons" level="ERROR"/>-->
     <!--<logger name="org.apache.zookeeper" level="ERROR"/>-->
-    <!--<logger name="com.alibaba.dubbo.monitor" level="ERROR"/>-->
     <logger name="com.qklx.qt.admin.dao" level="DEBUG"/>
 
     <!-- ${LOG_ROOT_LEVEL} 日志级别 -->

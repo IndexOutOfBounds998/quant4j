@@ -154,6 +154,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             submitcancelResponse = apiClient.submitcancel(orderId);
         } catch (Exception e) {
             logger.error("交易对: " + marketId + " 取消订单: " + orderId + " 失败=========" + e.getMessage());
+            throw new ApiException(e);
         }
         if (submitcancelResponse != null && submitcancelResponse.getStatus().equals("ok")) {
             return true;
@@ -201,7 +202,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             response = apiClient.balance(String.valueOf(accountId));
         } catch (Exception e) {
             logger.error("获取账户余额失败，账户id{}", accountId);
-            e.printStackTrace();
+            throw new ApiException(e);
         }
         if (response != null && response.getStatus().equals("ok")) {
             CopyOnWriteArrayList<BalanceBean> balances = new CopyOnWriteArrayList<>(response.getData().getList());
@@ -245,6 +246,7 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
             logger.error("获取k线数据symbol{} ,period {} ,size {} 失败", marketConfig.markName(),
                     klineConfig.period(),
                     klineConfig.size());
+            throw new ApiException(e);
         }
         return null;
     }

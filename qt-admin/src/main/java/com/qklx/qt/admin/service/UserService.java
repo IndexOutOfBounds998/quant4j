@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.service.IService;
 import com.qklx.qt.admin.entity.User;
 import com.qklx.qt.core.api.ApiResult;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <p>
  * 服务类
@@ -25,4 +27,8 @@ public interface UserService extends IService<User> {
     ApiResult info(String token);
 
     ApiResult logout();
+
+    ApiResult getUserEmail(@NotNull Integer id);
+
+    ApiResult emailEditer(@NotNull User user);
 }

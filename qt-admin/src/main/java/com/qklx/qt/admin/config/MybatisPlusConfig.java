@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 //Spring boot方式
 @EnableTransactionManagement
 @Configuration
-@MapperScan("com.qklx.qt.admin.dao.*.mapper*")
+@MapperScan("com.qklx.qt.admin.dao.*.Mapper*")
 public class MybatisPlusConfig {
 
     /**

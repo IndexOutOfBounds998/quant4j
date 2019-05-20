@@ -1,11 +1,22 @@
 package com.qklx.qt.admin;
 
+import com.qklx.qt.admin.entity.User;
+
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 public class QtParentApplicationTests {
 
-    public static void main(String[] args) {
-        String a = "30775841911";
-        int b = Integer.parseInt(a);
-        System.out.println(b);
+//    @Autowired
+//    private IMailService iMailService;
+
+    //    @Test
+    public void testMail() throws Exception {
+
+
+        User user = new User();
+        user = user.selectById(1);
+        System.out.println("获取到user" + user);
     }
+
 
 }

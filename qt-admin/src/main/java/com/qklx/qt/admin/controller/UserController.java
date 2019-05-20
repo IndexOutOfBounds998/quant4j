@@ -61,6 +61,19 @@ public class UserController extends BaseController {
         return userService.info(token);
     }
 
+    @GetMapping(value = "/getUserEmail")
+    public ApiResult getUserEmail(@NotNull Integer id) {
+        return userService.getUserEmail(id);
+    }
+
+
+    @PostMapping(value = "/emailEditer")
+    public ApiResult emailEditer(@NotNull @RequestBody User user) {
+        return userService.emailEditer(user);
+    }
+
+
+
     @Override
     protected ModelAndView handleRequestInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
         logger.info("method====" + httpServletRequest.getMethod());

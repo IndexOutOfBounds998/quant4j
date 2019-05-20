@@ -7,16 +7,18 @@
         <id column="id" property="id" />
         <result column="username" property="username" />
         <result column="password" property="password" />
-        <result column="create_time" property="createTime" />
-        <result column="is_delete" property="isDelete" />
         <result column="avatar" property="avatar" />
         <result column="introduction" property="introduction" />
+        <result column="enable_mail" property="enableMail" />
+        <result column="send_mail" property="sendMail" />
         <result column="roles" property="roles" />
+        <result column="is_delete" property="isDelete" />
+        <result column="create_time" property="createTime" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, username, password, create_time AS createTime, is_delete AS isDelete, avatar, introduction, roles
+        id, username, password, avatar, introduction, enable_mail AS enableMail, send_mail AS sendMail, roles, is_delete AS isDelete, create_time AS createTime
     </sql>
 
 </mapper>

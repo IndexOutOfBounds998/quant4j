@@ -39,6 +39,20 @@ spring:
         max-idle: 8
         min-idle: 0
     timeout: 15000
+  mail:
+    host: smtp.qq.com #发送邮件服务器
+    username: yangge975965279@vip.qq.com #QQ邮箱
+    password: sdncjthvgtwrbfgg #客户端授权码
+    protocol: smtp #发送邮件协议
+    properties.mail.smtp.auth: true
+    properties.mail.smtp.port: 465 #端口号465或587
+    properties.mail.display.sendmail: quant #可以任意
+    properties.mail.display.sendname: quant Email #可以任意
+    properties.mail.smtp.starttls.enable: true
+    properties.mail.smtp.starttls.required: true
+    properties.mail.smtp.ssl.enable: true
+    default-encoding: utf-8
+    from: yangge975965279@vip.qq.com #与上面的username保持一致
 #  mapper-locations: classpath:/mapper/*
 eureka:
   client:
@@ -51,3 +65,4 @@ vpnproxy:
   enable: true
   ip: 127.0.0.1
   port: 64035
+

@@ -11,9 +11,9 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig {
 
-    private final static int corePoolSize = 5;
-    private final static int maxPoolSize = 10;
-    private final static int queueCapacity = 10;
+    private final static int corePoolSize = 2;
+    private final static int maxPoolSize = 4;
+    private final static int queueCapacity = 6;
 
     @Bean
     public Executor taskExecutor() {

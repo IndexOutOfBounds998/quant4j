@@ -850,9 +850,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         try {
             //获取用户的账户余额 knc_balance_6688515
             this.tradingApi.getBalanceInfo(this.accountConfig.accountId(), this.redisUtil);
-//            balanceInfo.getBalancesOnHold().get()
-            log.info("quotaBalanceKey{}", quotaBalanceKey);
-            log.info("baseBalanceKey{}", baseBalanceKey);
             //基础货币和对价货币
             this.baseBalance = new BigDecimal(String.valueOf(redisUtil.get(baseBalanceKey)));
             this.quotaBalance = new BigDecimal(String.valueOf(redisUtil.get(quotaBalanceKey)));

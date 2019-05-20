@@ -3,13 +3,14 @@ package com.qklx.qt.admin.entity;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
+import com.qklx.qt.common.utils.DateUtils;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * <p>
- *
+ * <p>
  * </p>
  *
  * @author yang
@@ -155,20 +156,20 @@ public class Orders extends Model<Orders> {
 
     @Override
     public String toString() {
-        return "Orders{" +
-        ", orderId=" + orderId +
-        ", symbol=" + symbol +
-        ", robotId=" + robotId +
-        ", accountId=" + accountId +
-        ", amount=" + amount +
-        ", price=" + price +
-        ", orderState=" + orderState +
-        ", orderType=" + orderType +
-        ", createTime=" + createTime +
-        ", finishedTime=" + finishedTime +
-        ", fieldFees=" + fieldFees +
-        ", fieldAmount=" + fieldAmount +
-        ", fieldCashAmount=" + fieldCashAmount +
-        "}";
+        return "订单信息 ======【" +
+                "订单id=" + orderId +
+                ", 交易对=" + symbol +
+                ", 机器人id=" + robotId +
+                ", 交易账号id=" + accountId +
+                ", 数量=" + amount +
+                ", 价格=" + price +
+                ", 订单状态=" + orderState +
+                ", 订单类型=" + orderType +
+                ", 订单创建时间=" + DateUtils.formateDate(DateUtils.parseTimeMillisToDate(createTime)) +
+                ", 订单完成时间=" + DateUtils.formateDate(DateUtils.parseTimeMillisToDate(finishedTime)) +
+                ", 交易手续费=" + fieldFees +
+                ", 已成交数量=" + fieldAmount +
+                ", 已成交总金额=" + fieldCashAmount +
+                "】";
     }
 }

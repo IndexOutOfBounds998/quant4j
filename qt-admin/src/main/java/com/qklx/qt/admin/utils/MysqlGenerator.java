@@ -113,7 +113,7 @@ public class MysqlGenerator {
                         .setDriverName("com.mysql.jdbc.Driver")
                         .setUsername("root")
                         .setPassword("root")
-                        .setUrl("jdbc:mysql://localhost:3306/qt?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8")
+                        .setUrl("jdbc:mysql://localhost:3306/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8")
         ).setStrategy(
                 // 策略配置
                 new StrategyConfig()

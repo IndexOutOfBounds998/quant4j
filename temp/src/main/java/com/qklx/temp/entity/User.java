@@ -13,7 +13,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-30
+ * @since 2019-05-19
  */
 public class User extends Model<User> {
 
@@ -23,16 +23,26 @@ public class User extends Model<User> {
     private Integer id;
     private String username;
     private String password;
-    @TableField("create_time")
-    private Date createTime;
+    private String avatar;
+    private String introduction;
+    /**
+     * 是否开启邮件0不开 1开启
+     */
+    @TableField("enable_mail")
+    private Integer enableMail;
+    /**
+     * 接受邮件
+     */
+    @TableField("send_mail")
+    private String sendMail;
+    private String roles;
     /**
      * 是否删除
      */
     @TableField("is_delete")
     private Integer isDelete;
-    private String avatar;
-    private String introduction;
-    private String roles;
+    @TableField("create_time")
+    private Date createTime;
 
 
     public Integer getId() {
@@ -59,22 +69,6 @@ public class User extends Model<User> {
         this.password = password;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
-    }
-
     public String getAvatar() {
         return avatar;
     }
@@ -91,12 +85,44 @@ public class User extends Model<User> {
         this.introduction = introduction;
     }
 
+    public Integer getEnableMail() {
+        return enableMail;
+    }
+
+    public void setEnableMail(Integer enableMail) {
+        this.enableMail = enableMail;
+    }
+
+    public String getSendMail() {
+        return sendMail;
+    }
+
+    public void setSendMail(String sendMail) {
+        this.sendMail = sendMail;
+    }
+
     public String getRoles() {
         return roles;
     }
 
     public void setRoles(String roles) {
         this.roles = roles;
+    }
+
+    public Integer getIsDelete() {
+        return isDelete;
+    }
+
+    public void setIsDelete(Integer isDelete) {
+        this.isDelete = isDelete;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     @Override
@@ -110,11 +136,13 @@ public class User extends Model<User> {
         ", id=" + id +
         ", username=" + username +
         ", password=" + password +
-        ", createTime=" + createTime +
-        ", isDelete=" + isDelete +
         ", avatar=" + avatar +
         ", introduction=" + introduction +
+        ", enableMail=" + enableMail +
+        ", sendMail=" + sendMail +
         ", roles=" + roles +
+        ", isDelete=" + isDelete +
+        ", createTime=" + createTime +
         "}";
     }
 }

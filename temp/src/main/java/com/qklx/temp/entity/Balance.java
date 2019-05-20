@@ -12,7 +12,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author yang
- * @since 2019-04-30
+ * @since 2019-05-19
  */
 public class Balance extends Model<Balance> {
 

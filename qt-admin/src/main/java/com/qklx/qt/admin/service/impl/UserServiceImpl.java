@@ -1,5 +1,7 @@
 package com.qklx.qt.admin.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.qklx.qt.admin.dao.UserMapper;
@@ -8,6 +10,8 @@ import com.qklx.qt.admin.service.UserService;
 import com.qklx.qt.core.enums.Status;
 import com.qklx.qt.core.api.ApiResult;
 import org.springframework.stereotype.Service;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <p>
@@ -55,5 +59,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public ApiResult logout() {
         return new ApiResult(Status.SUCCESS);
+    }
+
+    @Override
+    public ApiResult getUserEmail(@NotNull Integer id) {
+        User user = new User();
+        User selectById = user.selectById(id);
+        return new ApiResult(Status.SUCCESS, selectById);
+    }
+
+    @Override
+    public ApiResult emailEditer(@NotNull User user) {
+
+        boolean byId = user.updateById();
+        if (byId) {
+            return new ApiResult(Status.SUCCESS);
+        }
+        return new ApiResult(Status.ERROR);
     }
 }

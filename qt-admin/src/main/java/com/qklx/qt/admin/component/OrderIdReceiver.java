@@ -90,6 +90,7 @@ public class OrderIdReceiver {
                     if (!lastOrderIds.contains(msg.getOrderId())) {
                         if (user != null && user.getEnableMail() == 1) {
                             iMailService.sendSimpleMail(user.getSendMail(), "机器人下单啦！", order.toString());
+                            log.info("发送邮件{}", order.toString());
                         }
                     }
                 }

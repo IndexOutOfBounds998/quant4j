@@ -1,8 +1,10 @@
 package com.qklx.qt.core.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class StrategyVo {
@@ -123,23 +125,51 @@ public class StrategyVo {
     @Data
     public static class Setting5Entity {
 
-        /**
-         * buyKline : 1min
-         * buyWeights : 1
-         * sellKline : 1min
-         * buyKlineOption : 1
-         * sellWeights : 1
-         * sellKlineOption : 1
-         */
-        private String buyKline;
-        private int buyWeights;
-        private String sellKline;
-        private String buyKlineOption;
-        private int sellWeights;
-        private String sellKlineOption;
-        private double buyPercent;
-        private double sellPercent;
+        private List<BuyStrategyBean> buyStrategy;
+        private List<SellStrategyBean> sellStrategy;
 
+        @Data
+        public static class BuyStrategyBean {
+            /**
+             * id : 1
+             * buyKlineOption : 1
+             * buyKline : 1min
+             * buyWeights : 3
+             * buyPercent : 2
+             */
+
+            private int id;
+            @JSONField(name = "buyKlineOption")
+            private String buyKlineOption;
+            @JSONField(name = "buyKline")
+            private String buyKline;
+            @JSONField(name = "buyWeights")
+            private int buyWeights;
+            @JSONField(name = "buyPercent")
+            private String buyPercent;
+        }
+
+        @Data
+        public static class SellStrategyBean {
+            /**
+             * id : 1
+             * sellKlineOption : 1
+             * sellKline : 5min
+             * sellWeights : 5
+             * sellPercent : 4
+             */
+
+            private int id;
+            @JSONField(name = "sellKlineOption")
+            private String sellKlineOption;
+            @JSONField(name = "sellKline")
+            private String sellKline;
+            @JSONField(name = "sellWeights")
+            private int sellWeights;
+            @JSONField(name = "sellPercent")
+            private String sellPercent;
+
+        }
     }
 
     /**

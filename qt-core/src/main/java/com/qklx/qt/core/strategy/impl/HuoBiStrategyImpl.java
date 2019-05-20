@@ -246,7 +246,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         break;
                     }
                     //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
-                    if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() > this.baseInfo.getBuyAllWeights()) {
+                    if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()) {
                         createBuyOrder();
                     } else {
                         redisMqService.sendMsg("当前策略计算购买权重:" + this.weights.getBuyTotal() + ",未达到策略购买总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
@@ -870,9 +870,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         setting2Buy();
         setting3Buy();
         setting4Buy();
-        if (this.setting5.getBuyWeights() != 0) {
-            setting5Buy(getBuyKline());
+        for (StrategyVo.Setting5Entity.BuyStrategyBean buyStrategyBean : this.setting5.getBuyStrategy()) {
+            if (buyStrategyBean.getBuyWeights() != 0) {
+                setting5Buy(buyStrategyBean, getBuyKline(buyStrategyBean));
+            }
         }
+
     }
 
     @Override
@@ -883,9 +886,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         setting2Sell();
         setting3Sell();
         setting4Sell();
-        if (this.setting5.getSellWeights() != 0) {
-            setting5Sell(getSellKline());
+        for (StrategyVo.Setting5Entity.SellStrategyBean sellStrategyBean : this.setting5.getSellStrategy()) {
+            if (sellStrategyBean.getSellWeights() != 0) {
+                setting5Sell(sellStrategyBean, getSellKline(sellStrategyBean));
+            }
         }
+
     }
 
     /**
@@ -990,22 +996,20 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     /**
      * 策略5的购买权重
      */
-    private void setting5Buy(List<Kline> lines) {
-        final StrategyVo.Setting5Entity config = this.setting5;
+    private void setting5Buy(StrategyVo.Setting5Entity.BuyStrategyBean buyStrategyBean, List<Kline> lines) {
         if (lines != null && !lines.isEmpty()) {
             //买的权重
-            setting5BuyCalculation(config, lines);
+            setting5BuyCalculation(buyStrategyBean, lines);
         }
     }
 
     /**
      * 策略5的出售权重
      */
-    private void setting5Sell(List<Kline> lines) {
-        final StrategyVo.Setting5Entity config = this.setting5;
+    private void setting5Sell(StrategyVo.Setting5Entity.SellStrategyBean sellStrategyBean, List<Kline> lines) {
         if (lines != null && !lines.isEmpty()) {
             //卖
-            setting5SellCalculation(config, lines);
+            setting5SellCalculation(sellStrategyBean, lines);
         }
     }
 
@@ -1014,12 +1018,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      *
      * @return
      */
-    private List<Kline> getBuyKline() {
-        final StrategyVo.Setting5Entity config = this.setting5;
+    private List<Kline> getBuyKline(StrategyVo.Setting5Entity.BuyStrategyBean cfg) {
         final TradingApi tradingApi = this.tradingApi;
         final MarketConfig marketConfig = this.marketConfig;
         //计算买的权重 获取k线
-        String buyKline = config.getBuyKline();
+        String buyKline = cfg.getBuyKline();
         return getKlines(tradingApi, marketConfig, buyKline);
     }
 
@@ -1029,12 +1032,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      *
      * @return
      */
-    private List<Kline> getSellKline() {
-        final StrategyVo.Setting5Entity config = this.setting5;
+    private List<Kline> getSellKline(StrategyVo.Setting5Entity.SellStrategyBean cfg) {
         final TradingApi tradingApi = this.tradingApi;
         final MarketConfig marketConfig = this.marketConfig;
         //计算买的权重 获取k线
-        String sellKline = config.getSellKline();
+        String sellKline = cfg.getSellKline();
         return getKlines(tradingApi, marketConfig, sellKline);
     }
 
@@ -1210,7 +1212,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param config
      * @param lines
      */
-    private void setting5BuyCalculation(StrategyVo.Setting5Entity config, List<Kline> lines) {
+    private void setting5BuyCalculation(StrategyVo.Setting5Entity.BuyStrategyBean config, List<Kline> lines) {
         //当前闭盘价
         BigDecimal nowClosePrice = lines.get(0).getClose().setScale(pricePrecision, RoundingMode.DOWN);
         //上一次的闭盘价
@@ -1247,7 +1249,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param config
      * @param lines
      */
-    private void setting5SellCalculation(StrategyVo.Setting5Entity config, List<Kline> lines) {
+    private void setting5SellCalculation(StrategyVo.Setting5Entity.SellStrategyBean config, List<Kline> lines) {
         //当前闭盘价
         BigDecimal nowClosePrice = lines.get(0).getClose().setScale(pricePrecision, RoundingMode.DOWN);
         //上一次的闭盘价
@@ -1310,7 +1312,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param config
      * @param lines
      */
-    private void buyUpPercentageCompare(StrategyVo.Setting5Entity config, List<Kline> lines) {
+    private void buyUpPercentageCompare(StrategyVo.Setting5Entity.BuyStrategyBean config, List<Kline> lines) {
         BigDecimal percentage = percentageCalculation(lines);
         if (percentage.compareTo(new BigDecimal(config.getBuyPercent())) > 0) {
             //涨跌幅大于设置值后
@@ -1333,7 +1335,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param config
      * @param lines
      */
-    private void buyDownPercentageCompare(StrategyVo.Setting5Entity config, List<Kline> lines) {
+    private void buyDownPercentageCompare(StrategyVo.Setting5Entity.BuyStrategyBean config, List<Kline> lines) {
         BigDecimal percentage = percentageCalculation(lines);
         if (percentage.compareTo(new BigDecimal(config.getBuyPercent())) > 0) {
             //涨跌幅大于设置值后
@@ -1346,26 +1348,26 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         }
     }
 
-    private void sellUpPercentageCompare(StrategyVo.Setting5Entity config, List<Kline> lines) {
+    private void sellUpPercentageCompare(StrategyVo.Setting5Entity.SellStrategyBean config, List<Kline> lines) {
         BigDecimal percentage = percentageCalculation(lines);
         if (percentage.compareTo(new BigDecimal(config.getSellPercent())) > 0) {
             //涨跌幅大于设置值后
             redisMqService.sendMsg("策略5：" + config.getSellKline()
                     + "k线,涨幅：" + percentage + "%, [大于] 设置值：" + config.getSellPercent() + "%,策略5权重生效!");
-            this.weights.AddBuyTotal(config.getBuyWeights());
+            this.weights.AddSellTotal(config.getSellWeights());
         } else {
             redisMqService.sendMsg("策略5：" + config.getSellKline()
                     + "k线,涨幅：" + percentage + "%, [小于] 设置值：" + config.getSellPercent() + "%,策略5权重不生效!");
         }
     }
 
-    private void sellDownPercentageCompare(StrategyVo.Setting5Entity config, List<Kline> lines) {
+    private void sellDownPercentageCompare(StrategyVo.Setting5Entity.SellStrategyBean config, List<Kline> lines) {
         BigDecimal percentage = percentageCalculation(lines);
         if (percentage.compareTo(new BigDecimal(config.getSellPercent())) > 0) {
             //涨跌幅大于设置值后
             redisMqService.sendMsg("策略5：" + config.getSellKline()
                     + "k线,跌幅：" + percentage + "%, [大于] 设置值：" + config.getSellPercent() + "%,策略5权重生效!");
-            this.weights.AddBuyTotal(config.getBuyWeights());
+            this.weights.AddSellTotal(config.getSellWeights());
         } else {
             redisMqService.sendMsg("策略5：" + config.getSellKline()
                     + "k线,跌幅：" + percentage + "%, [小于] 设置值：" + config.getSellPercent() + "%,策略5权重不生效!");

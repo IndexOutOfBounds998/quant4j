@@ -27,12 +27,18 @@ public class RobotController extends BaseController {
     @Autowired
     RobotService robotService;
 
-    @PostMapping("/addRobot")
-    public ApiResult addRobot(@RequestBody RobotVo vo, HttpServletRequest request) {
+    @PostMapping("/addOrUpdateRobot")
+    public ApiResult addOrUpdateRobot(@RequestBody RobotVo vo, HttpServletRequest request) {
         @NotBlank
         String uid = getUid(request);
         vo.setUserId(uid);
-        return robotService.addRobot(vo);
+        return robotService.addOrUpdateRobot(vo);
+    }
+
+
+    @GetMapping("/getRobotById")
+    public ApiResult getRobotById(int id) {
+        return robotService.getRobotById(id);
     }
 
     /**
@@ -46,16 +52,17 @@ public class RobotController extends BaseController {
         String uid = getUid(request);
         return robotService.list(uid);
     }
+
     /**
      * 删除我的机器人
      *
      * @return
      */
     @GetMapping("/deleteRobot")
-    public ApiResult deleteRobot(HttpServletRequest request,int id) {
+    public ApiResult deleteRobot(HttpServletRequest request, int id) {
         @NotBlank
         String uid = getUid(request);
-        return robotService.deleteRobot(uid,id);
+        return robotService.deleteRobot(uid, id);
     }
 
 

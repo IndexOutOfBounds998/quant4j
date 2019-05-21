@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
     RobotClientService robotClientService;
 
     @Override
-    public ApiResult addRobot(RobotVo vo) {
+    public ApiResult addOrUpdateRobot(RobotVo vo) {
         if (vo == null) {
             return new ApiResult(Status.ERROR);
         }
@@ -61,8 +62,16 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
             robot.setCreateTime(new Date());
             robot.setUserId(vo.getUserId());
             robot.setSymbol(vo.getSymbol());
-            if (robot.insert()) {
-                return new ApiResult(Status.SUCCESS);
+            if (vo.getId() != null) {
+                robot.setId(vo.getId());
+                boolean b = robot.updateById();
+                if (b) {
+                    return new ApiResult(Status.SUCCESS, "机器人更新成功");
+                }
+            } else {
+                if (robot.insert()) {
+                    return new ApiResult(Status.SUCCESS, "机器人添加成功");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -221,5 +230,12 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
     @Override
     public boolean editRobotRunState(int runState) {
         return false;
+    }
+
+    @Override
+    public ApiResult getRobotById(@NotBlank int id) {
+        Robot robot = new Robot();
+        Robot byId = robot.selectById(id);
+        return new ApiResult(Status.SUCCESS, byId);
     }
 }

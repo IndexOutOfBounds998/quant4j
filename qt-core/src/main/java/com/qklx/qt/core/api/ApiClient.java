@@ -80,6 +80,7 @@ public class ApiClient {
     }
 
     public ApiClient() {
+        client = createOkHttpClient();
     }
 
     public ApiClient(VpnProxyConfig vpnProxyConfig) {

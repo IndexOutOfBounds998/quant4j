@@ -87,13 +87,13 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
             //修改
             strategy.setId(strategyVo.getId());
             if (strategy.updateById()) {
-                return new ApiResult(Status.SUCCESS);
+                return new ApiResult(Status.SUCCESS, strategy.getId());
             } else {
                 return new ApiResult(Status.ERROR);
             }
         } else {
             if (strategy.insert()) {
-                return new ApiResult(Status.SUCCESS);
+                return new ApiResult(Status.SUCCESS, strategy.getId());
             } else {
                 return new ApiResult(Status.ERROR);
             }

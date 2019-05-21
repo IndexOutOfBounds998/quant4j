@@ -5,6 +5,8 @@ import com.qklx.qt.admin.entity.Robot;
 import com.qklx.qt.core.api.ApiResult;
 import com.qklx.qt.core.vo.RobotVo;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * <p>
  *  服务类
@@ -15,7 +17,7 @@ import com.qklx.qt.core.vo.RobotVo;
  */
 public interface RobotService extends IService<Robot> {
 
-    ApiResult addRobot(RobotVo vo);
+    ApiResult addOrUpdateRobot(RobotVo vo);
 
     ApiResult list(String uid);
 
@@ -25,4 +27,5 @@ public interface RobotService extends IService<Robot> {
 
     boolean editRobotRunState(int runState);
 
+    ApiResult getRobotById(@NotBlank int uid);
 }

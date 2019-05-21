@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.qklx.qt.admin.entity.Orders;
 import com.qklx.qt.admin.entity.User;
 import com.qklx.qt.admin.service.IMailService;
+import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import com.qklx.qt.core.api.ApiClient;
@@ -28,13 +29,21 @@ import static com.qklx.qt.common.utils.JsonFormate.parseJsonToString;
 @Slf4j
 public class OrderIdReceiver {
 
-    private static Set<Long> lastOrderIds = new ConcurrentSet<>();
+    /**
+     * 历史的订单id放到redis的set里
+     */
+    private final String orderIdsKey = "history_order_ids";
+
     private VpnProxyConfig vpnProxyConfig;
     private IMailService iMailService;
+    private RedisUtil redisUtil;
 
-    public OrderIdReceiver(VpnProxyConfig vpnProxyConfig, IMailService iMailService) {
+    public OrderIdReceiver(VpnProxyConfig vpnProxyConfig,
+                           IMailService iMailService,
+                           RedisUtil util) {
         this.vpnProxyConfig = vpnProxyConfig;
         this.iMailService = iMailService;
+        this.redisUtil = util;
     }
 
     /**
@@ -87,17 +96,15 @@ public class OrderIdReceiver {
                     User user = new User();
                     user = user.selectById(msg.getUserId());
                     //发送邮件
-                    if (!lastOrderIds.contains(msg.getOrderId())) {
+                    if (!redisUtil.sHasKey(orderIdsKey, msg.getOrderId())) {
                         if (user != null && user.getEnableMail() == 1) {
                             iMailService.sendSimpleMail(user.getSendMail(), "机器人下单啦！", order.toString());
                             log.info("发送邮件{}", order.toString());
                         }
                     }
                 }
-                if (lastOrderIds.size() >= 100) {
-                    lastOrderIds.clear();
-                }
-                lastOrderIds.add(msg.getOrderId());
+                //保存进set
+                redisUtil.sSet(orderIdsKey, msg.getOrderId());
             }
         } catch (NumberFormatException e) {
             e.printStackTrace();

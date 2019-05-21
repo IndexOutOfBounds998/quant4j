@@ -4,6 +4,7 @@ import com.qklx.qt.admin.component.OrderIdReceiver;
 import com.qklx.qt.admin.component.ProfitReceiver;
 import com.qklx.qt.admin.component.RobotMsgReceiver;
 import com.qklx.qt.admin.service.IMailService;
+import com.qklx.qt.common.config.RedisUtil;
 import com.qklx.qt.common.config.VpnProxyConfig;
 import com.qklx.qt.common.constans.RobotRedisKeyConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class SubscriberConfig {
     VpnProxyConfig vpnProxyConfig;
     @Autowired
     IMailService iMailService;
+    @Autowired
+    RedisUtil redisUtil;
 
     private SimpMessagingTemplate simpMessageSendingOperations;//消息发送模板
 
@@ -37,7 +40,7 @@ public class SubscriberConfig {
 
     @Bean
     public MessageListenerAdapter orderIdReceiverAdapter() {
-        return new MessageListenerAdapter(new OrderIdReceiver(vpnProxyConfig,iMailService), "receiveMessage"); //当没有继承MessageListener时需要写方法名字
+        return new MessageListenerAdapter(new OrderIdReceiver(vpnProxyConfig, iMailService, redisUtil), "receiveMessage"); //当没有继承MessageListener时需要写方法名字
     }
 
     @Bean

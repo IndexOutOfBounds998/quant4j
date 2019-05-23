@@ -1214,9 +1214,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private void setting5BuyCalculation(StrategyVo.Setting5Entity.BuyStrategyBean config, List<Kline> lines) {
         //当前闭盘价
-        BigDecimal nowClosePrice = lines.get(0).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+        Double nowClosePrice = lines.get(0).getClose();
         //上一次的闭盘价
-        BigDecimal lastClosePrice = lines.get(1).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+        Double lastClosePrice = lines.get(1).getClose();
 
         if (config.getBuyKlineOption().equals(TraceType.up.getStr())) {
 
@@ -1251,9 +1251,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private void setting5SellCalculation(StrategyVo.Setting5Entity.SellStrategyBean config, List<Kline> lines) {
         //当前闭盘价
-        BigDecimal nowClosePrice = lines.get(0).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+        Double nowClosePrice = lines.get(0).getClose();
         //上一次的闭盘价
-        BigDecimal lastClosePrice = lines.get(1).getClose().setScale(pricePrecision, RoundingMode.DOWN);
+        Double lastClosePrice = lines.get(1).getClose();
 
         //卖的权重
         if (config.getSellKlineOption().equals(TraceType.up.getStr())) {
@@ -1381,7 +1381,9 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @return
      */
     private BigDecimal percentageCalculation(List<Kline> lines) {
-        BigDecimal quoteChange = (lines.get(0).getClose().subtract(lines.get(1).getClose())).divide(lines.get(1).getClose(), decimalPoint, RoundingMode.HALF_UP);
+        BigDecimal quoteChange = (new BigDecimal(lines.get(0).getClose())
+                .subtract(new BigDecimal(lines.get(1).getClose())))
+                .divide(new BigDecimal(lines.get(1).getClose()), decimalPoint, RoundingMode.HALF_UP);
         return quoteChange.abs().multiply(new BigDecimal(100));
     }
 

@@ -22,11 +22,10 @@
  *   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *******************************************************************************/
 
-import com.qklx.qt.core.Main;
-import com.qklx.qt.core.response.Kline;
+import com.quant.core.Main;
+import com.quant.core.response.Kline;
 import org.ta4j.core.*;
 import org.ta4j.core.indicators.RSIIndicator;
-import org.ta4j.core.indicators.SMAIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.PrecisionNum;
 import org.ta4j.core.num.Num;

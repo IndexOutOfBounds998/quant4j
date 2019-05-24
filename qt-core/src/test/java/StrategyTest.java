@@ -1,15 +1,13 @@
-import com.qklx.qt.core.Main;
-import com.qklx.qt.core.response.Kline;
-import com.qklx.qt.core.strategy.StrategyCalculation;
-import com.qklx.qt.core.strategy.impl.RsiStrategyImpl;
+import com.quant.core.Main;
+import com.quant.core.response.Kline;
+import com.quant.core.strategy.StrategyCalculation;
+import com.quant.core.strategy.impl.RsiStrategyImpl;
 import org.ta4j.core.*;
-import org.ta4j.core.analysis.criteria.BuyAndHoldCriterion;
 import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
 import org.ta4j.core.indicators.CCIIndicator;
 import org.ta4j.core.indicators.RSIIndicator;
 import org.ta4j.core.indicators.SMAIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
-import org.ta4j.core.num.Num;
 import org.ta4j.core.trading.rules.CrossedDownIndicatorRule;
 import org.ta4j.core.trading.rules.CrossedUpIndicatorRule;
 import org.ta4j.core.trading.rules.OverIndicatorRule;
@@ -24,8 +22,8 @@ public class StrategyTest {
 
     public static void main(String[] args) {
         //get kine
-        List<Kline> kline = Main.getKline("15min", "2000");
-        //builder timeseries
+        List<Kline> kline = Main.getKline("30min", "2000");
+        //builder time series
         TimeSeries series = Main.loadTimeSeries(kline);
         //构建策略并执行
         buildSimpleStrategy(series);
@@ -58,8 +56,11 @@ public class StrategyTest {
         StrategyCalculation rsiStrategyCal = new RsiStrategyImpl(series, 14);
 
         Indicator indicator = rsiStrategyCal.strategCalculation();
+
+//        WilliamsRIndicator williamsRIndicator = new WilliamsRIndicator(series, 14);
         //rsi 指标值 低于30 执行买入
-        Rule entry = new CrossedDownIndicatorRule(indicator, 30);
+        Rule entry = new CrossedDownIndicatorRule(indicator, 40);
+//        entry.and(new CrossedDownIndicatorRule(williamsRIndicator, indicator));
         //rsi 指标高于70 执行卖出
         Rule exit = new OverIndicatorRule(indicator, 70);
 

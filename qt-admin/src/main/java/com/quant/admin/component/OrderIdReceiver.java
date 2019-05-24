@@ -8,9 +8,9 @@ import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import com.quant.core.api.ApiClient;
-import com.quant.core.response.OrdersDetail;
-import com.quant.core.response.OrdersDetailResponse;
-import com.quant.core.vo.OrderTaskMessage;
+import com.quant.common.response.OrdersDetail;
+import com.quant.common.response.OrdersDetailResponse;
+import com.quant.common.vo.OrderTaskMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;

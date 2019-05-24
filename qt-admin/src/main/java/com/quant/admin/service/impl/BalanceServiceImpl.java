@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.BalanceMapper;
 import com.quant.admin.entity.Balance;
 import com.quant.admin.service.BalanceService;
-import com.quant.core.enums.Status;
+import com.quant.common.enums.Status;
 import com.quant.core.api.ApiResult;
 import org.springframework.stereotype.Service;
 

@@ -3,7 +3,7 @@ package com.quant.admin.service;
 import com.baomidou.mybatisplus.service.IService;
 import com.quant.admin.entity.Robot;
 import com.quant.core.api.ApiResult;
-import com.quant.core.vo.RobotVo;
+import com.quant.common.vo.RobotVo;
 
 import javax.validation.constraints.NotBlank;
 

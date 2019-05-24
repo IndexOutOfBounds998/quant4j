@@ -14,11 +14,11 @@ import com.quant.admin.service.RobotService;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import com.quant.core.api.ApiResult;
-import com.quant.core.enums.RobotState;
-import com.quant.core.enums.Status;
-import com.quant.core.vo.RobotStrategyVo;
-import com.quant.core.vo.RobotVo;
-import com.quant.core.vo.StrategyVo;
+import com.quant.common.enums.RobotState;
+import com.quant.common.enums.Status;
+import com.quant.common.vo.RobotStrategyVo;
+import com.quant.common.vo.RobotVo;
+import com.quant.common.vo.StrategyVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -145,7 +145,7 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
         Account selectOne = account.selectOne(accountWrapper);
 
         //设置账户信息
-        com.quant.core.domain.Account accountConfig = new com.quant.core.domain.Account();
+        com.quant.common.domain.Account accountConfig = new com.quant.common.domain.Account();
         accountConfig.setId(String.valueOf(selectOne.getId()));
         accountConfig.setType(selectOne.getType());
         accountConfig.setState(selectOne.getState());

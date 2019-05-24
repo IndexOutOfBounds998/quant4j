@@ -1,5 +1,5 @@
 import com.quant.core.Main;
-import com.quant.core.response.Kline;
+import com.quant.common.response.Kline;
 import com.quant.core.strategy.StrategyCalculation;
 import com.quant.core.strategy.impl.RsiStrategyImpl;
 import org.ta4j.core.*;
@@ -26,8 +26,21 @@ public class StrategyTest {
         //builder time series
         TimeSeries series = Main.loadTimeSeries(kline);
         //构建策略并执行
-        buildSimpleStrategy(series);
+        Strategy strategy = buildStrategy(series);
+        //回测历史数据
 
+        TimeSeriesManager seriesManager = new TimeSeriesManager(series);
+        TradingRecord tradingRecord = seriesManager.run(strategy);
+
+        // Analysis
+        System.out.println("策略总收益: "
+                + new TotalProfitCriterion().calculate(series, tradingRecord));
+
+        //==================================
+        System.out.println("策略总交易数: "
+                + tradingRecord.getTradeCount());
+
+        System.out.println("end================");
 //        boolean shouldEnter = strategy.shouldEnter(series.getBarCount() - 1);
 //        boolean shouldExit = strategy.shouldExit(series.getBarCount() - 1);
 //        System.out.println("shouldEnter:" + shouldEnter);
@@ -50,16 +63,14 @@ public class StrategyTest {
     }
 
     //构建一个简单的策略
-    private static void buildSimpleStrategy(TimeSeries series) {
+    private static BaseStrategy buildSimpleStrategy(TimeSeries series) {
 
         //计算rsi
         StrategyCalculation rsiStrategyCal = new RsiStrategyImpl(series, 14);
-
         Indicator indicator = rsiStrategyCal.strategCalculation();
-
 //        WilliamsRIndicator williamsRIndicator = new WilliamsRIndicator(series, 14);
         //rsi 指标值 低于30 执行买入
-        Rule entry = new CrossedDownIndicatorRule(indicator, 40);
+        Rule entry = new CrossedDownIndicatorRule(indicator, 30);
 //        entry.and(new CrossedDownIndicatorRule(williamsRIndicator, indicator));
         //rsi 指标高于70 执行卖出
         Rule exit = new OverIndicatorRule(indicator, 70);
@@ -67,20 +78,7 @@ public class StrategyTest {
         //构建策略
         BaseStrategy strategy = new BaseStrategy(entry, exit);
 
-        //回测历史数据
-
-        TimeSeriesManager seriesManager = new TimeSeriesManager(series);
-        TradingRecord tradingRecord = seriesManager.run(strategy);
-
-        // Analysis
-        System.out.println("策略总收益: "
-                + new TotalProfitCriterion().calculate(series, tradingRecord));
-
-        //==================================
-        System.out.println("策略总交易数: "
-                + tradingRecord.getTradeCount());
-
-
+        return strategy;
     }
 
     public static Strategy buildStrategy(TimeSeries series) {
@@ -93,7 +91,7 @@ public class StrategyTest {
         SMAIndicator longSma = new SMAIndicator(closePrice, 200);
         // We use a 2-period RSI indicator to identify buying
         // or selling opportunities within the bigger trend.
-        RSIIndicator rsi = new RSIIndicator(closePrice, 2);
+        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
 
         CCIIndicator cciIndicator = new CCIIndicator(series, 20);
         // Entry rule

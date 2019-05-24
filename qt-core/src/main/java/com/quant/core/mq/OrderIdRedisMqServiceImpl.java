@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import com.quant.core.config.AccountConfig;
-import com.quant.core.vo.OrderTaskMessage;
+import com.quant.common.vo.OrderTaskMessage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

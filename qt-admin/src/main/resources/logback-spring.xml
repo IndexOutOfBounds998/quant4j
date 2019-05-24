@@ -106,7 +106,7 @@
     <logger name="org.springframework" level="ERROR"/>
     <!--<logger name="org.apache.commons" level="ERROR"/>-->
     <!--<logger name="org.apache.zookeeper" level="ERROR"/>-->
-    <logger name="com.qklx.qt.admin.dao" level="DEBUG"/>
+    <logger name="com.quant.admin.dao" level="DEBUG"/>
 
     <!-- ${LOG_ROOT_LEVEL} 日志级别 -->
     <root level="${LOG_ROOT_LEVEL}">

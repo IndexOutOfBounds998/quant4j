@@ -8,8 +8,8 @@ import com.quant.admin.dao.StrategyMapper;
 import com.quant.admin.entity.Strategy;
 import com.quant.admin.service.StrategyService;
 import com.quant.core.api.ApiResult;
-import com.quant.core.enums.Status;
-import com.quant.core.vo.StrategyVo;
+import com.quant.common.enums.Status;
+import com.quant.common.vo.StrategyVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

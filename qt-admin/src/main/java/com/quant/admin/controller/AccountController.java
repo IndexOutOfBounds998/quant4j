@@ -2,7 +2,7 @@ package com.quant.admin.controller;
 
 
 import com.quant.admin.service.AccountService;
-import com.quant.core.vo.AccountVo;
+import com.quant.common.vo.AccountVo;
 import com.quant.core.api.ApiResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -38,5 +38,5 @@ management:
 vpnproxy:
   enable: true
   ip: 127.0.0.1
-  port: 64035
+  port: 1088
 

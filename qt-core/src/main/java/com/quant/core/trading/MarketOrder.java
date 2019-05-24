@@ -1,6 +1,6 @@
 package com.quant.core.trading;
 
-import com.quant.core.response.TradeBean;
+import com.quant.common.response.TradeBean;
 import lombok.Data;
 
 import java.util.List;

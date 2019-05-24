@@ -27,8 +27,8 @@ import com.quant.common.config.RedisUtil;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
-import com.quant.core.response.Kline;
-import com.quant.core.response.OrdersDetail;
+import com.quant.common.response.Kline;
+import com.quant.common.response.OrdersDetail;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -108,7 +108,7 @@ public interface TradingApi {
      *                                  to prevent unexpected losses.
      * @since 1.0
      */
-    Long createOrder(String marketId, String accountId, com.quant.core.enums.OrderType orderType, BigDecimal quantity, BigDecimal price)
+    Long createOrder(String marketId, String accountId, com.quant.common.enums.OrderType orderType, BigDecimal quantity, BigDecimal price)
             throws ExchangeNetworkException, TradingApiException;
 
     /**

@@ -1,6 +1,6 @@
 package com.quant.core.trading.impl;
 
-import com.quant.core.response.OrdersDetail;
+import com.quant.common.response.OrdersDetail;
 import com.quant.core.trading.OpenOrder;
 import com.quant.common.utils.DateUtils;
 

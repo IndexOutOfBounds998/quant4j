@@ -9,20 +9,20 @@ import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
 import com.quant.core.config.StrategyConfig;
 import com.quant.core.config.imp.HuoBiKlineConfigImpl;
-import com.quant.core.enums.TraceType;
+import com.quant.common.enums.TraceType;
 import com.quant.core.mq.OrderIdRedisMqServiceImpl;
 import com.quant.core.mq.OrderProfitRedisMqServiceImpl;
 import com.quant.core.mq.RedisMqService;
 import com.quant.core.mq.RobotLogsRedisMqServiceImpl;
-import com.quant.core.response.Kline;
-import com.quant.core.response.OrdersDetail;
-import com.quant.core.response.TradeBean;
+import com.quant.common.response.Kline;
+import com.quant.common.response.OrdersDetail;
+import com.quant.common.response.TradeBean;
 import com.quant.core.strategy.AbstractStrategy;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
 import com.quant.core.trading.*;
-import com.quant.core.vo.ProfitMessage;
-import com.quant.core.vo.StrategyVo;
+import com.quant.common.vo.ProfitMessage;
+import com.quant.common.vo.StrategyVo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -520,7 +520,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     return;
                 }
                 //如果是市价的情况
-                if (this.orderState.orderType == com.quant.core.enums.OrderType.SELL_MARKET) {
+                if (this.orderState.orderType == com.quant.common.enums.OrderType.SELL_MARKET) {
                     //上一次购买的交易额就是总金额
                     allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
                     allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
@@ -639,7 +639,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private void order(
             BigDecimal amount,
             BigDecimal price,
-            com.quant.core.enums.OrderType orderType,
+            com.quant.common.enums.OrderType orderType,
             TradingApi tradingApi, OrderType type) {
         //下订单
         try {
@@ -678,7 +678,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         //当前无订单 创建购买订单
         BigDecimal buyAmount = BigDecimal.ZERO;
         BigDecimal buyPrice = BigDecimal.ZERO;
-        com.quant.core.enums.OrderType orderType;
+        com.quant.common.enums.OrderType orderType;
         //获取余额
         if (!getBalance()) {
             redisMqService.sendMsg("未获取账户【" + this.accountConfig.accountId() + "】的余额信息！！！");
@@ -717,7 +717,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 redisMqService.sendMsg("限价自定义购买数量为【" + buyAmount + "】");
             }
             //设置当前订单的type 为限价买入
-            orderType = com.quant.core.enums.OrderType.BUY_LIMIT;
+            orderType = com.quant.common.enums.OrderType.BUY_LIMIT;
         } else {
             redisMqService.sendMsg("=========当前策略交易方式:市价购买交易========");
             //市价买 价格直接填0 交易额的精度固定为8
@@ -743,7 +743,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 log.info("市价自定义购买交易额:账户id{},购买数量{}", accountConfig.accountId(), buyAmount);
                 redisMqService.sendMsg("市价自定义购买数量为【" + buyAmount + "】");
             }
-            orderType = com.quant.core.enums.OrderType.BUY_MARKET;
+            orderType = com.quant.common.enums.OrderType.BUY_MARKET;
         }
 
         //设置当前订单状态为购买
@@ -765,7 +765,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         }
         BigDecimal sellAmount = BigDecimal.ZERO;
         BigDecimal sellPrice = BigDecimal.ZERO;
-        com.quant.core.enums.OrderType orderType;
+        com.quant.common.enums.OrderType orderType;
         if (!getBalance()) {
             return;
         }
@@ -798,7 +798,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 log.info("限价自定义卖出数量:账户id{},卖出数量{}", this.accountConfig.accountId(), sellAmount);
                 redisMqService.sendMsg("限价自定义卖出数量:账户id【" + this.accountConfig.accountId() + "】,卖出数量【" + sellAmount + "】");
             }
-            orderType = com.quant.core.enums.OrderType.SELL_LIMIT;
+            orderType = com.quant.common.enums.OrderType.SELL_LIMIT;
         } else {
             //市价卖出 价格直接填0 计算交易额度
             if (baseInfo.getIsAllSell() == 1) {
@@ -817,7 +817,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 log.info("市价自定义卖出数量:账户id{},卖出币种{},数量{}", this.accountConfig.accountId(), this.baseCurrency, sellAmount);
                 redisMqService.sendMsg("市价自定义卖出数量:账户id【" + this.accountConfig.accountId() + "】,卖出币种【" + this.baseCurrency + "】,数量【" + sellAmount + "】");
             }
-            orderType = com.quant.core.enums.OrderType.SELL_MARKET;
+            orderType = com.quant.common.enums.OrderType.SELL_MARKET;
         }
         //设置当前订单状态为卖出
         OrderType type = OrderType.SELL;
@@ -833,7 +833,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param orderType
      * @param type
      */
-    private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, com.quant.core.enums.OrderType orderType, OrderType type) {
+    private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, com.quant.common.enums.OrderType orderType, OrderType type) {
 
         this.orderState.amount = sellAmount;
         this.orderState.price = sellPrice;
@@ -1492,7 +1492,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         /**
          * 当前订单的类型
          */
-        private com.quant.core.enums.OrderType orderType = null;
+        private com.quant.common.enums.OrderType orderType = null;
 
         /**
          * Price to buy/sell at - default to zero.

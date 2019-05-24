@@ -1,6 +1,6 @@
 package com.quant.core.api;
 
-import com.quant.core.enums.Status;
+import com.quant.common.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -2,7 +2,7 @@ package com.quant.admin.rest.impl;
 
 import com.quant.admin.rest.RobotClientService;
 import com.quant.core.api.ApiResult;
-import com.quant.core.vo.RobotStrategyVo;
+import com.quant.common.vo.RobotStrategyVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

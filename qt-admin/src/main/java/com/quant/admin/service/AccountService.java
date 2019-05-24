@@ -2,7 +2,7 @@ package com.quant.admin.service;
 
 import com.quant.admin.entity.Account;
 import com.baomidou.mybatisplus.service.IService;
-import com.quant.core.vo.AccountVo;
+import com.quant.common.vo.AccountVo;
 import com.quant.core.api.ApiResult;
 
 /**

@@ -1,7 +1,7 @@
 package com.quant.admin.rest;
 
 import com.quant.core.api.ApiResult;
-import com.quant.core.vo.RobotStrategyVo;
+import com.quant.common.vo.RobotStrategyVo;
 
 public interface RobotClientService {
 

@@ -46,9 +46,9 @@
             <scope>test</scope>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.ta4j</groupId>-->
-            <!--<artifactId>ta4j-core</artifactId>-->
-            <!--<version>0.12</version>-->
+        <!--<groupId>org.ta4j</groupId>-->
+        <!--<artifactId>ta4j-core</artifactId>-->
+        <!--<version>0.12</version>-->
         <!--</dependency>-->
         <!--自省和监控的集成功能-->
         <dependency>
@@ -82,12 +82,38 @@
         </dependency>
         <!--热加载-->
         <!--<dependency>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--<artifactId>spring-boot-devtools</artifactId>-->
-            <!--<scope>runtime</scope>-->
-            <!--<optional>true</optional>-->
+        <!--<groupId>org.springframework.boot</groupId>-->
+        <!--<artifactId>spring-boot-devtools</artifactId>-->
+        <!--<scope>runtime</scope>-->
+        <!--<optional>true</optional>-->
         <!--</dependency>-->
-
+        <dependency>
+            <groupId>org.ta4j</groupId>
+            <artifactId>ta4j-core</artifactId>
+            <version>0.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ta4j</groupId>
+            <artifactId>ta4j-examples</artifactId>
+            <version>0.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tictactec</groupId>
+            <artifactId>ta-lib</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tictactec</groupId>
+            <artifactId>ta-lib</artifactId>
+            <version>0.4.0</version>
+            <classifier>javadoc</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.tictactec</groupId>
+            <artifactId>ta-lib</artifactId>
+            <version>0.4.0</version>
+            <classifier>sources</classifier>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

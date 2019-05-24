@@ -1,7 +1,7 @@
 package com.quant.admin.component;
 
 import com.alibaba.fastjson.JSON;
-import com.quant.core.to.RobotRunMessage;
+import com.quant.common.to.RobotRunMessage;
 import com.quant.common.utils.JsonFormate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.UserMapper;
 import com.quant.admin.entity.User;
 import com.quant.admin.service.UserService;
-import com.quant.core.enums.Status;
+import com.quant.common.enums.Status;
 import com.quant.core.api.ApiResult;
 import org.springframework.stereotype.Service;
 

@@ -2,7 +2,7 @@ package com.quant.core.strategy;
 
 import com.quant.core.strategy.impl.HuoBiStrategyImpl;
 import com.quant.core.trading.OrderType;
-import com.quant.core.vo.StrategyVo;
+import com.quant.common.vo.StrategyVo;
 
 /**
  * 策略基类

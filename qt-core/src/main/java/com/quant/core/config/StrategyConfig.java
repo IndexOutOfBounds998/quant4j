@@ -23,7 +23,7 @@
 
 package com.quant.core.config;
 
-import com.quant.core.vo.StrategyVo;
+import com.quant.common.vo.StrategyVo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

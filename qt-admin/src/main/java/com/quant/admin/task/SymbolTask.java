@@ -4,7 +4,7 @@ import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import com.quant.core.api.ApiClient;
-import com.quant.core.response.Symbol;
+import com.quant.common.response.Symbol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

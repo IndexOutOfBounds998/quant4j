@@ -1,7 +1,7 @@
 package com.quant.core.config.imp;
 
 import com.quant.core.config.MarketConfig;
-import com.quant.core.domain.Market;
+import com.quant.common.domain.Market;
 
 public class HuoBiMarketConfigImpl implements MarketConfig {
     private Market market;

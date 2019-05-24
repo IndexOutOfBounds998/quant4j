@@ -58,33 +58,7 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.ta4j</groupId>
-            <artifactId>ta4j-core</artifactId>
-            <version>0.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ta4j</groupId>
-            <artifactId>ta4j-examples</artifactId>
-            <version>0.12</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tictactec</groupId>
-            <artifactId>ta-lib</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tictactec</groupId>
-            <artifactId>ta-lib</artifactId>
-            <version>0.4.0</version>
-            <classifier>javadoc</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.tictactec</groupId>
-            <artifactId>ta-lib</artifactId>
-            <version>0.4.0</version>
-            <classifier>sources</classifier>
-        </dependency>
+
 
     </dependencies>
 

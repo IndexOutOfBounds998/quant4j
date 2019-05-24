@@ -8,7 +8,7 @@ import com.quant.admin.dao.OrderProfitMapper;
 import com.quant.admin.entity.OrderProfit;
 import com.quant.admin.service.OrderProfitService;
 import com.quant.core.api.ApiResult;
-import com.quant.core.enums.Status;
+import com.quant.common.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

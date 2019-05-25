@@ -165,8 +165,8 @@ public class Orders extends Model<Orders> {
                 ", 价格=" + price +
                 ", 订单状态=" + orderState +
                 ", 订单类型=" + orderType +
-                ", 订单创建时间=" + DateUtils.formateDate(DateUtils.parseTimeMillisToDate(createTime)) +
-                ", 订单完成时间=" + DateUtils.formateDate(DateUtils.parseTimeMillisToDate(finishedTime)) +
+                ", 订单创建时间=" + DateUtils.formateDate(DateUtils.parseTimeMillisToDate(createTime),null) +
+                ", 订单完成时间=" + DateUtils.formateDate(DateUtils.parseTimeMillisToDate(finishedTime),null) +
                 ", 交易手续费=" + fieldFees +
                 ", 已成交数量=" + fieldAmount +
                 ", 已成交总金额=" + fieldCashAmount +

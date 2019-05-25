@@ -13,8 +13,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @MapperScan("com.quant.admin.dao")
 @ComponentScan({"com.quant.common", "com.quant.admin"})
-public class QtAdminApplication {
+public class AppAdmin {
     public static void main(String[] args) {
-        SpringApplication.run(QtAdminApplication.class, args);
+        SpringApplication.run(AppAdmin.class, args);
     }
 }

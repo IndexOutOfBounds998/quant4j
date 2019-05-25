@@ -1,18 +1,30 @@
 import com.quant.core.Main;
 import com.quant.common.response.Kline;
-import com.quant.core.strategy.StrategyCalculation;
-import com.quant.core.strategy.impl.RsiStrategyImpl;
+import com.quant.core.indicator.IndicatorCat;
+import com.quant.core.indicator.RsiIndicatorCat;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.Marker;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.time.Minute;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RefineryUtilities;
 import org.ta4j.core.*;
 import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
-import org.ta4j.core.indicators.CCIIndicator;
-import org.ta4j.core.indicators.RSIIndicator;
-import org.ta4j.core.indicators.SMAIndicator;
+import org.ta4j.core.indicators.*;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.trading.rules.CrossedDownIndicatorRule;
 import org.ta4j.core.trading.rules.CrossedUpIndicatorRule;
 import org.ta4j.core.trading.rules.OverIndicatorRule;
 import org.ta4j.core.trading.rules.UnderIndicatorRule;
 
+import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,33 +53,58 @@ public class StrategyTest {
                 + tradingRecord.getTradeCount());
 
         System.out.println("end================");
-//        boolean shouldEnter = strategy.shouldEnter(series.getBarCount() - 1);
-//        boolean shouldExit = strategy.shouldExit(series.getBarCount() - 1);
-//        System.out.println("shouldEnter:" + shouldEnter);
-//        System.out.println("shouldExit:" + shouldExit);
+        AnalysisCriterion criterion = new TotalProfitCriterion();
+        criterion.calculate(series, tradingRecord); // Returns the result for strategy1
 
-//        //run strategy for this
-//        TimeSeriesManager seriesManager = new TimeSeriesManager(series);
-//        TradingRecord tradingRecord = seriesManager.run(strategy);
-//
-//        // Analysis
-//        System.out.println("Total profit for the strategy: "
-//                + new TotalProfitCriterion().calculate(series, tradingRecord));
-//
-//        //==================================
-//        System.out.println("Number of trades for the strategy: "
-//                + tradingRecord.getTradeCount());
-//
-//        Num calculate = new BuyAndHoldCriterion().calculate(series, tradingRecord);
-//        System.out.println("buy and hold " + calculate);
+    }
+
+
+    private static void addBuySellSignals(TimeSeries series, Strategy strategy, XYPlot plot) {
+        // Running the strategy
+        TimeSeriesManager seriesManager = new TimeSeriesManager(series);
+        List<Trade> trades = seriesManager.run(strategy).getTrades();
+        // Adding markers to plot
+        for (Trade trade : trades) {
+            // Buy signal
+            double buySignalBarTime = new Minute(Date.from(series.getBar(trade.getEntry().getIndex()).getEndTime().toInstant())).getFirstMillisecond();
+            Marker buyMarker = new ValueMarker(buySignalBarTime);
+            buyMarker.setPaint(Color.GREEN);
+            buyMarker.setLabel("B");
+            plot.addDomainMarker(buyMarker);
+            // Sell signal
+            double sellSignalBarTime = new Minute(Date.from(series.getBar(trade.getExit().getIndex()).getEndTime().toInstant())).getFirstMillisecond();
+            Marker sellMarker = new ValueMarker(sellSignalBarTime);
+            sellMarker.setPaint(Color.RED);
+            sellMarker.setLabel("S");
+            plot.addDomainMarker(sellMarker);
+        }
+    }
+
+    /**
+     * Displays a chart in a frame.
+     *
+     * @param chart the chart to be displayed
+     */
+    private static void displayChart(JFreeChart chart) {
+        // Chart panel
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setFillZoomRectangle(true);
+        panel.setMouseWheelEnabled(true);
+        panel.setPreferredSize(new Dimension(1024, 400));
+        // Application frame
+        ApplicationFrame frame = new ApplicationFrame("Ta4j example - Buy and sell signals to chart");
+        frame.setContentPane(panel);
+        frame.pack();
+        RefineryUtilities.centerFrameOnScreen(frame);
+        frame.setVisible(true);
     }
 
     //构建一个简单的策略
     private static BaseStrategy buildSimpleStrategy(TimeSeries series) {
 
         //计算rsi
-        StrategyCalculation rsiStrategyCal = new RsiStrategyImpl(series, 14);
-        Indicator indicator = rsiStrategyCal.strategCalculation();
+        IndicatorCat rsiStrategyCal = new RsiIndicatorCat(series, 14);
+        org.ta4j.core.Indicator indicator = rsiStrategyCal.strategCalculation();
 //        WilliamsRIndicator williamsRIndicator = new WilliamsRIndicator(series, 14);
         //rsi 指标值 低于30 执行买入
         Rule entry = new CrossedDownIndicatorRule(indicator, 30);
@@ -93,6 +130,9 @@ public class StrategyTest {
         // or selling opportunities within the bigger trend.
         RSIIndicator rsi = new RSIIndicator(closePrice, 14);
 
+        MACDIndicator macdIndicator = new MACDIndicator(closePrice, 12, 26);
+//        PreviousValueIndicator
+//        StochasticOscillatorKIndicator  stochasticOscillatorKIndicator=new StochasticOscillatorKIndicator(series,14,3,3);
         CCIIndicator cciIndicator = new CCIIndicator(series, 20);
         // Entry rule
         // The long-term trend is up when a security is above its 200-period SMA.

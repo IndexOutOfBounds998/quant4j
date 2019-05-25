@@ -5,8 +5,12 @@ import java.util.Date;
 
 public class DateUtils {
 
-
-    static ThreadLocal<SimpleDateFormat> local = new ThreadLocal<>();
+    /**
+     * @author yang
+     * @desc 使用ThreadLocal保证线程安全
+     * @date 2019/5/26
+     */
+    private static final ThreadLocal<SimpleDateFormat> local = new ThreadLocal<>();
 
     public static void main(String[] args) {
         long time = System.currentTimeMillis();
@@ -18,11 +22,14 @@ public class DateUtils {
         return new Date(Long.parseLong(String.valueOf(timeStamp)));
     }
 
-    public static String formateDate(Date date) {
+    public static String formateDate(Date date, String format) {
         if (local.get() != null) {
             return local.get().format(date);
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        if (format == null) {
+            format = "yyyy-MM-dd HH:mm:ss";
+        }
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
         local.set(simpleDateFormat);
         return simpleDateFormat.format(date);
     }

@@ -1,10 +1,10 @@
 server:
   port: 8024
-  address: 0.0.0.0
+  address: 47.52.207.164
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_ZONE_HOST:localhost}:${EUREKA_ZONE_PORT:8761}/eureka/
+      defaultZone: http://${EUREKA_ZONE_HOST:47.95.214.100}:${EUREKA_ZONE_PORT:8762}/eureka/
 
 spring:
   application:
@@ -16,7 +16,7 @@ spring:
 #    password: ${RABBIT_MQ_PASSWORD:yang}
   redis:
     database: 0
-    host: 127.0.0.1
+    host: 47.52.207.164
     port: 6379
     password:
     jedis:

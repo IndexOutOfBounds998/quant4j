@@ -1,12 +1,12 @@
 server:
-  port: 8080
-  address: 0.0.0.0
+  port: 8180
+  address: 47.95.214.100
 #添加数据源
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://47.52.207.164:3306/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: root
     password: Sjh13693094831
     druid:
@@ -30,7 +30,7 @@ spring:
     name: qt-admin
   redis:
     database: 0
-    host: 127.0.0.1
+    host: 47.52.207.164
     port: 6379
     password:
     jedis:
@@ -57,11 +57,11 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_ZONE_HOST:localhost}:${EUREKA_ZONE_PORT:8761}/eureka/
+      defaultZone: http://${EUREKA_ZONE_HOST:47.95.214.100}:${EUREKA_ZONE_PORT:8762}/eureka/
 mybatis-plus:
   mapper-locations: classpath*:mapper/*Mapper.xml
 
 vpnproxy:
-  enable: false
+  enable: true
   ip: 127.0.0.1
-  port: 64035
+  port: 1080

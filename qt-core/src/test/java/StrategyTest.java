@@ -40,7 +40,6 @@ public class StrategyTest {
         //构建策略并执行
         Strategy strategy = buildStrategy(series);
         //回测历史数据
-
         TimeSeriesManager seriesManager = new TimeSeriesManager(series);
         TradingRecord tradingRecord = seriesManager.run(strategy);
 

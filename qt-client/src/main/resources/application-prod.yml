@@ -1,6 +1,6 @@
 server:
   port: 8024
-  address: 47.52.207.164
+  address: 0.0.0.0
 eureka:
   client:
     serviceUrl:
@@ -16,7 +16,7 @@ spring:
 #    password: ${RABBIT_MQ_PASSWORD:yang}
   redis:
     database: 0
-    host: 47.52.207.164
+    host: 0.0.0.0
     port: 6379
     password:
     jedis:

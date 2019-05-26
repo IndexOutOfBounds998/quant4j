@@ -1,6 +1,6 @@
 server:
   port: 8180
-  address: 47.95.214.100
+  address: 0.0.0.0
 #添加数据源
 spring:
   datasource:

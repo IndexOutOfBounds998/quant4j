@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.ta4j.core.*;
 import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
-import org.ta4j.core.trading.rules.CrossedDownIndicatorRule;
-import org.ta4j.core.trading.rules.OverIndicatorRule;
+import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.trading.rules.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,19 +47,13 @@ public class IndicatorController extends BaseController {
         ApiClient apiClient = new ApiClient(config);
         KlineResponse response = apiClient.kline(vo.getSymbol(), vo.getKline(), vo.getSize());
         List<Kline> data = (ArrayList<Kline>) response.data;
-
         TimeSeries series = IndicatorHelper.buildSeries(data);
-
-
         StaticIndicatorFactory factory = new StaticIndicatorFactory(series);
-
-
         int buyDay = Integer.parseInt(vo.getIndicatorBuy().getCount());
         IndicatorCalParam buy = new IndicatorCalParam();
         buy.setDay(buyDay);
         buy.setIndicatorName(vo.getIndicatorBuy().getIndicator());
         Indicator buyIndicator = factory.getIndicator(buy);
-
 
         int sellDay = Integer.parseInt(vo.getIndicatorSell().getCount());
         IndicatorCalParam sell = new IndicatorCalParam();
@@ -67,13 +61,24 @@ public class IndicatorController extends BaseController {
         sell.setIndicatorName(vo.getIndicatorSell().getIndicator());
         Indicator sellIndicator = factory.getIndicator(sell);
 
-        Rule entry = new CrossedDownIndicatorRule(buyIndicator, Double.parseDouble(vo.getIndicatorBuy().getValue()));
-//        entry.and(new CrossedDownIndicatorRule(williamsRIndicator, indicator));
-        //rsi 指标高于70 执行卖出
-        Rule exit = new OverIndicatorRule(sellIndicator, Double.parseDouble(vo.getIndicatorSell().getValue()));
+        final Rule entry = new CrossedDownIndicatorRule(buyIndicator, Double.parseDouble(vo.getIndicatorBuy().getValue()));
 
+        Rule exit = new CrossedUpIndicatorRule(sellIndicator, Double.parseDouble(vo.getIndicatorSell().getValue()));
+        if (vo.getStopGain() != null && vo.getStopGain() != 0) {
+            //给卖出条件增加止盈
+            StopGainRule stopGainRule = new StopGainRule(new ClosePriceIndicator(sellIndicator.getTimeSeries()), vo.getStopGain());
+            exit = exit.and(stopGainRule);
+
+        }
+        if (vo.getStopLoss() != null && vo.getStopLoss() != 0) {
+            //给卖出条件增加止损
+            StopLossRule stopLossRule = new StopLossRule(new ClosePriceIndicator(sellIndicator.getTimeSeries()), vo.getStopLoss());
+            exit = exit.and(stopLossRule);
+
+        }
+        //构建策略
         Strategy strategy = new BaseStrategy(entry, exit);
-
+        // 回测
         TimeSeriesManager seriesManager = new TimeSeriesManager(series);
         TradingRecord tradingRecord = seriesManager.run(strategy);
 

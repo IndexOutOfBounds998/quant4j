@@ -1,11 +1,12 @@
 package com.quant.common.to;
 
+import lombok.Data;
+
 /**
  * Created by yang on 2019/5/24.
  */
+@Data
 public class SimpleIndicatorVo {
-
-
     /**
      * kline : 1min
      * size :
@@ -13,53 +14,15 @@ public class SimpleIndicatorVo {
      * indicatorBuy : {"indicator":"","count":"14","value":""}
      * indicatorSell : {"indicator":"","count":"14","value":""}
      */
-
+    private Double stopGain;
+    private Double stopLoss;
     private String kline;
     private String size;
     private String symbol;
     private IndicatorBuyBean indicatorBuy;
     private IndicatorSellBean indicatorSell;
 
-    public String getKline() {
-        return kline;
-    }
-
-    public void setKline(String kline) {
-        this.kline = kline;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public IndicatorBuyBean getIndicatorBuy() {
-        return indicatorBuy;
-    }
-
-    public void setIndicatorBuy(IndicatorBuyBean indicatorBuy) {
-        this.indicatorBuy = indicatorBuy;
-    }
-
-    public IndicatorSellBean getIndicatorSell() {
-        return indicatorSell;
-    }
-
-    public void setIndicatorSell(IndicatorSellBean indicatorSell) {
-        this.indicatorSell = indicatorSell;
-    }
-
+    @Data
     public static class IndicatorBuyBean {
         /**
          * indicator :
@@ -71,31 +34,9 @@ public class SimpleIndicatorVo {
         private String count;
         private String value;
 
-        public String getIndicator() {
-            return indicator;
-        }
-
-        public void setIndicator(String indicator) {
-            this.indicator = indicator;
-        }
-
-        public String getCount() {
-            return count;
-        }
-
-        public void setCount(String count) {
-            this.count = count;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
     }
 
+    @Data
     public static class IndicatorSellBean {
         /**
          * indicator :
@@ -107,28 +48,5 @@ public class SimpleIndicatorVo {
         private String count;
         private String value;
 
-        public String getIndicator() {
-            return indicator;
-        }
-
-        public void setIndicator(String indicator) {
-            this.indicator = indicator;
-        }
-
-        public String getCount() {
-            return count;
-        }
-
-        public void setCount(String count) {
-            this.count = count;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
     }
 }

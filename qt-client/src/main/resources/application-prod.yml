@@ -5,6 +5,9 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${EUREKA_ZONE_HOST:47.95.214.100}:${EUREKA_ZONE_PORT:8762}/eureka/
+  instance:
+    prefer-ip-address: true
+    ip-address: 47.52.207.164
 
 spring:
   application:
@@ -16,7 +19,7 @@ spring:
 #    password: ${RABBIT_MQ_PASSWORD:yang}
   redis:
     database: 0
-    host: 0.0.0.0
+    host: 127.0.0.1
     port: 6379
     password:
     jedis:

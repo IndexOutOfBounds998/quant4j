@@ -1,5 +1,5 @@
 server:
-  port: ${EUREKA_PORT:8761}
+  port: ${EUREKA_PORT:8762}
   address: 0.0.0.0
 eureka:
   client:

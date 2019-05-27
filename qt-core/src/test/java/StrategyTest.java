@@ -129,6 +129,7 @@ public class StrategyTest {
         // or selling opportunities within the bigger trend.
         RSIIndicator rsi = new RSIIndicator(closePrice, 14);
 
+
         MACDIndicator macdIndicator = new MACDIndicator(closePrice, 12, 26);
 //        PreviousValueIndicator
 //        StochasticOscillatorKIndicator  stochasticOscillatorKIndicator=new StochasticOscillatorKIndicator(series,14,3,3);

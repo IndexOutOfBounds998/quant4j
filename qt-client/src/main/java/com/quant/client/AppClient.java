@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableScheduling
-@ComponentScan({"com.qklx.qt.common", "com.qklx.client"})
+@ComponentScan({"com.quant.common", "com.quant.client"})
 public class AppClient {
     public static void main(String[] args) {
 

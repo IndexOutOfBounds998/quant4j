@@ -38,13 +38,13 @@ public class StaticIndicatorFactory extends AbsIndicatorFactory {
     public Indicator getIndicator(IndicatorCalParam indicatorCalParam) {
 
         if (indicatorCalParam.getIndicatorName().equals("RSI")) {
-
-            return getRSI(timeSeries, indicatorCalParam.getDay());
+            int day = Integer.parseInt(indicatorCalParam.getParams()[0]);
+            return getRSI(timeSeries, day);
 
         }
         if (indicatorCalParam.getIndicatorName().equals("ADX")) {
-
-            return getADX(timeSeries, indicatorCalParam.getDay());
+            int day = Integer.parseInt(indicatorCalParam.getParams()[0]);
+            return getADX(timeSeries, day);
 
         }
         return null;

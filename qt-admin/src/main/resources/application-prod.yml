@@ -63,5 +63,5 @@ mybatis-plus:
 
 vpnproxy:
   enable: true
-  ip: 47.52.207.164
-  port: 8388
+  ip: 127.0.0.1
+  port: 1088

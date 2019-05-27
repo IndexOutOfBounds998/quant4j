@@ -9,6 +9,6 @@ import lombok.Data;
 public class IndicatorCalParam {
 
     private String indicatorName;
-    private int day;
+    private String[] params;
 
 }

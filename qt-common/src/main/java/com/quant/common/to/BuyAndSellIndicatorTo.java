@@ -33,7 +33,7 @@ public class BuyAndSellIndicatorTo {
 
     @NoArgsConstructor
     @Data
-    public static class IndicatorBuyBean implements IndicatorBean{
+    public static class IndicatorBuyBean implements IndicatorBean {
         /**
          * condition : or
          * compare : {"value":"num_down","label":"小于"}
@@ -46,48 +46,12 @@ public class BuyAndSellIndicatorTo {
         private RuleFirstBean ruleFirst;
         private RuleSecondBean ruleSecond;
 
-        @NoArgsConstructor
-        @Data
-        public static class CompareBean {
-            /**
-             * value : num_down
-             * label : 小于
-             */
 
-            private String value;
-            private String label;
-        }
-
-        @NoArgsConstructor
-        @Data
-        public static class RuleFirstBean {
-            /**
-             * name : 价格
-             * value : price
-             * params : 默认指标
-             */
-
-            private String name;
-            private String value;
-            private String params;
-        }
-
-        @NoArgsConstructor
-        @Data
-        public static class RuleSecondBean {
-            /**
-             * value : 240
-             */
-
-            private String value;
-
-            private String params;
-        }
     }
 
     @NoArgsConstructor
     @Data
-    public static class IndicatorSellBean implements IndicatorBean{
+    public static class IndicatorSellBean implements IndicatorBean {
         /**
          * condition : and
          * compare : {"value":"num_over","label":"大于"}
@@ -96,45 +60,49 @@ public class BuyAndSellIndicatorTo {
          */
 
         private String condition;
-        private CompareBeanX compare;
-        private RuleFirstBeanX ruleFirst;
-        private RuleSecondBeanX ruleSecond;
+        private CompareBean compare;
+        private RuleFirstBean ruleFirst;
+        private RuleSecondBean ruleSecond;
 
-        @NoArgsConstructor
-        @Data
-        public static class CompareBeanX {
-            /**
-             * value : num_over
-             * label : 大于
-             */
+    }
 
-            private String value;
-            private String label;
-        }
 
-        @NoArgsConstructor
-        @Data
-        public static class RuleFirstBeanX {
-            /**
-             * name : 价格
-             * value : price
-             * params : 默认指标
-             */
+    @NoArgsConstructor
+    @Data
+    public static class CompareBean {
+        /**
+         * value : num_down
+         * label : 小于
+         */
 
-            private String name;
-            private String value;
-            private String params;
-        }
+        private String value;
+        private String label;
+    }
 
-        @NoArgsConstructor
-        @Data
-        public static class RuleSecondBeanX {
-            /**
-             * value : 270
-             */
+    @NoArgsConstructor
+    @Data
+    public static class RuleFirstBean implements RuleBean {
+        /**
+         * name : 价格
+         * value : price
+         * params : 默认指标
+         */
 
-            private String value;
-            private String params;
-        }
+        private String name;
+        private String value;
+        private String params;
+
+
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class RuleSecondBean implements RuleBean {
+        /**
+         * value : 240
+         */
+        private String name;
+        private String value;
+        private String params;
     }
 }

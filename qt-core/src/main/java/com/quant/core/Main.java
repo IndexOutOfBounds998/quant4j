@@ -32,6 +32,7 @@ import org.jfree.ui.RefineryUtilities;
 import org.ta4j.core.*;
 import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
 import org.ta4j.core.indicators.RSIIndicator;
+import org.ta4j.core.indicators.SMAIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.Num;
 import org.ta4j.core.trading.rules.CrossedDownIndicatorRule;
@@ -76,7 +77,7 @@ public class Main {
 
 
     public static void testRsi() {
-        List<Kline> kline = getKline("15min","2000");
+        List<Kline> kline = getKline("15min", "2000");
         TimeSeries series = loadTimeSeries(kline);
 
         // Running the strategy
@@ -283,7 +284,7 @@ public class Main {
         frame.setVisible(true);
     }
 
-    public static List<Kline> getKline(String tyoe,String size) {
+    public static List<Kline> getKline(String tyoe, String size) {
         VpnProxyConfig vpnProxyConfig = new VpnProxyConfig();
         vpnProxyConfig.setEnable(true);
         vpnProxyConfig.setIp("127.0.0.1");
@@ -317,7 +318,9 @@ public class Main {
             // We use a 2-period RSI indicator to identify buying
             // or selling opportunities within the bigger trend.
             RSIIndicator rsi = new RSIIndicator(closePrice, barCount);
-
+            SMAIndicator smaIndicator = new SMAIndicator(closePrice, 5);
+            Num value = smaIndicator.getValue(series.getEndIndex());
+            System.out.println("sma 5=" + value.toString());
             // Entry rule
             // The long-term trend is up when a security is above its 200-period SMA.
             Rule entryRule = // Trend
@@ -326,6 +329,39 @@ public class Main {
             // Exit rule
             // The long-term trend is down when a security is below its 200-period SMA.
             Rule exitRule = new CrossedUpIndicatorRule(rsi, 70);
+
+            // TODO: Finalize the strategy
+
+            return new BaseStrategy(entryRule, exitRule);
+        }
+
+
+    }
+
+    public static class SMA {
+
+        /**
+         * @param series a time series
+         * @return a 2-period RSI strategy
+         */
+        public static Strategy buildStrategy(TimeSeries series, int barCount) {
+            if (series == null) {
+                throw new IllegalArgumentException("Series cannot be null");
+            }
+
+            ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
+            // We use a 2-period RSI indicator to identify buying
+            // or selling opportunities within the bigger trend.
+            SMAIndicator smaIndicator = new SMAIndicator(closePrice, barCount);
+
+            // Entry rule
+            // The long-term trend is up when a security is above its 200-period SMA.
+            Rule entryRule = // Trend
+                    new CrossedDownIndicatorRule(smaIndicator, 30);// Signal 1; // Signal 2
+
+            // Exit rule
+            // The long-term trend is down when a security is below its 200-period SMA.
+            Rule exitRule = new CrossedUpIndicatorRule(smaIndicator, 70);
 
             // TODO: Finalize the strategy
 

@@ -1,10 +1,13 @@
 package com.quant.common.utils;
 
+import com.quant.common.exception.IndicatorException;
+import com.quant.common.factory.StaticIndicatorFactory;
 import com.quant.common.response.Kline;
-import org.ta4j.core.Bar;
-import org.ta4j.core.BaseBar;
-import org.ta4j.core.BaseTimeSeries;
-import org.ta4j.core.TimeSeries;
+import com.quant.common.to.BuyAndSellIndicatorTo;
+import com.quant.common.to.IndicatorBean;
+import com.quant.common.to.RuleBean;
+import com.quant.common.vo.IndicatorCalParam;
+import org.ta4j.core.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -39,5 +42,26 @@ public class IndicatorHelper {
 
     }
 
+    /**
+     * builder a Indicator
+     *
+     * @param bean
+     * @return
+     */
+    public static Indicator builderIndicator(RuleBean bean, TimeSeries timeSeries) {
+        try {
+            StaticIndicatorFactory factory = new StaticIndicatorFactory(timeSeries);
+            String value = bean.getValue();
+            String params = bean.getParams();
+            String[] strings = params.split(",");
+            //构建一个指标
+            IndicatorCalParam indicatorCalParam = new IndicatorCalParam();
+            indicatorCalParam.setIndicatorName(value);
+            indicatorCalParam.setParams(strings);
+            return factory.getIndicator(indicatorCalParam);
+        } catch (Exception e) {
+            throw new IndicatorException(e);
+        }
+    }
 
 }

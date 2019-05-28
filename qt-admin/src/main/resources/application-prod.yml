@@ -6,9 +6,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://47.52.207.164:3306/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://47.52.207.164:3308/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: root
-    password: 'sjh13693094831'
+    password: sjh13693094831
     druid:
       initial-size: 5
       min-idle: 10
@@ -31,8 +31,8 @@ spring:
   redis:
     database: 0
     host: 47.52.207.164
-    port: 6379
-    password:
+    port: 6380
+    password: sjh13693094831
     jedis:
       pool:
         max-active: 8

@@ -3,17 +3,15 @@ package com.quant.admin.controller;
 import com.quant.common.config.VpnProxyConfig;
 import com.quant.common.enums.Status;
 import com.quant.common.to.BuyAndSellIndicatorTo;
+import com.quant.common.to.IndicatorBean;
 import com.quant.common.utils.DateUtils;
 import com.quant.common.utils.IndicatorHelper;
 import com.quant.common.vo.IndicatorCalParam;
 import com.quant.core.api.ApiClient;
 import com.quant.common.response.Kline;
 import com.quant.common.response.KlineResponse;
-import com.quant.common.to.SimpleIndicatorVo;
 import com.quant.core.api.ApiResult;
-import com.quant.core.factory.StaticIndicatorFactory;
-import com.quant.core.indicator.RsiIndicatorCat;
-import org.bouncycastle.asn1.pkcs.IssuerAndSerialNumber;
+import com.quant.common.factory.StaticIndicatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +46,11 @@ public class IndicatorController extends BaseController {
     private static final String cross_up = "cross_up"; //交叉向上
     private static final String cross_down = "cross_down"; //交叉乡下
 
+
+    private static final ThreadLocal<Boolean> buyOnlyOneRule = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> sellOnlyOneRule = new ThreadLocal<>();
+
+
     /**
      * @author yang
      * @desc 回测
@@ -60,325 +63,24 @@ public class IndicatorController extends BaseController {
         List<Kline> data = (ArrayList<Kline>) response.data;
         TimeSeries series = IndicatorHelper.buildSeries(data);
         StaticIndicatorFactory factory = new StaticIndicatorFactory(series);
+        //是否只有一条规则
+        buyOnlyOneRule.set(true);
+        sellOnlyOneRule.set(true);
 
         Rule entry = null;
-
-
-        int i = 0;
         for (BuyAndSellIndicatorTo.IndicatorBuyBean buyBean : to.getIndicatorBuy()) {
             //指标名称
-            String NameIndicator = buyBean.getRuleFirst().getValue();
-            String params = buyBean.getRuleFirst().getParams();
-
-
-            String[] str = params.split(",");
-            boolean price = NameIndicator.equals("price");
-            boolean amount = NameIndicator.equals("amount");
-
-            //获取价格的值
-            String value = buyBean.getRuleSecond().getValue();
-            //获取之间的关系
-            String condition = buyBean.getCondition();
-            //获取大小关系
-            String compare = buyBean.getCompare().getValue();
-
-            if (price) {
-                //是价格指标
-                ClosePriceIndicator priceIndicator = new ClosePriceIndicator(series);
-                if (num_down.equals(compare)) {
-                    //小于
-                    UnderIndicatorRule rule = new UnderIndicatorRule(priceIndicator, new BigDecimal(value));
-                    entry = andOr(entry, rule, i, condition);
-                    i++;
-                }
-
-                if (num_up.equals(compare)) {
-                    //大于
-                    OverIndicatorRule rule = new OverIndicatorRule(priceIndicator, new BigDecimal(value));
-                    entry = andOr(entry, rule, i, condition);
-                    i++;
-
-                }
-            } else if (amount) {
-                //是成交量指标
-                VolumeIndicator volumeIndicator = new VolumeIndicator(series);
-                if (num_down.equals(compare)) {
-                    //小于
-                    UnderIndicatorRule rule = new UnderIndicatorRule(volumeIndicator, new BigDecimal(value));
-                    entry = andOr(entry, rule, i, condition);
-                    i++;
-                }
-
-                if (num_up.equals(compare)) {
-                    //大于
-                    OverIndicatorRule rule = new OverIndicatorRule(volumeIndicator, new BigDecimal(value));
-                    entry = andOr(entry, rule, i, condition);
-                    i++;
-
-                }
-            } else {
-                //是指标
-                IndicatorCalParam param = new IndicatorCalParam();
-                param.setIndicatorName(NameIndicator);
-                param.setParams(str);
-                Indicator indicator = factory.getIndicator(param);
-
-                //获取第二个指标
-                String NameIndicator2 = buyBean.getRuleSecond().getValue();
-                String params2 = buyBean.getRuleSecond().getParams();
-
-                if (buyBean.getRuleSecond().getParams() == null) {
-                    //值
-
-                    if (num_down.equals(compare)) {
-                        //小于
-
-                        UnderIndicatorRule underIndicatorRule = new UnderIndicatorRule(indicator, new BigDecimal(NameIndicator2));
-
-                        if (i == 0) {
-                            entry = underIndicatorRule;
-                        } else {
-
-                            if (condition.equals(and)) {
-                                entry = entry.and(underIndicatorRule);
-                            }
-                            if (condition.equals(or)) {
-                                entry = entry.or(underIndicatorRule);
-                            }
-
-                        }
-
-
-                    }
-                    if (num_up.equals(compare)) {
-                        //小于
-
-                        OverIndicatorRule overIndicatorRule = new OverIndicatorRule(indicator, new BigDecimal(NameIndicator2));
-
-                        if (i == 0) {
-                            entry = overIndicatorRule;
-                        } else {
-
-                            if (condition.equals(and)) {
-                                entry = entry.and(overIndicatorRule);
-                            }
-                            if (condition.equals(or)) {
-                                entry = entry.or(overIndicatorRule);
-                            }
-
-                        }
-
-
-                    }
-
-                } else {
-
-
-                    IndicatorCalParam param2 = new IndicatorCalParam();
-                    param2.setIndicatorName(NameIndicator2);
-                    param2.setParams(params2.split(","));
-                    Indicator indicator2 = factory.getIndicator(param2);
-
-
-                    if (compare.equals(cross_up)) {
-                        //交叉向上的趋势
-                        CrossedUpIndicatorRule crossedUpIndicatorRule = new CrossedUpIndicatorRule(indicator, indicator2);
-                        if (i == 0) {
-                            entry = crossedUpIndicatorRule;
-                            i++;
-                            continue;
-                        }
-                        if (condition.equals(and)) {
-                            entry = entry.and(crossedUpIndicatorRule);
-                        }
-                        if (condition.equals(or)) {
-                            entry = entry.or(crossedUpIndicatorRule);
-                        }
-
-                    }
-
-                    if (compare.equals(cross_down)) {
-                        //交叉向下的趋势
-                        CrossedDownIndicatorRule crossedDownIndicatorRule = new CrossedDownIndicatorRule(indicator, indicator2);
-                        if (i == 0) {
-                            entry = crossedDownIndicatorRule;
-                            i++;
-                            continue;
-                        }
-                        if (condition.equals(and)) {
-                            entry = entry.and(crossedDownIndicatorRule);
-                        }
-                        if (condition.equals(or)) {
-                            entry = entry.or(crossedDownIndicatorRule);
-                        }
-
-                    }
-                }
-
-
-            }
-
+            entry = simpleBuilder(buyBean, factory, series, entry, buyOnlyOneRule);
         }
-
-
         //构建卖出
-
-        int j = 0;
         Rule exit = null;
         for (BuyAndSellIndicatorTo.IndicatorSellBean sellBean : to.getIndicatorSell()) {
-            //指标名称
-            String NameIndicator = sellBean.getRuleFirst().getValue();
-            String params = sellBean.getRuleFirst().getParams();
-
-
-            String[] str = params.split(",");
-            boolean price = NameIndicator.equals("price");
-            boolean amount = NameIndicator.equals("amount");
-
-            //获取价格的值
-            String value = sellBean.getRuleSecond().getValue();
-            //获取之间的关系
-            String condition = sellBean.getCondition();
-            //获取大小关系
-            String compare = sellBean.getCompare().getValue();
-
-            if (price) {
-                //是价格指标
-                ClosePriceIndicator priceIndicator = new ClosePriceIndicator(series);
-                if (num_down.equals(compare)) {
-                    //小于
-                    UnderIndicatorRule rule = new UnderIndicatorRule(priceIndicator, new BigDecimal(value));
-                    exit = andOr(exit, rule, j, condition);
-                    j++;
-                }
-
-                if (num_up.equals(compare)) {
-                    //大于
-                    OverIndicatorRule rule = new OverIndicatorRule(priceIndicator, new BigDecimal(value));
-                    exit = andOr(exit, rule, j, condition);
-                    j++;
-
-                }
-            } else if (amount) {
-                //是成交量指标
-                VolumeIndicator volumeIndicator = new VolumeIndicator(series);
-                if (num_down.equals(compare)) {
-                    //小于
-                    UnderIndicatorRule rule = new UnderIndicatorRule(volumeIndicator, new BigDecimal(value));
-                    exit = andOr(exit, rule, j, condition);
-                    j++;
-                }
-
-                if (num_up.equals(compare)) {
-                    //大于
-                    OverIndicatorRule rule = new OverIndicatorRule(volumeIndicator, new BigDecimal(value));
-                    exit = andOr(exit, rule, j, condition);
-                    j++;
-
-                }
-            } else {
-                //是指标
-                IndicatorCalParam param = new IndicatorCalParam();
-                param.setIndicatorName(NameIndicator);
-                param.setParams(str);
-                Indicator indicator = factory.getIndicator(param);
-                String NameIndicator2 = sellBean.getRuleSecond().getValue();
-                //获取第二个指标
-                //判断第二个指标是值还是指标
-                if (sellBean.getRuleSecond().getParams() == null) {
-                    //值
-
-                    if (num_down.equals(compare)) {
-                        //小于
-
-                        UnderIndicatorRule underIndicatorRule = new UnderIndicatorRule(indicator, new BigDecimal(NameIndicator2));
-
-                        if (j == 0) {
-                            exit = underIndicatorRule;
-                        } else {
-
-                            if (condition.equals(and)) {
-                                exit = exit.and(underIndicatorRule);
-                            }
-                            if (condition.equals(or)) {
-                                exit = exit.or(underIndicatorRule);
-                            }
-
-                        }
-
-
-                    }
-                    if (num_up.equals(compare)) {
-                        //大于
-
-                        OverIndicatorRule overIndicatorRule = new OverIndicatorRule(indicator, new BigDecimal(NameIndicator2));
-
-                        if (j == 0) {
-                            exit = overIndicatorRule;
-                        } else {
-
-                            if (condition.equals(and)) {
-                                exit = exit.and(overIndicatorRule);
-                            }
-                            if (condition.equals(or)) {
-                                exit = exit.or(overIndicatorRule);
-                            }
-
-                        }
-
-
-                    }
-
-                } else {
-
-                    String params2 = sellBean.getRuleSecond().getParams();
-                    IndicatorCalParam param2 = new IndicatorCalParam();
-                    param2.setIndicatorName(NameIndicator2);
-                    param2.setParams(params2.split(","));
-                    Indicator indicator2 = factory.getIndicator(param2);
-
-
-                    if (compare.equals(cross_up)) {
-                        //交叉向上的趋势
-                        CrossedUpIndicatorRule crossedUpIndicatorRule = new CrossedUpIndicatorRule(indicator, indicator2);
-                        if (j == 0) {
-                            entry = crossedUpIndicatorRule;
-                            j++;
-                            continue;
-                        }
-                        if (condition.equals(and)) {
-                            exit = exit.and(crossedUpIndicatorRule);
-                        }
-                        if (condition.equals(or)) {
-                            exit = exit.or(crossedUpIndicatorRule);
-                        }
-
-                    }
-
-                    if (compare.equals(cross_down)) {
-                        //交叉向下的趋势
-                        CrossedDownIndicatorRule crossedDownIndicatorRule = new CrossedDownIndicatorRule(indicator, indicator2);
-                        if (j == 0) {
-                            exit = crossedDownIndicatorRule;
-                            j++;
-                            continue;
-                        }
-                        if (condition.equals(and)) {
-                            exit = exit.and(crossedDownIndicatorRule);
-                        }
-                        if (condition.equals(or)) {
-                            exit = exit.or(crossedDownIndicatorRule);
-                        }
-
-                    }
-                }
-
-
-            }
-
+            exit = simpleBuilder(sellBean, factory, series, exit, sellOnlyOneRule);
         }
-
-
+        if (entry == null || exit == null) {
+            return new ApiResult(Status.ERROR, "策略构建失败！");
+        }
+        //构建止盈止损
         if (to.getStopGain() != null && to.getStopGain() != 0) {
             //给卖出条件增加止盈
             StopGainRule stopGainRule = new StopGainRule(new ClosePriceIndicator(series), to.getStopGain());
@@ -396,12 +98,10 @@ public class IndicatorController extends BaseController {
         // 回测
         TimeSeriesManager seriesManager = new TimeSeriesManager(series);
         TradingRecord tradingRecord = seriesManager.run(strategy);
-
         // Analysis
         System.out.println("策略总收益: "
                 + new TotalProfitCriterion().calculate(series, tradingRecord));
 
-        //==================================
         System.out.println("策略总交易数: "
                 + tradingRecord.getTradeCount());
         HashMap<String, Object> param = new HashMap<>(2);
@@ -438,18 +138,121 @@ public class IndicatorController extends BaseController {
     }
 
 
-    private Rule andOr(Rule entry, Rule rule, int i, String condition) {
-        if (i == 0) {
+    private static Rule simpleBuilder(IndicatorBean bean, StaticIndicatorFactory factory, TimeSeries series, Rule rule, ThreadLocal<Boolean> onlyOneRule) {
+
+        //指标名称
+        String NameIndicator = bean.getRuleFirst().getValue();
+        boolean price = NameIndicator.equals("price");
+        boolean amount = NameIndicator.equals("amount");
+        //获取价格的值
+        String value = bean.getRuleSecond().getValue();
+        //获取之间的关系
+        String condition = bean.getCondition();
+        //获取大小关系
+        String compare = bean.getCompare().getValue();
+        rule = builderRule(price, amount, factory, compare, condition, value, onlyOneRule, bean, series, rule);
+
+        return rule;
+    }
+
+
+    private static Rule builderRule(boolean price, boolean amount,
+                                    StaticIndicatorFactory factory,
+                                    String compare,
+                                    String condition,
+                                    String value,
+                                    ThreadLocal<Boolean> ruleOnlyOne,
+                                    IndicatorBean bean,
+                                    TimeSeries timeSeries,
+                                    Rule entry) {
+        if (price) {
+            //是价格指标
+            Indicator priceIndicator = factory.getIndicator("price");
+            if (num_down.equals(compare)) {
+                //小于
+                UnderIndicatorRule rule = new UnderIndicatorRule(priceIndicator, new BigDecimal(value));
+                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+            }
+
+            if (num_up.equals(compare)) {
+                //大于
+                OverIndicatorRule rule = new OverIndicatorRule(priceIndicator, new BigDecimal(value));
+                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+            }
+        } else if (amount) {
+            //是成交量指标
+            Indicator volumeIndicator = factory.getIndicator("amount");
+            if (num_down.equals(compare)) {
+                //小于
+                UnderIndicatorRule rule = new UnderIndicatorRule(volumeIndicator, new BigDecimal(value));
+                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+            }
+
+            if (num_up.equals(compare)) {
+                //大于
+                OverIndicatorRule rule = new OverIndicatorRule(volumeIndicator, new BigDecimal(value));
+                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+
+            }
+        } else {
+            //是指标
+            Indicator indicatorFirst = IndicatorHelper.builderIndicator(bean.getRuleFirst(), timeSeries);
+
+            //获取第二个指标的
+            String NameIndicator2 = bean.getRuleSecond().getValue();
+            String params2 = bean.getRuleSecond().getParams();
+
+            if (params2 == null) {
+                //值
+                if (num_down.equals(compare)) {
+                    //小于
+                    UnderIndicatorRule underIndicatorRule = new UnderIndicatorRule(indicatorFirst, new BigDecimal(NameIndicator2));
+                    entry = andOr(entry, underIndicatorRule, ruleOnlyOne.get(), condition);
+                }
+                if (num_up.equals(compare)) {
+                    //小于
+                    OverIndicatorRule overIndicatorRule = new OverIndicatorRule(indicatorFirst, new BigDecimal(NameIndicator2));
+                    entry = andOr(entry, overIndicatorRule, ruleOnlyOne.get(), condition);
+
+                }
+
+            } else {
+                Indicator indicatorSecond = IndicatorHelper.builderIndicator(bean.getRuleSecond(), timeSeries);
+                if (compare.equals(cross_up)) {
+                    //交叉向上的趋势
+                    CrossedUpIndicatorRule crossedUpIndicatorRule = new CrossedUpIndicatorRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, crossedUpIndicatorRule, ruleOnlyOne.get(), condition);
+
+                }
+
+                if (compare.equals(cross_down)) {
+                    //交叉向下的趋势
+                    CrossedDownIndicatorRule crossedDownIndicatorRule = new CrossedDownIndicatorRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, crossedDownIndicatorRule, ruleOnlyOne.get(), condition);
+                }
+            }
+        }
+        ruleOnlyOne.set(false);
+        return entry;
+    }
+
+
+    private static Rule andOr(Rule entry, Rule rule, boolean firstRuleOnlyOne, String condition) {
+        if (firstRuleOnlyOne) {
             entry = rule;
             return entry;
-        }
-        if (condition.equals(and)) {
-            entry = entry.and(rule);
-        }
-        if (condition.equals(or)) {
-            entry = entry.or(rule);
+        } else {
+            if (condition.equals(and)) {
+                entry = entry.and(rule);
+                return entry;
+            }
+            if (condition.equals(or)) {
+                entry = entry.or(rule);
+                return entry;
+            }
         }
         return entry;
     }
+
 
 }

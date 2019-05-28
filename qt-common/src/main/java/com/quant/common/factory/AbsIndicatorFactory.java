@@ -1,4 +1,4 @@
-package com.quant.core.factory;
+package com.quant.common.factory;
 
 import com.quant.common.vo.IndicatorCalParam;
 import org.ta4j.core.Indicator;

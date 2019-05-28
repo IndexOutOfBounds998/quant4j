@@ -1,6 +1,6 @@
 package com.quant.core.factory;
 
-import com.quant.core.indicator.*;
+import com.quant.core.indicatorAdapter.*;
 import com.quant.common.domain.vo.IndicatorCalParam;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.TimeSeries;
@@ -11,10 +11,10 @@ import org.ta4j.core.indicators.helpers.VolumeIndicator;
  * 静态工厂 生成指标
  * Created by yang on 2019/5/26.
  */
-public class StaticIndicatorFactory extends AbsIndicatorFactory {
+public class IndicatorFactory extends AbsIndicatorFactory {
 
 
-    public StaticIndicatorFactory(TimeSeries timeSeries) {
+    public IndicatorFactory(TimeSeries timeSeries) {
         super(timeSeries);
     }
 

@@ -8,8 +8,8 @@ import com.quant.common.enums.Status;
 import com.quant.common.utils.DateUtils;
 import com.quant.core.api.ApiClient;
 import com.quant.core.api.ApiResult;
-import com.quant.core.factory.StaticIndicatorFactory;
-import com.quant.core.indicator.IndicatorHelper;
+import com.quant.core.factory.IndicatorFactory;
+import com.quant.core.utils.IndicatorHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,7 +51,7 @@ public class IndicatorController extends BaseController {
         KlineResponse response = apiClient.kline(to.getSymbol(), to.getKline(), to.getSize());
         List<Kline> data = (ArrayList<Kline>) response.data;
         TimeSeries series = IndicatorHelper.buildSeries(data);
-        StaticIndicatorFactory factory = new StaticIndicatorFactory(series);
+        IndicatorFactory factory = new IndicatorFactory(series);
         //是否只有一条规则
         buyOnlyOneRule.set(true);
         sellOnlyOneRule.set(true);

@@ -11,8 +11,8 @@ public class SimpleIndicatorVo {
      * kline : 1min
      * size :
      * symbol :
-     * indicatorBuy : {"indicator":"","count":"14","value":""}
-     * indicatorSell : {"indicator":"","count":"14","value":""}
+     * indicatorBuy : {"indicatorAdapter":"","count":"14","value":""}
+     * indicatorSell : {"indicatorAdapter":"","count":"14","value":""}
      */
     private Double stopGain;
     private Double stopLoss;
@@ -25,7 +25,7 @@ public class SimpleIndicatorVo {
     @Data
     public static class IndicatorBuyBean {
         /**
-         * indicator :
+         * indicatorAdapter :
          * count : 14
          * value :
          */
@@ -39,7 +39,7 @@ public class SimpleIndicatorVo {
     @Data
     public static class IndicatorSellBean {
         /**
-         * indicator :
+         * indicatorAdapter :
          * count : 14
          * value :
          */

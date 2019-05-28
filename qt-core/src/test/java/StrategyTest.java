@@ -1,7 +1,7 @@
 //import com.quant.core.Main;
 //import com.quant.common.domain.response.Kline;
-//import com.quant.core.indicator.IndicatorAdapter;
-//import com.quant.core.indicator.RsiIndicatorAdapter;
+//import com.quant.core.indicatorAdapter.IndicatorAdapter;
+//import com.quant.core.indicatorAdapter.RsiIndicatorAdapter;
 //import org.jfree.chart.ChartPanel;
 //import org.jfree.chart.JFreeChart;
 //import org.jfree.chart.plot.Marker;
@@ -99,13 +99,13 @@
 //
 //        //计算rsi
 //        IndicatorAdapter rsiStrategyCal = new RsiIndicatorAdapter(series, 14);
-//        org.ta4j.core.Indicator indicator = rsiStrategyCal.strategCalculation();
+//        org.ta4j.core.Indicator indicatorAdapter = rsiStrategyCal.strategCalculation();
 ////        WilliamsRIndicator williamsRIndicator = new WilliamsRIndicator(series, 14);
 //        //rsi 指标值 低于30 执行买入
-//        Rule entry = new CrossedDownIndicatorRule(indicator, 30);
-////        entry.and(new CrossedDownIndicatorRule(williamsRIndicator, indicator));
+//        Rule entry = new CrossedDownIndicatorRule(indicatorAdapter, 30);
+////        entry.and(new CrossedDownIndicatorRule(williamsRIndicator, indicatorAdapter));
 //        //rsi 指标高于70 执行卖出
-//        Rule exit = new OverIndicatorRule(indicator, 70);
+//        Rule exit = new OverIndicatorRule(indicatorAdapter, 70);
 //
 //        //构建策略
 //        BaseStrategy strategy = new BaseStrategy(entry, exit);
@@ -121,7 +121,7 @@
 //        ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
 //        SMAIndicator shortSma = new SMAIndicator(closePrice, 5);
 //        SMAIndicator longSma = new SMAIndicator(closePrice, 200);
-//        // We use a 2-period RSI indicator to identify buying
+//        // We use a 2-period RSI indicatorAdapter to identify buying
 //        // or selling opportunities within the bigger trend.
 //        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
 //

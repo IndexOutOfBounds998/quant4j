@@ -1,8 +1,8 @@
-package com.quant.core.indicator;
+package com.quant.core.utils;
 
 import com.quant.common.domain.to.IndicatorBean;
 import com.quant.common.exception.IndicatorException;
-import com.quant.core.factory.StaticIndicatorFactory;
+import com.quant.core.factory.IndicatorFactory;
 import com.quant.common.domain.response.Kline;
 import com.quant.common.domain.to.RuleBean;
 import com.quant.common.domain.vo.IndicatorCalParam;
@@ -68,7 +68,7 @@ public class IndicatorHelper {
      */
     public static Indicator builderIndicator(RuleBean bean, TimeSeries timeSeries) {
         try {
-            StaticIndicatorFactory factory = new StaticIndicatorFactory(timeSeries);
+            IndicatorFactory factory = new IndicatorFactory(timeSeries);
             String value = bean.getValue();
             String params = bean.getParams();
             String[] strings = params.split(",");
@@ -92,7 +92,7 @@ public class IndicatorHelper {
      * @param onlyOneRule
      * @return
      */
-    public static Rule simpleBuilder(IndicatorBean bean, StaticIndicatorFactory factory, TimeSeries series, Rule rule, ThreadLocal<Boolean> onlyOneRule) {
+    public static Rule simpleBuilder(IndicatorBean bean, IndicatorFactory factory, TimeSeries series, Rule rule, ThreadLocal<Boolean> onlyOneRule) {
 
         //指标名称
         String NameIndicator = bean.getRuleFirst().getValue();
@@ -125,7 +125,7 @@ public class IndicatorHelper {
      * @return
      */
     public static Rule builderRule(boolean price, boolean amount,
-                                   StaticIndicatorFactory factory,
+                                   IndicatorFactory factory,
                                    String compare,
                                    String condition,
                                    String value,

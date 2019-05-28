@@ -1,4 +1,4 @@
-package com.quant.core.mq;
+package com.quant.core.redisMq;
 
 import com.alibaba.fastjson.JSON;
 import com.quant.common.config.RedisUtil;

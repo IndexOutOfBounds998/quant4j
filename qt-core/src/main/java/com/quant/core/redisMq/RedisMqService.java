@@ -1,4 +1,4 @@
-package com.quant.core.mq;
+package com.quant.core.redisMq;
 
 public interface RedisMqService {
 

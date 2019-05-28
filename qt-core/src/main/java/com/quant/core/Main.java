@@ -220,10 +220,10 @@ public class Main {
     }
 
     /**
-     * Builds a JFreeChart time series from a Ta4j time series and an indicator.
+     * Builds a JFreeChart time series from a Ta4j time series and an indicatorAdapter.
      *
      * @param barseries the ta4j time series
-     * @param indicator the indicator
+     * @param indicator the indicatorAdapter
      * @param name      the name of the chart time series
      * @return the JFreeChart time series
      */
@@ -315,7 +315,7 @@ public class Main {
             }
 
             ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
-            // We use a 2-period RSI indicator to identify buying
+            // We use a 2-period RSI indicatorAdapter to identify buying
             // or selling opportunities within the bigger trend.
             RSIIndicator rsi = new RSIIndicator(closePrice, barCount);
             SMAIndicator smaIndicator = new SMAIndicator(closePrice, 5);
@@ -350,7 +350,7 @@ public class Main {
             }
 
             ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
-            // We use a 2-period RSI indicator to identify buying
+            // We use a 2-period RSI indicatorAdapter to identify buying
             // or selling opportunities within the bigger trend.
             SMAIndicator smaIndicator = new SMAIndicator(closePrice, barCount);
 

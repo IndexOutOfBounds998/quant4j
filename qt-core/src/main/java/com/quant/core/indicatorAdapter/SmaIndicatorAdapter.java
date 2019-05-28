@@ -1,20 +1,20 @@
 
-package com.quant.core.indicator;
+package com.quant.core.indicatorAdapter;
 
 
 import org.ta4j.core.Indicator;
 import org.ta4j.core.TimeSeries;
-import org.ta4j.core.indicators.RSIIndicator;
+import org.ta4j.core.indicators.SMAIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 
 
 /**
- * Rsi指标计算
+ * sma指标计算
  */
-public class RsiIndicatorAdapter extends IndicatorAdapter {
+public class SmaIndicatorAdapter extends IndicatorAdapter {
 
 
-    public RsiIndicatorAdapter(TimeSeries timeSeries, int barCount) {
+    public SmaIndicatorAdapter(TimeSeries timeSeries, int barCount) {
         super(timeSeries, barCount);
     }
 
@@ -26,7 +26,7 @@ public class RsiIndicatorAdapter extends IndicatorAdapter {
     @Override
     public Indicator strategCalculation() {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        return new RSIIndicator(closePrice, barCount);
+        return new SMAIndicator(closePrice, barCount);
     }
 }
 

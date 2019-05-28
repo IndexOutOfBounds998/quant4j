@@ -1,5 +1,5 @@
 
-package com.quant.core.indicator;
+package com.quant.core.indicatorAdapter;
 
 
 import org.ta4j.core.Indicator;

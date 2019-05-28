@@ -1,7 +1,7 @@
 package com.quant.admin.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.quant.admin.entity.User;
+import com.quant.common.domain.entity.User;
 import com.quant.core.api.ApiResult;
 
 import javax.validation.constraints.NotNull;

@@ -1,6 +1,6 @@
 package com.quant.core.config.imp;
 
-import com.quant.common.domain.Account;
+import com.quant.common.domain.vo.Account;
 import com.quant.core.config.AccountConfig;
 import lombok.Data;
 

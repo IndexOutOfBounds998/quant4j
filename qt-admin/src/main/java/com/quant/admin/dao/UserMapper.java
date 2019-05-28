@@ -1,6 +1,6 @@
 package com.quant.admin.dao;
 
-import com.quant.admin.entity.User;
+import com.quant.common.domain.entity.User;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 
 /**

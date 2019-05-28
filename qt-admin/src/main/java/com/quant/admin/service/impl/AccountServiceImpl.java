@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.AccountMapper;
-import com.quant.admin.entity.Account;
+import com.quant.common.domain.entity.Account;
 import com.quant.admin.service.AccountService;
 import com.quant.common.config.VpnProxyConfig;
 import com.quant.core.api.ApiClient;

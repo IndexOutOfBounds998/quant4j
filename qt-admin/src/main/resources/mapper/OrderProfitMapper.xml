@@ -3,7 +3,7 @@
 <mapper namespace="com.quant.admin.dao.OrderProfitMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.quant.admin.entity.OrderProfit">
+    <resultMap id="BaseResultMap" type="com.quant.common.domain.entity.OrderProfit">
         <id column="id" property="id" />
         <result column="robot_id" property="robotId" />
         <result column="sell_order_id" property="sellOrderId" />

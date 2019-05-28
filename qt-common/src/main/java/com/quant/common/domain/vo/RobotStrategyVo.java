@@ -1,6 +1,5 @@
 package com.quant.common.domain.vo;
 
-import com.quant.common.domain.Account;
 import lombok.Data;
 
 @Data

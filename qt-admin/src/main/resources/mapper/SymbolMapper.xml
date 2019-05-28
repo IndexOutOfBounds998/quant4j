@@ -3,7 +3,7 @@
 <mapper namespace="com.quant.admin.dao.SymbolMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.quant.admin.entity.Symbol">
+    <resultMap id="BaseResultMap" type="com.quant.common.domain.entity.Symbol">
         <id column="id" property="id" />
         <result column="base_currency" property="baseCurrency" />
         <result column="quote_currency" property="quoteCurrency" />

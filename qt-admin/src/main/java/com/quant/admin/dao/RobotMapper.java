@@ -1,8 +1,8 @@
 package com.quant.admin.dao;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.quant.admin.model.RobotListModel;
-import com.quant.admin.entity.Robot;
+import com.quant.common.domain.bo.RobotBo;
+import com.quant.common.domain.entity.Robot;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 public interface RobotMapper extends BaseMapper<Robot> {
 
 
-    List<RobotListModel> getRobotList(String uid);
+    List<RobotBo> getRobotList(String uid);
 
 
 }

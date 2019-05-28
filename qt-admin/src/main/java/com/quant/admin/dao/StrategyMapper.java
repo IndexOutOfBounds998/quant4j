@@ -1,7 +1,7 @@
 package com.quant.admin.dao;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.quant.admin.entity.Strategy;
+import com.quant.common.domain.entity.Strategy;
 
 /**
  * <p>

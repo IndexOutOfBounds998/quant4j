@@ -1,6 +1,6 @@
 package com.quant.admin.task;
 
-import com.quant.admin.entity.Robot;
+import com.quant.common.domain.entity.Robot;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import lombok.extern.slf4j.Slf4j;

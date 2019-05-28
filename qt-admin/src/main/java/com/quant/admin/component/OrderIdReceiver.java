@@ -1,8 +1,8 @@
 package com.quant.admin.component;
 
 import com.alibaba.fastjson.JSON;
-import com.quant.admin.entity.Orders;
-import com.quant.admin.entity.User;
+import com.quant.common.domain.entity.Orders;
+import com.quant.common.domain.entity.User;
 import com.quant.admin.service.IMailService;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;

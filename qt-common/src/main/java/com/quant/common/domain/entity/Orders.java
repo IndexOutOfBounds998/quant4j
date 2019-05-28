@@ -1,4 +1,4 @@
-package com.quant.admin.entity;
+package com.quant.common.domain.entity;
 
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;

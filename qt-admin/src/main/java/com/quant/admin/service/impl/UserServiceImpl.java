@@ -3,7 +3,7 @@ package com.quant.admin.service.impl;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.UserMapper;
-import com.quant.admin.entity.User;
+import com.quant.common.domain.entity.User;
 import com.quant.admin.service.UserService;
 import com.quant.common.enums.Status;
 import com.quant.core.api.ApiResult;

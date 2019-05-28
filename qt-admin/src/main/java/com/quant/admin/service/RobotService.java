@@ -1,7 +1,7 @@
 package com.quant.admin.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.quant.admin.entity.Robot;
+import com.quant.common.domain.entity.Robot;
 import com.quant.core.api.ApiResult;
 import com.quant.common.domain.vo.RobotVo;
 

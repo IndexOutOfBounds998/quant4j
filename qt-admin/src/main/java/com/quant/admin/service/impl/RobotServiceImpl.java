@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.RobotMapper;
-import com.quant.admin.entity.Account;
-import com.quant.admin.entity.Robot;
-import com.quant.admin.entity.Strategy;
-import com.quant.admin.model.RobotListModel;
+import com.quant.common.domain.entity.Account;
+import com.quant.common.domain.entity.Robot;
+import com.quant.common.domain.entity.Strategy;
+import com.quant.common.domain.bo.RobotBo;
 import com.quant.admin.rest.RobotClientService;
 import com.quant.admin.service.RobotService;
 import com.quant.common.config.RedisUtil;
@@ -89,7 +89,7 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
     @Override
     public ApiResult list(String uid) {
         try {
-            List<RobotListModel> robotList = robotMapper.getRobotList(uid);
+            List<RobotBo> robotList = robotMapper.getRobotList(uid);
             return new ApiResult(Status.SUCCESS, robotList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,7 +145,7 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
         Account selectOne = account.selectOne(accountWrapper);
 
         //设置账户信息
-        com.quant.common.domain.Account accountConfig = new com.quant.common.domain.Account();
+        com.quant.common.domain.vo.Account accountConfig = new com.quant.common.domain.vo.Account();
         accountConfig.setId(String.valueOf(selectOne.getId()));
         accountConfig.setType(selectOne.getType());
         accountConfig.setState(selectOne.getState());

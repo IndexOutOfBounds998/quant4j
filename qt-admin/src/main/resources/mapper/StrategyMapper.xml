@@ -3,7 +3,7 @@
 <mapper namespace="com.quant.admin.dao.StrategyMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.quant.admin.entity.Strategy">
+    <resultMap id="BaseResultMap" type="com.quant.common.domain.entity.Strategy">
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="strategy_name" property="strategyName"/>

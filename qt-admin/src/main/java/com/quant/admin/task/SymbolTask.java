@@ -39,7 +39,7 @@ public class SymbolTask {
         int i = 0;
         for (Symbol s : symbols) {
             ++i;
-            com.quant.admin.entity.Symbol symbol = new com.quant.admin.entity.Symbol();
+            com.quant.common.domain.entity.Symbol symbol = new com.quant.common.domain.entity.Symbol();
             symbol.setId(i);
             symbol.setAmountPrecision(s.getAmountPrecision());
             symbol.setBaseCurrency(s.getBaseCurrency());

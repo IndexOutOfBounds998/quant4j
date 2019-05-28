@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.BalanceMapper;
-import com.quant.admin.entity.Balance;
+import com.quant.common.domain.entity.Balance;
 import com.quant.admin.service.BalanceService;
 import com.quant.common.enums.Status;
 import com.quant.core.api.ApiResult;

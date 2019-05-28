@@ -3,7 +3,7 @@
 <mapper namespace="com.quant.admin.dao.RobotMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.quant.admin.entity.Robot">
+    <resultMap id="BaseResultMap" type="com.quant.common.domain.entity.Robot">
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="account_id" property="accountId"/>
@@ -21,7 +21,7 @@
         id, user_id AS userId, robot_name AS robotName, symbol, strategy_id AS strategyId, client_address AS clientAddress, create_time AS createTime, is_delete AS isDelete,is_run as isRun
     </sql>
 
-    <select id="getRobotList" resultType="com.quant.admin.model.RobotListModel">
+    <select id="getRobotList" resultType="com.quant.common.domain.bo.RobotBo">
         select r.id,r.user_id as userId,r.robot_name as robotName,r.symbol as symbol,r.strategy_id
         as strategyId,r.client_address as clientAddress,r.is_delete as isDelete,r.is_run as isRun,s.strategy_name as strategyName
          from robot as r left join strategy as s on r.strategy_id=s.id where r.user_id=#{0}

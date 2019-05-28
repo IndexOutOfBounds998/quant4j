@@ -1,16 +1,11 @@
-package com.quant.admin.model;
+package com.quant.common.domain.bo;
 
-import com.baomidou.mybatisplus.activerecord.Model;
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.baomidou.mybatisplus.enums.IdType;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class RobotListModel {
+public class RobotBo {
     private static final long serialVersionUID = 1L;
 
 

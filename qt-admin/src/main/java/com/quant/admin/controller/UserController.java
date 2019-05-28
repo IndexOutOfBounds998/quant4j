@@ -1,7 +1,7 @@
 package com.quant.admin.controller;
 
 
-import com.quant.admin.entity.User;
+import com.quant.common.domain.entity.User;
 import com.quant.admin.service.UserService;
 import com.quant.core.api.ApiResult;
 import org.slf4j.Logger;

@@ -8,7 +8,7 @@ import com.quant.core.config.MarketConfig;
 import com.quant.core.config.StrategyConfig;
 import com.quant.core.config.imp.HuoBiAccountConfigImpl;
 import com.quant.core.config.imp.HuoBiMarketConfigImpl;
-import com.quant.common.domain.Market;
+import com.quant.common.domain.vo.Market;
 import com.quant.core.exchangeAdapter.HuobiExchangeAdapter;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;

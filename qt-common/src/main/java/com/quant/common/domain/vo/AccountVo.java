@@ -20,4 +20,7 @@ public class AccountVo {
     int userId;
 
     String info;
+    String type;
+    String state;
+
 }

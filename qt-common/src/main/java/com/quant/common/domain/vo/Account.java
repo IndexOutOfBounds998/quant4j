@@ -1,4 +1,4 @@
-package com.quant.common.domain;
+package com.quant.common.domain.vo;
 
 import lombok.Data;
 

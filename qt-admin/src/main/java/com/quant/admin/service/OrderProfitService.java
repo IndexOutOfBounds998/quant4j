@@ -1,7 +1,7 @@
 package com.quant.admin.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.quant.admin.entity.OrderProfit;
+import com.quant.common.domain.entity.OrderProfit;
 import com.quant.core.api.ApiResult;
 
 /**

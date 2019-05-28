@@ -14,11 +14,6 @@ import java.util.List;
  * @author yang
  * @since 2019-04-17
  */
-
 public interface RobotMapper extends BaseMapper<Robot> {
-
-
     List<RobotBo> getRobotList(String uid);
-
-
 }

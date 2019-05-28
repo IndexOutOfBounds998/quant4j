@@ -24,7 +24,7 @@ public class EmaIndicatorAdapter extends IndicatorAdapter {
      * @return
      */
     @Override
-    public Indicator strategCalculation() {
+    public Indicator indicatorCalculation() {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
         return new EMAIndicator(closePrice, barCount);
     }

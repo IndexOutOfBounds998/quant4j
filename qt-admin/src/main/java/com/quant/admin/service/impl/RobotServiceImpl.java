@@ -82,6 +82,7 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
 
     /**
      * 获取机器人列表
+     * todo 这里检查机器人是否还在运行 不再用task来检测
      *
      * @param uid
      * @return
@@ -90,6 +91,25 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
     public ApiResult list(String uid) {
         try {
             List<RobotBo> robotList = robotMapper.getRobotList(uid);
+            //检测机器人的状态
+            for (RobotBo r : robotList) {
+                String key = RobotRedisKeyConfig.getRobotIsRunStateKey() + r.getId();
+                Object o = redisUtil.get(key);
+                if (o == null) {
+                    //检测是否已经更新了
+                    if (r.getIsRun() == 1) {
+                        //更新数据库机器人状态
+                        Robot robot = new Robot();
+                        robot.setId(r.getId());
+                        robot.setIsRun(0);
+                        robot.updateById();
+                    }
+                    //已经取消了机器人的运行
+                    r.setIsRun(0);
+                } else {
+                    r.setIsRun(1);
+                }
+            }
             return new ApiResult(Status.SUCCESS, robotList);
         } catch (Exception e) {
             e.printStackTrace();

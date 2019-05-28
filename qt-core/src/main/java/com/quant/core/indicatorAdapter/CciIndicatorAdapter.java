@@ -23,7 +23,7 @@ public class CciIndicatorAdapter extends IndicatorAdapter {
      * @return
      */
     @Override
-    public Indicator strategCalculation() {
+    public Indicator indicatorCalculation() {
         return new CCIIndicator(timeSeries, barCount);
     }
 }

@@ -24,7 +24,7 @@ public class SmaIndicatorAdapter extends IndicatorAdapter {
      * @return
      */
     @Override
-    public Indicator strategCalculation() {
+    public Indicator indicatorCalculation() {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
         return new SMAIndicator(closePrice, barCount);
     }

@@ -15,10 +15,7 @@ public class ADXIndicatorAdapter extends IndicatorAdapter {
     }
 
     @Override
-
-
-    public Indicator strategCalculation() {
-        ADXIndicator adxIndicator = new ADXIndicator(timeSeries, barCount);
-        return adxIndicator;
+    public Indicator indicatorCalculation() {
+        return new ADXIndicator(timeSeries, barCount);
     }
 }

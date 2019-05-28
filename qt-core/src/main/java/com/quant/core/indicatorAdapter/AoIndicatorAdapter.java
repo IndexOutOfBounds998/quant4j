@@ -24,11 +24,11 @@ public class AoIndicatorAdapter extends IndicatorAdapter {
      * @return
      */
     @Override
-    public Indicator strategCalculation() {
+    public Indicator indicatorCalculation() {
 
         if (barCount != null && barCount2 == null) {
             return new AwesomeOscillatorIndicator(new MedianPriceIndicator(timeSeries), barCount, 34);
-        } else if (barCount != null && barCount2 != null) {
+        } else if (barCount != null) {
             return new AwesomeOscillatorIndicator(new MedianPriceIndicator(timeSeries), barCount, barCount2);
         } else {
             return new AwesomeOscillatorIndicator(timeSeries);

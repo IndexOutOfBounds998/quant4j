@@ -26,5 +26,5 @@ public abstract class IndicatorAdapter {
         this.barCount2 = barCount2;
     }
 
-   public abstract Indicator strategCalculation();
+   public abstract Indicator indicatorCalculation();
 }

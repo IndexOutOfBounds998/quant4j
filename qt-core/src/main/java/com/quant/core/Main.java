@@ -3,11 +3,11 @@ package com.quant.core;
 import com.alibaba.fastjson.JSON;
 import com.quant.common.config.VpnProxyConfig;
 import com.quant.core.api.ApiClient;
-import com.quant.common.request.DepthRequest;
-import com.quant.common.response.Depth;
-import com.quant.common.response.DepthResponse;
-import com.quant.common.response.Kline;
-import com.quant.common.response.KlineResponse;
+import com.quant.common.domain.request.DepthRequest;
+import com.quant.common.domain.response.Depth;
+import com.quant.common.domain.response.DepthResponse;
+import com.quant.common.domain.response.Kline;
+import com.quant.common.domain.response.KlineResponse;
 
 import java.awt.*;
 import java.io.*;

@@ -3,7 +3,7 @@ package com.quant.admin.controller;
 
 import com.quant.admin.service.RobotService;
 import com.quant.core.api.ApiResult;
-import com.quant.common.vo.RobotVo;
+import com.quant.common.domain.vo.RobotVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;

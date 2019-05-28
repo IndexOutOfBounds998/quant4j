@@ -1,7 +1,7 @@
 //import com.quant.core.Main;
-//import com.quant.common.response.Kline;
-//import com.quant.common.indicator.IndicatorAdapter;
-//import com.quant.common.indicator.RsiIndicatorAdapter;
+//import com.quant.common.domain.response.Kline;
+//import com.quant.core.indicator.IndicatorAdapter;
+//import com.quant.core.indicator.RsiIndicatorAdapter;
 //import org.jfree.chart.ChartPanel;
 //import org.jfree.chart.JFreeChart;
 //import org.jfree.chart.plot.Marker;

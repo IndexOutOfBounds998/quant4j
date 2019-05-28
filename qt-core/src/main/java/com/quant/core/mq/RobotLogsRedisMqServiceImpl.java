@@ -3,7 +3,7 @@ package com.quant.core.mq;
 import com.alibaba.fastjson.JSON;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
-import com.quant.common.to.RobotRunMessage;
+import com.quant.common.domain.to.RobotRunMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;

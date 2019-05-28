@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.quant.admin.entity.OrderProfit;
-import com.quant.common.vo.ProfitMessage;
+import com.quant.common.domain.vo.ProfitMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.quant.common.utils.JsonFormate.parseJsonToString;

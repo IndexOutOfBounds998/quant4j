@@ -23,7 +23,7 @@
 // *******************************************************************************/
 //
 //import com.quant.core.Main;
-//import com.quant.common.response.Kline;
+//import com.quant.common.domain.response.Kline;
 //import org.ta4j.core.*;
 //import org.ta4j.core.indicators.RSIIndicator;
 //import org.ta4j.core.indicators.helpers.ClosePriceIndicator;

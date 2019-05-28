@@ -3,7 +3,7 @@ package com.quant.admin.controller;
 import com.quant.admin.service.StrategyService;
 import com.quant.core.api.ApiResult;
 import com.quant.common.enums.Status;
-import com.quant.common.vo.StrategyVo;
+import com.quant.common.domain.vo.StrategyVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

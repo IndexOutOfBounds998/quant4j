@@ -27,8 +27,8 @@ import com.quant.common.config.RedisUtil;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
-import com.quant.common.response.Kline;
-import com.quant.common.response.OrdersDetail;
+import com.quant.common.domain.response.Kline;
+import com.quant.common.domain.response.OrdersDetail;
 
 import java.math.BigDecimal;
 import java.util.List;

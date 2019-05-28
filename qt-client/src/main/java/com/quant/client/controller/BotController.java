@@ -2,7 +2,7 @@ package com.quant.client.controller;
 
 import com.quant.client.service.RobotService;
 import com.quant.core.api.ApiResult;
-import com.quant.common.vo.RobotStrategyVo;
+import com.quant.common.domain.vo.RobotStrategyVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -14,7 +14,7 @@ import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
 import com.quant.core.strategy.impl.HuoBiStrategyImpl;
 import com.quant.core.trading.TradingApi;
-import com.quant.common.vo.RobotStrategyVo;
+import com.quant.common.domain.vo.RobotStrategyVo;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

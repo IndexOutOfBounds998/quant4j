@@ -15,12 +15,12 @@
         <version>2.0.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.qklx.qt</groupId>
+    <groupId>com.quant</groupId>
     <artifactId>qt-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>qt-parent</name>
     <packaging>pom</packaging>
-    <description>Demo project for Spring Boot</description>
+    <description>qt-parent</description>
 
     <dependencyManagement>
         <dependencies>

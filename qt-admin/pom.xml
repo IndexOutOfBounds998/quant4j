@@ -53,13 +53,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.qklx.qt</groupId>
+            <groupId>com.quant</groupId>
             <artifactId>qt-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>com.qklx.qt</groupId>
+            <groupId>com.quant</groupId>
             <artifactId>qt-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -80,6 +80,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.quant</groupId>
+            <artifactId>qt-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

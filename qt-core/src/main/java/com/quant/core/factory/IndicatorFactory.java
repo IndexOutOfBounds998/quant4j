@@ -95,7 +95,7 @@ public class IndicatorFactory extends AbsIndicatorFactory {
      */
     private Indicator getRSI(TimeSeries timeSeries, int day) {
         IndicatorAdapter rsiIndicator = new RsiIndicatorAdapter(timeSeries, day);
-        return rsiIndicator.strategCalculation();
+        return rsiIndicator.indicatorCalculation();
 
     }
 
@@ -108,7 +108,7 @@ public class IndicatorFactory extends AbsIndicatorFactory {
      */
     private Indicator getSma(TimeSeries timeSeries, int i) {
         IndicatorAdapter smaIndicator = new SmaIndicatorAdapter(timeSeries, i);
-        return smaIndicator.strategCalculation();
+        return smaIndicator.indicatorCalculation();
     }
 
     /**
@@ -120,7 +120,7 @@ public class IndicatorFactory extends AbsIndicatorFactory {
      */
     private Indicator getADX(TimeSeries timeSeries, int day) {
         IndicatorAdapter adxIndicator = new ADXIndicatorAdapter(timeSeries, day);
-        return adxIndicator.strategCalculation();
+        return adxIndicator.indicatorCalculation();
 
     }
 
@@ -133,7 +133,7 @@ public class IndicatorFactory extends AbsIndicatorFactory {
      */
     private Indicator getEma(TimeSeries timeSeries, int i) {
         IndicatorAdapter emaIndicatorCalculation = new EmaIndicatorAdapter(timeSeries, i);
-        return emaIndicatorCalculation.strategCalculation();
+        return emaIndicatorCalculation.indicatorCalculation();
     }
 
     /**
@@ -145,7 +145,7 @@ public class IndicatorFactory extends AbsIndicatorFactory {
      */
     private Indicator getCCI(TimeSeries timeSeries, int i) {
         IndicatorAdapter cciIndicatorAdapter = new CciIndicatorAdapter(timeSeries, i);
-        return cciIndicatorAdapter.strategCalculation();
+        return cciIndicatorAdapter.indicatorCalculation();
     }
 
     /**
@@ -158,6 +158,6 @@ public class IndicatorFactory extends AbsIndicatorFactory {
      */
     private Indicator getAo(TimeSeries timeSeries, Integer day, Integer day2) {
         IndicatorAdapter aoIndicatorAdapter = new AoIndicatorAdapter(timeSeries, day, day2);
-        return aoIndicatorAdapter.strategCalculation();
+        return aoIndicatorAdapter.indicatorCalculation();
     }
 }

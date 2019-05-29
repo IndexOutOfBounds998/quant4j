@@ -9,7 +9,7 @@ import com.quant.common.utils.DateUtils;
 import com.quant.core.api.ApiClient;
 import com.quant.core.api.ApiResult;
 import com.quant.core.factory.IndicatorFactory;
-import com.quant.core.utils.IndicatorHelper;
+import com.quant.core.helpers.IndicatorHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

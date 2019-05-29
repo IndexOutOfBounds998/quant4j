@@ -11,9 +11,9 @@ import org.ta4j.core.TimeSeries;
  */
 public abstract class AbsIndicatorFactory {
 
-    protected TimeSeries timeSeries;
+    protected volatile TimeSeries timeSeries;
 
-    public AbsIndicatorFactory(TimeSeries timeSeries) {
+    AbsIndicatorFactory(TimeSeries timeSeries) {
         this.timeSeries = timeSeries;
     }
 
@@ -27,5 +27,5 @@ public abstract class AbsIndicatorFactory {
 
     public abstract Indicator getIndicator(IndicatorCalParam simpleIndicatorVo);
 
-
+    public abstract void updateTimeSeries(TimeSeries timeSeries);
 }

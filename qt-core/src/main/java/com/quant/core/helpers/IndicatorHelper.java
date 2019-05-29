@@ -1,4 +1,4 @@
-package com.quant.core.utils;
+package com.quant.core.helpers;
 
 import com.quant.common.domain.to.IndicatorBean;
 import com.quant.common.exception.IndicatorException;

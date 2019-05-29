@@ -18,6 +18,7 @@ public class IndicatorFactory extends AbsIndicatorFactory {
         super(timeSeries);
     }
 
+
     @Override
     public Indicator getIndicator(String indicatorName) {
         if (indicatorName.equals("RSI")) {
@@ -70,13 +71,30 @@ public class IndicatorFactory extends AbsIndicatorFactory {
             int day = Integer.parseInt(indicatorCalParam.getParams()[0]);
             return getCCI(timeSeries, day);
         } else if (indicatorCalParam.getIndicatorName().equals("AO")) {
-            Integer day = Integer.parseInt(indicatorCalParam.getParams()[0]);
-            Integer day2 = Integer.parseInt(indicatorCalParam.getParams()[1]);
+            Integer day = null;
+            try {
+                day = Integer.parseInt(indicatorCalParam.getParams()[0]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            Integer day2 = null;
+            try {
+                day2 = Integer.parseInt(indicatorCalParam.getParams()[1]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
             return getAo(timeSeries, day, day2);
         }
         return null;
     }
 
+    @Override
+    public void updateTimeSeries(TimeSeries timeSeries) {
+        if (timeSeries == null) {
+            throw new IllegalArgumentException("timeSeries must be not null");
+        }
+        this.timeSeries = timeSeries;
+    }
 
     private Indicator getAmount(TimeSeries timeSeries) {
         return new VolumeIndicator(timeSeries);

@@ -13,7 +13,7 @@ public enum Status {
     getRobotListError(1004, "获取机器人列表发生错误"),
     startRobotError(1005, "启动client端机器人失败"),
     Login_out(50014, "登录过期"),
-    ERROR(1000, "请求异常 (服务器或数据库异常)");
+    ERROR(1000, "请求参数异常");
 
     int code;
     String msg;

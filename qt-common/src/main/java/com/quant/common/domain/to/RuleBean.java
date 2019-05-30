@@ -10,4 +10,6 @@ public interface RuleBean {
     public String getValue();
 
     public String getParams();
+
+    BuyAndSellIndicatorTo.SourceBean getSource();
 }

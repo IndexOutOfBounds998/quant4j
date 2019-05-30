@@ -1,5 +1,6 @@
 package com.quant.core.indicatorAdapter;
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.TimeSeries;
 import org.ta4j.core.indicators.MACDIndicator;
@@ -12,18 +13,20 @@ import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
  */
 public class MacdIndicatorAdapter extends IndicatorAdapter {
 
-    public MacdIndicatorAdapter(TimeSeries timeSeries, int barCount) {
-        super(timeSeries, barCount);
+    public MacdIndicatorAdapter(TimeSeries timeSeries, Integer barCount, Integer barCount2, BuyAndSellIndicatorTo.SourceBean sourceBean) {
+        super(timeSeries, barCount, barCount2, sourceBean);
     }
 
     @Override
     public Indicator indicatorCalculation() {
-        ClosePriceIndicator closePriceIndicator = new ClosePriceIndicator(timeSeries);
+        final Indicator indicator = defaultIndicatorFromSource();
         if (barCount != null && barCount2 == null) {
-            return new MACDIndicator(closePriceIndicator, barCount, 26);
-        } else if (barCount != null) {
-            return new MACDIndicator(closePriceIndicator, barCount, barCount2);
+            return new MACDIndicator(indicator, barCount, 26);
         }
-        return new MACDIndicator(closePriceIndicator);
+        if (barCount != null && barCount2 != null) {
+            return new MACDIndicator(indicator, barCount, barCount2);
+        } else {
+            return new MACDIndicator(indicator);
+        }
     }
 }

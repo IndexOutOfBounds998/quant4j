@@ -2,10 +2,10 @@
 package com.quant.core.indicatorAdapter;
 
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.TimeSeries;
 import org.ta4j.core.indicators.RSIIndicator;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 
 
 /**
@@ -14,8 +14,8 @@ import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 public class RsiIndicatorAdapter extends IndicatorAdapter {
 
 
-    public RsiIndicatorAdapter(TimeSeries timeSeries, int barCount) {
-        super(timeSeries, barCount);
+    public RsiIndicatorAdapter(TimeSeries timeSeries, int barCount, BuyAndSellIndicatorTo.SourceBean sourceBean) {
+        super(timeSeries, barCount, sourceBean);
     }
 
     /**
@@ -25,8 +25,8 @@ public class RsiIndicatorAdapter extends IndicatorAdapter {
      */
     @Override
     public Indicator indicatorCalculation() {
-        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        return new RSIIndicator(closePrice, barCount);
+        final Indicator indicator =defaultIndicatorFromSource();
+        return new RSIIndicator(indicator, barCount);
     }
 }
 

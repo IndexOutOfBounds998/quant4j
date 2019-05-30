@@ -12,4 +12,5 @@ public interface IndicatorBean {
     BuyAndSellIndicatorTo.RuleFirstBean getRuleFirst();
 
     BuyAndSellIndicatorTo.RuleSecondBean getRuleSecond();
+
 }

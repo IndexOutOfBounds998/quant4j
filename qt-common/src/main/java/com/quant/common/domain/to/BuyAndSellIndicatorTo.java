@@ -81,6 +81,21 @@ public class BuyAndSellIndicatorTo {
 
     @NoArgsConstructor
     @Data
+    public static class SourceBean {
+        /**
+         * "name":"r1",
+         * "value":"RSI",
+         * "source":"CLOSE",
+         * "params":14
+         */
+        private String name;
+        private String value;
+        private String source;
+        private String params;
+    }
+
+    @NoArgsConstructor
+    @Data
     public static class RuleFirstBean implements RuleBean {
         /**
          * name : 价格
@@ -91,7 +106,7 @@ public class BuyAndSellIndicatorTo {
         private String name;
         private String value;
         private String params;
-
+        private SourceBean source;
 
     }
 
@@ -104,5 +119,6 @@ public class BuyAndSellIndicatorTo {
         private String name;
         private String value;
         private String params;
+        private SourceBean source;
     }
 }

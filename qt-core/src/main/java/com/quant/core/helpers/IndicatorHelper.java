@@ -1,5 +1,6 @@
 package com.quant.core.helpers;
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import com.quant.common.domain.to.IndicatorBean;
 import com.quant.common.exception.IndicatorException;
 import com.quant.core.factory.IndicatorFactory;
@@ -7,10 +8,8 @@ import com.quant.common.domain.response.Kline;
 import com.quant.common.domain.to.RuleBean;
 import com.quant.common.domain.vo.IndicatorCalParam;
 import org.ta4j.core.*;
-import org.ta4j.core.trading.rules.CrossedDownIndicatorRule;
-import org.ta4j.core.trading.rules.CrossedUpIndicatorRule;
-import org.ta4j.core.trading.rules.OverIndicatorRule;
-import org.ta4j.core.trading.rules.UnderIndicatorRule;
+import org.ta4j.core.indicators.helpers.VolumeIndicator;
+import org.ta4j.core.trading.rules.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -19,19 +18,13 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static com.quant.common.constans.IndicatorCons.*;
+
 /**
  * 指标计算 帮助类
  * Created by yang on 2019/5/24.
  */
 public class IndicatorHelper {
-    private static final String and = "and"; //and
-    private static final String or = "or"; //or
-
-    private static final String num_down = "num_down"; //小于
-    private static final String num_up = "num_up"; //大于
-
-    private static final String cross_up = "cross_up"; //交叉向上
-    private static final String cross_down = "cross_down"; //交叉乡下
 
     /**
      * 构建series
@@ -76,6 +69,7 @@ public class IndicatorHelper {
             IndicatorCalParam indicatorCalParam = new IndicatorCalParam();
             indicatorCalParam.setIndicatorName(value);
             indicatorCalParam.setParams(strings);
+            indicatorCalParam.setSourceBean(bean.getSource());
             return factory.getIndicator(indicatorCalParam);
         } catch (Exception e) {
             throw new IndicatorException(e);
@@ -93,11 +87,10 @@ public class IndicatorHelper {
      * @return
      */
     public static Rule simpleBuilder(IndicatorBean bean, IndicatorFactory factory, TimeSeries series, Rule rule, ThreadLocal<Boolean> onlyOneRule) {
-
         //指标名称
         String NameIndicator = bean.getRuleFirst().getValue();
-        boolean price = NameIndicator.equals("price");
-        boolean amount = NameIndicator.equals("amount");
+        boolean price = NameIndicator.equals(PRICE);
+        boolean amount = NameIndicator.equals(VOLUME);
         //获取价格的值
         String value = bean.getRuleSecond().getValue();
         //获取之间的关系
@@ -105,7 +98,6 @@ public class IndicatorHelper {
         //获取大小关系
         String compare = bean.getCompare().getValue();
         rule = builderRule(price, amount, factory, compare, condition, value, onlyOneRule, bean, series, rule);
-
         return rule;
     }
 
@@ -135,72 +127,81 @@ public class IndicatorHelper {
                                    Rule entry) {
         if (price) {
             //是价格指标
-            Indicator priceIndicator = factory.getIndicator("price");
-            if (num_down.equals(compare)) {
-                //小于
-                UnderIndicatorRule rule = new UnderIndicatorRule(priceIndicator, new BigDecimal(value));
-                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
-            }
-
-            if (num_up.equals(compare)) {
-                //大于
-                OverIndicatorRule rule = new OverIndicatorRule(priceIndicator, new BigDecimal(value));
-                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
-            }
+            Indicator priceIndicator = factory.getIndicator(PRICE);
+            entry = AddOrAnd(priceIndicator, entry, compare, ruleOnlyOne, condition, value);
         } else if (amount) {
             //是成交量指标
-            Indicator volumeIndicator = factory.getIndicator("amount");
-            if (num_down.equals(compare)) {
-                //小于
-                UnderIndicatorRule rule = new UnderIndicatorRule(volumeIndicator, new BigDecimal(value));
-                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
-            }
-
-            if (num_up.equals(compare)) {
-                //大于
-                OverIndicatorRule rule = new OverIndicatorRule(volumeIndicator, new BigDecimal(value));
-                entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
-
-            }
+            Indicator volumeIndicator = factory.getIndicator(VOLUME);
+            entry = AddOrAnd(volumeIndicator, entry, compare, ruleOnlyOne, condition, value);
         } else {
             //是指标
             Indicator indicatorFirst = IndicatorHelper.builderIndicator(bean.getRuleFirst(), timeSeries);
 
             //获取第二个指标的
-            String NameIndicator2 = bean.getRuleSecond().getValue();
+            String value2 = bean.getRuleSecond().getValue();
             String params2 = bean.getRuleSecond().getParams();
 
             if (params2 == null) {
-                //值
-                if (num_down.equals(compare)) {
-                    //小于
-                    UnderIndicatorRule underIndicatorRule = new UnderIndicatorRule(indicatorFirst, new BigDecimal(NameIndicator2));
-                    entry = andOr(entry, underIndicatorRule, ruleOnlyOne.get(), condition);
-                }
-                if (num_up.equals(compare)) {
-                    //小于
-                    OverIndicatorRule overIndicatorRule = new OverIndicatorRule(indicatorFirst, new BigDecimal(NameIndicator2));
-                    entry = andOr(entry, overIndicatorRule, ruleOnlyOne.get(), condition);
-
-                }
-
+                entry = AddOrAnd(indicatorFirst, entry, compare, ruleOnlyOne, condition, value2);
             } else {
                 Indicator indicatorSecond = IndicatorHelper.builderIndicator(bean.getRuleSecond(), timeSeries);
-                if (compare.equals(cross_up)) {
-                    //交叉向上的趋势
-                    CrossedUpIndicatorRule crossedUpIndicatorRule = new CrossedUpIndicatorRule(indicatorFirst, indicatorSecond);
+                if (compare.equals(indicator_cross_down)) {
+                    //大于等于
+                    CrossedDownIndicatorRule crossedUpIndicatorRule = new CrossedDownIndicatorRule(indicatorFirst, indicatorSecond);
                     entry = andOr(entry, crossedUpIndicatorRule, ruleOnlyOne.get(), condition);
-
                 }
-
-                if (compare.equals(cross_down)) {
-                    //交叉向下的趋势
-                    CrossedDownIndicatorRule crossedDownIndicatorRule = new CrossedDownIndicatorRule(indicatorFirst, indicatorSecond);
+                if (compare.equals(indicator_cross_up)) {
+                    //小于等于
+                    CrossedUpIndicatorRule crossedDownIndicatorRule = new CrossedUpIndicatorRule(indicatorFirst, indicatorSecond);
                     entry = andOr(entry, crossedDownIndicatorRule, ruleOnlyOne.get(), condition);
+                }
+                if (compare.equals(indicator_under)) {
+                    //小于的趋势
+                    UnderIndicatorRule underIndicatorRule = new UnderIndicatorRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, underIndicatorRule, ruleOnlyOne.get(), condition);
+                }
+                if (compare.equals(indicator_up)) {
+                    //大于的趋势
+                    OverIndicatorRule overIndicatorRule = new OverIndicatorRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, overIndicatorRule, ruleOnlyOne.get(), condition);
+                }
+                if (compare.equals(indicator_equal)) {
+                    //等于
+                    IsEqualRule overIndicatorRule = new IsEqualRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, overIndicatorRule, ruleOnlyOne.get(), condition);
                 }
             }
         }
         ruleOnlyOne.set(false);
+        return entry;
+    }
+
+    private static Rule AddOrAnd(Indicator volumeIndicator, Rule entry, String compare, ThreadLocal<Boolean> ruleOnlyOne, String condition, String value) {
+        if (num_under.equals(compare)) {
+            //小于
+            UnderIndicatorRule rule = new UnderIndicatorRule(volumeIndicator, new BigDecimal(value));
+            entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+        }
+        if (num_over.equals(compare)) {
+            //大于
+            OverIndicatorRule rule = new OverIndicatorRule(volumeIndicator, new BigDecimal(value));
+            entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+        }
+        if (num_cross_down.equals(compare)) {
+            //大于等于
+            CrossedDownIndicatorRule rule = new CrossedDownIndicatorRule(volumeIndicator, new BigDecimal(value));
+            entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+        }
+        if (num_cross_up.equals(compare)) {
+            //小于等于
+            CrossedUpIndicatorRule rule = new CrossedUpIndicatorRule(volumeIndicator, new BigDecimal(value));
+            entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+        }
+        if (num_equal.equals(compare)) {
+            //等于
+            IsEqualRule rule = new IsEqualRule(volumeIndicator, new BigDecimal(value));
+            entry = andOr(entry, rule, ruleOnlyOne.get(), condition);
+        }
         return entry;
     }
 

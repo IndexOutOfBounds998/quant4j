@@ -35,8 +35,14 @@ public class IndicatorController extends BaseController {
     @Autowired
     VpnProxyConfig config;
 
-
+    /**
+     * 检测买入指标是否只有一条规则
+     */
     private static final ThreadLocal<Boolean> buyOnlyOneRule = new ThreadLocal<>();
+
+    /**
+     * 检测卖出指标是否只有一条规则
+     */
     private static final ThreadLocal<Boolean> sellOnlyOneRule = new ThreadLocal<>();
 
 

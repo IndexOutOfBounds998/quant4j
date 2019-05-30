@@ -2,6 +2,7 @@
 package com.quant.core.indicatorAdapter;
 
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.TimeSeries;
 import org.ta4j.core.indicators.SMAIndicator;
@@ -14,8 +15,8 @@ import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 public class SmaIndicatorAdapter extends IndicatorAdapter {
 
 
-    public SmaIndicatorAdapter(TimeSeries timeSeries, int barCount) {
-        super(timeSeries, barCount);
+    public SmaIndicatorAdapter(TimeSeries timeSeries, int barCount, BuyAndSellIndicatorTo.SourceBean sourceBean) {
+        super(timeSeries, barCount,sourceBean);
     }
 
     /**
@@ -25,8 +26,8 @@ public class SmaIndicatorAdapter extends IndicatorAdapter {
      */
     @Override
     public Indicator indicatorCalculation() {
-        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        return new SMAIndicator(closePrice, barCount);
+        final Indicator indicator =defaultIndicatorFromSource();
+        return new SMAIndicator(indicator, barCount);
     }
 }
 

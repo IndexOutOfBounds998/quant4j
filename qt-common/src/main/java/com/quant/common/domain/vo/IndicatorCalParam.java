@@ -1,5 +1,6 @@
 package com.quant.common.domain.vo;
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import lombok.Data;
 
 /**
@@ -7,8 +8,7 @@ import lombok.Data;
  */
 @Data
 public class IndicatorCalParam {
-
     private String indicatorName;
     private String[] params;
-
+    private BuyAndSellIndicatorTo.SourceBean sourceBean;
 }

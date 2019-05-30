@@ -1,5 +1,6 @@
 package com.quant.core.indicatorAdapter;
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.TimeSeries;
 import org.ta4j.core.indicators.adx.ADXIndicator;
@@ -10,8 +11,8 @@ import org.ta4j.core.indicators.adx.ADXIndicator;
  */
 public class ADXIndicatorAdapter extends IndicatorAdapter {
 
-    public ADXIndicatorAdapter(TimeSeries timeSeries, int barCount) {
-        super(timeSeries, barCount);
+    public ADXIndicatorAdapter(TimeSeries timeSeries, int barCount, BuyAndSellIndicatorTo.SourceBean sourceBean) {
+        super(timeSeries, barCount,sourceBean);
     }
 
     @Override

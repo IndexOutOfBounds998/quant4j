@@ -1,4 +1,4 @@
-package com.quant.client.Task;
+package com.quant.client.task;
 
 import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;
@@ -9,6 +9,7 @@ import com.quant.core.config.StrategyConfig;
 import com.quant.core.config.imp.HuoBiAccountConfigImpl;
 import com.quant.core.config.imp.HuoBiMarketConfigImpl;
 import com.quant.common.domain.vo.Market;
+import com.quant.core.config.imp.HuoboSimpleStragegyConfig;
 import com.quant.core.exchangeAdapter.HuobiExchangeAdapter;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
@@ -36,7 +37,7 @@ public class RobotOperate {
         ApiClient apiClient = new ApiClient(vo.getAppKey(), vo.getAppSecret(), vpnProxyConfig);
         TradingApi api = new HuobiExchangeAdapter(apiClient);
         MarketConfig marketConfig = new HuoBiMarketConfigImpl(new Market(vo.getSymbol()));
-        StrategyConfig strategyConfig = new StrategyConfig(vo.getStrategyVo());
+        StrategyConfig strategyConfig = new HuoboSimpleStragegyConfig(vo.getStrategyVo());
         AccountConfig accountConfig = new HuoBiAccountConfigImpl(vo.getAccountConfig());
         log.info("加载机器人{}>>>>>>", vo.getRobotId());
         huobiStrategy.init(api, marketConfig, strategyConfig, accountConfig);

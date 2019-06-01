@@ -4,10 +4,7 @@ import com.quant.common.enums.Status;
 import com.quant.common.domain.vo.RobotStrategyVo;
 import com.quant.core.api.ApiResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -15,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
     
 
-    @PostMapping("/test")
-    public ApiResult test(@RequestBody RobotStrategyVo vo) {
+    @GetMapping("/test")
+    public ApiResult test() {
        return new ApiResult(Status.SUCCESS);
     }
 

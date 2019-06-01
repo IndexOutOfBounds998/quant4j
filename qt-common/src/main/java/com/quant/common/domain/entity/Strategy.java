@@ -1,20 +1,19 @@
 package com.quant.common.domain.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.enums.IdType;
-
-import java.io.Serializable;
 import java.math.BigDecimal;
+import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.activerecord.Model;
+import java.io.Serializable;
 
 /**
  * <p>
- *
+ * 
  * </p>
  *
  * @author yang
- * @since 2019-04-30
+ * @since 2019-05-31
  */
 public class Strategy extends Model<Strategy> {
 
@@ -26,6 +25,8 @@ public class Strategy extends Model<Strategy> {
     private Integer userId;
     @TableField("strategy_name")
     private String strategyName;
+    @TableField("strategy_type")
+    private Integer strategyType;
     @TableField("buy_amount")
     private BigDecimal buyAmount;
     /**
@@ -93,6 +94,14 @@ public class Strategy extends Model<Strategy> {
 
     public void setStrategyName(String strategyName) {
         this.strategyName = strategyName;
+    }
+
+    public Integer getStrategyType() {
+        return strategyType;
+    }
+
+    public void setStrategyType(Integer strategyType) {
+        this.strategyType = strategyType;
     }
 
     public BigDecimal getBuyAmount() {
@@ -250,6 +259,7 @@ public class Strategy extends Model<Strategy> {
         ", id=" + id +
         ", userId=" + userId +
         ", strategyName=" + strategyName +
+        ", strategyType=" + strategyType +
         ", buyAmount=" + buyAmount +
         ", buyQuotaPrice=" + buyQuotaPrice +
         ", sellAmount=" + sellAmount +

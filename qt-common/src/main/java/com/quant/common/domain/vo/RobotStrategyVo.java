@@ -1,5 +1,6 @@
 package com.quant.common.domain.vo;
 
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import lombok.Data;
 
 @Data

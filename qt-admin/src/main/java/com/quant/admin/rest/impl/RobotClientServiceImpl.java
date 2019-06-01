@@ -1,6 +1,7 @@
 package com.quant.admin.rest.impl;
 
 import com.quant.admin.rest.RobotClientService;
+import com.quant.common.domain.vo.IndicatorStrategyVo;
 import com.quant.core.api.ApiResult;
 import com.quant.common.domain.vo.RobotStrategyVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,11 @@ public class RobotClientServiceImpl implements RobotClientService {
     @Override
     public ApiResult operatingRobot(String url, RobotStrategyVo vo) {
         return restTemplate.postForEntity(url, vo, ApiResult.class).getBody();
+    }
+
+    @Override
+    public ApiResult operatingIndicatorRobot(String url, IndicatorStrategyVo strategyVo) {
+        return restTemplate.postForEntity(url, strategyVo, ApiResult.class).getBody();
     }
 
 

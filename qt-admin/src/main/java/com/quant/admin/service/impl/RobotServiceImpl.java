@@ -13,12 +13,12 @@ import com.quant.admin.rest.RobotClientService;
 import com.quant.admin.service.RobotService;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
+import com.quant.common.domain.to.llIndicatorTo;
+import com.quant.common.domain.vo.*;
 import com.quant.core.api.ApiResult;
 import com.quant.common.enums.RobotState;
 import com.quant.common.enums.Status;
-import com.quant.common.domain.vo.RobotStrategyVo;
-import com.quant.common.domain.vo.RobotVo;
-import com.quant.common.domain.vo.StrategyVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -180,51 +180,91 @@ public class RobotServiceImpl extends ServiceImpl<RobotMapper, Robot> implements
         Strategy strategyOne = strategy.selectOne(strategyWrapper);
         if (strategyOne != null) {
             //组装机器人基础信息
-            StrategyVo strategyVo = new StrategyVo();
-            StrategyVo.BaseInfoEntity baseInfoEntity = new StrategyVo.BaseInfoEntity();
-            baseInfoEntity.setStrategyName(strategyOne.getStrategyName());
-            baseInfoEntity.setBuyAllWeights(strategyOne.getBuyAllWeights());
-            baseInfoEntity.setBuyAmount(strategyOne.getBuyAmount());
-            baseInfoEntity.setBuyPrice(strategyOne.getBuyPrice());
-            baseInfoEntity.setProfit(strategyOne.getProfit());
-            baseInfoEntity.setSleep(strategyOne.getSleep());
-            baseInfoEntity.setIsAllBuy(strategyOne.getIsAllBuy());
-            baseInfoEntity.setIsLimitPrice(strategyOne.getIsLimitPrice());
-            baseInfoEntity.setIsAllSell(strategyOne.getIsAllSell());
-            baseInfoEntity.setSellAllWeights(strategyOne.getSellAllWeights());
-            baseInfoEntity.setSellAmount(strategyOne.getSellAmount());
-            baseInfoEntity.setSellPrice(strategyOne.getSellPrice());
-            baseInfoEntity.setBuyQuotaPrice(strategyOne.getBuyQuotaPrice());
-            strategyVo.setBaseInfo(baseInfoEntity);
-            //组装机器人的策略1-5
-            StrategyVo.Setting1Entity setting1Entity = JSON.parseObject(strategyOne.getSetting1(), StrategyVo.Setting1Entity.class);
-            strategyVo.setSetting1(setting1Entity);
+            if (strategyOne.getStrategyType() == 0) {
+                StrategyVo strategyVo = new StrategyVo();
+                BaseInfoEntity baseInfoEntity = new BaseInfoEntity();
+                baseInfoEntity.setStrategyName(strategyOne.getStrategyName());
+                baseInfoEntity.setBuyAllWeights(strategyOne.getBuyAllWeights());
+                baseInfoEntity.setBuyAmount(strategyOne.getBuyAmount());
+                baseInfoEntity.setBuyPrice(strategyOne.getBuyPrice());
+                baseInfoEntity.setProfit(strategyOne.getProfit());
+                baseInfoEntity.setSleep(strategyOne.getSleep());
+                baseInfoEntity.setIsAllBuy(strategyOne.getIsAllBuy());
+                baseInfoEntity.setIsLimitPrice(strategyOne.getIsLimitPrice());
+                baseInfoEntity.setIsAllSell(strategyOne.getIsAllSell());
+                baseInfoEntity.setSellAllWeights(strategyOne.getSellAllWeights());
+                baseInfoEntity.setSellAmount(strategyOne.getSellAmount());
+                baseInfoEntity.setSellPrice(strategyOne.getSellPrice());
+                baseInfoEntity.setBuyQuotaPrice(strategyOne.getBuyQuotaPrice());
+                strategyVo.setBaseInfo(baseInfoEntity);
 
-            StrategyVo.Setting2Entity setting2Entity = JSON.parseObject(strategyOne.getSetting2(), StrategyVo.Setting2Entity.class);
-            strategyVo.setSetting2(setting2Entity);
+                //组装机器人的策略1-5
+                StrategyVo.Setting1Entity setting1Entity = JSON.parseObject(strategyOne.getSetting1(), StrategyVo.Setting1Entity.class);
+                strategyVo.setSetting1(setting1Entity);
 
-            StrategyVo.Setting3Entity setting3Entity = JSON.parseObject(strategyOne.getSetting3(), StrategyVo.Setting3Entity.class);
-            strategyVo.setSetting3(setting3Entity);
+                StrategyVo.Setting2Entity setting2Entity = JSON.parseObject(strategyOne.getSetting2(), StrategyVo.Setting2Entity.class);
+                strategyVo.setSetting2(setting2Entity);
 
-            StrategyVo.Setting4Entity setting4Entity = JSON.parseObject(strategyOne.getSetting4(), StrategyVo.Setting4Entity.class);
-            strategyVo.setSetting4(setting4Entity);
+                StrategyVo.Setting3Entity setting3Entity = JSON.parseObject(strategyOne.getSetting3(), StrategyVo.Setting3Entity.class);
+                strategyVo.setSetting3(setting3Entity);
 
-            StrategyVo.Setting5Entity setting5Entity = JSON.parseObject(strategyOne.getSetting5(), StrategyVo.Setting5Entity.class);
-            strategyVo.setSetting5(setting5Entity);
+                StrategyVo.Setting4Entity setting4Entity = JSON.parseObject(strategyOne.getSetting4(), StrategyVo.Setting4Entity.class);
+                strategyVo.setSetting4(setting4Entity);
 
-            StrategyVo.Setting6Entity setting6Entity = JSON.parseObject(strategyOne.getSetting6(), StrategyVo.Setting6Entity.class);
-            strategyVo.setSetting6(setting6Entity);
-            //组装整体机器人vo
-            RobotStrategyVo robotStrategyVo = new RobotStrategyVo();
-            robotStrategyVo.setRobotId(oneRobot.getId());
-            robotStrategyVo.setSymbol(oneRobot.getSymbol());
-            robotStrategyVo.setAppKey(selectOne.getAccessKey());
-            robotStrategyVo.setAppSecret(selectOne.getSecretKey());
-            robotStrategyVo.setAddress(oneRobot.getClientAddress());
-            robotStrategyVo.setStrategyVo(strategyVo);
-            robotStrategyVo.setAccountConfig(accountConfig);
-            String url = "http://" + oneRobot.getClientAddress() + "/robot/operatingRobot";
-            return robotClientService.operatingRobot(url, robotStrategyVo);
+                StrategyVo.Setting5Entity setting5Entity = JSON.parseObject(strategyOne.getSetting5(), StrategyVo.Setting5Entity.class);
+                strategyVo.setSetting5(setting5Entity);
+
+                StrategyVo.Setting6Entity setting6Entity = JSON.parseObject(strategyOne.getSetting6(), StrategyVo.Setting6Entity.class);
+                strategyVo.setSetting6(setting6Entity);
+                //组装整体机器人vo
+                RobotStrategyVo robotStrategyVo = new RobotStrategyVo();
+                robotStrategyVo.setRobotId(oneRobot.getId());
+                robotStrategyVo.setSymbol(oneRobot.getSymbol());
+                robotStrategyVo.setAppKey(selectOne.getAccessKey());
+                robotStrategyVo.setAppSecret(selectOne.getSecretKey());
+                robotStrategyVo.setAddress(oneRobot.getClientAddress());
+                robotStrategyVo.setStrategyVo(strategyVo);
+                robotStrategyVo.setAccountConfig(accountConfig);
+                String url = "http://" + oneRobot.getClientAddress() + "/robot/operatingRobot";
+                return robotClientService.operatingRobot(url, robotStrategyVo);
+            } else {
+                BuyAndSellIndicatorTo buyAndSellIndicatorTo = JSON.parseObject(strategyOne.getSetting1(), BuyAndSellIndicatorTo.class);
+
+                BaseInfoEntity baseInfoEntity = new BaseInfoEntity();
+                baseInfoEntity.setStrategyName(strategyOne.getStrategyName());
+                baseInfoEntity.setBuyAllWeights(strategyOne.getBuyAllWeights());
+                baseInfoEntity.setBuyAmount(strategyOne.getBuyAmount());
+                baseInfoEntity.setBuyPrice(strategyOne.getBuyPrice());
+                baseInfoEntity.setSleep(strategyOne.getSleep());
+                baseInfoEntity.setIsAllBuy(strategyOne.getIsAllBuy());
+                baseInfoEntity.setIsLimitPrice(strategyOne.getIsLimitPrice());
+                baseInfoEntity.setIsAllSell(strategyOne.getIsAllSell());
+                baseInfoEntity.setSellAllWeights(strategyOne.getSellAllWeights());
+                baseInfoEntity.setSellAmount(strategyOne.getSellAmount());
+                baseInfoEntity.setSellPrice(strategyOne.getSellPrice());
+                baseInfoEntity.setBuyQuotaPrice(strategyOne.getBuyQuotaPrice());
+
+                llIndicatorTo indicatorTo=new llIndicatorTo();
+                indicatorTo.setBaseData(buyAndSellIndicatorTo);
+                indicatorTo.setBaseInfo(baseInfoEntity);
+
+                IndicatorStrategyVo indicatorStrategyVo = new IndicatorStrategyVo();
+                indicatorStrategyVo.setIndicatorTo(indicatorTo);
+                indicatorStrategyVo.setAccountConfig(accountConfig);
+
+                //appkey he miyao
+                indicatorStrategyVo.setRobotId(oneRobot.getId());
+                indicatorStrategyVo.setSymbol(oneRobot.getSymbol());
+                indicatorStrategyVo.setAppKey(selectOne.getAccessKey());
+                indicatorStrategyVo.setAppSecret(selectOne.getSecretKey());
+                indicatorStrategyVo.setAddress(oneRobot.getClientAddress());
+
+
+                String url = "http://" + oneRobot.getClientAddress() + "/robot/operatingIndicatorRobot";
+                return robotClientService.operatingIndicatorRobot(url, indicatorStrategyVo);
+            }
+
+
         }
         return new ApiResult(Status.ERROR);
     }

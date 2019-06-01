@@ -1,29 +1,28 @@
 package com.quant.core.strategy.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.base.MoreObjects;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
+import com.quant.common.domain.response.Kline;
+import com.quant.common.domain.response.OrdersDetail;
+import com.quant.common.domain.response.TradeBean;
+import com.quant.common.domain.vo.BaseInfoEntity;
+import com.quant.common.domain.vo.ProfitMessage;
+import com.quant.common.domain.vo.StrategyVo;
+import com.quant.common.enums.TraceType;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
 import com.quant.core.config.StrategyConfig;
 import com.quant.core.config.imp.HuoBiKlineConfigImpl;
-import com.quant.common.enums.TraceType;
 import com.quant.core.redisMq.OrderIdRedisMqServiceImpl;
 import com.quant.core.redisMq.OrderProfitRedisMqServiceImpl;
 import com.quant.core.redisMq.RedisMqService;
 import com.quant.core.redisMq.RobotLogsRedisMqServiceImpl;
-import com.quant.common.domain.response.Kline;
-import com.quant.common.domain.response.OrdersDetail;
-import com.quant.common.domain.response.TradeBean;
 import com.quant.core.strategy.AbstractStrategy;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
 import com.quant.core.trading.*;
-import com.quant.common.domain.vo.ProfitMessage;
-import com.quant.common.domain.vo.StrategyVo;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -40,25 +39,6 @@ import java.util.Optional;
 @Slf4j
 public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrategy {
 
-    private RedisUtil redisUtil;
-    private Integer robotId;
-
-    //当前使用的配额币种
-    private String quotaCurrency;
-
-    //当前使用的基础币种
-    private String baseCurrency;
-
-    //价格精度
-    private int pricePrecision;
-    //数量金额精度
-    private int amountPrecision;
-
-    //当前账户余额
-    private BigDecimal quotaBalance;
-
-    //当前账户base余额
-    private BigDecimal baseBalance;
 
     //精确到小数点的个数
     private static final int decimalPoint = 4;
@@ -68,10 +48,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private int profitTimes;
 
     private Weights weights;
-    private TradingApi tradingApi;
-    private MarketConfig marketConfig;
-    //    private OrderState orderState;
-    private AccountConfig accountConfig;
     //    private StrategyVo.BaseInfoEntity baseInfo;
     private StrategyVo.Setting1Entity setting1;
     private StrategyVo.Setting2Entity setting2;
@@ -81,14 +57,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private StrategyVo.Setting6Entity setting6;
     private long runTimes = 0;
 
-    //标志机器人已经启动
-    private volatile String startkey;
-    //标志机器人是否在运行
-    private volatile String isRunKey;
-
-    private String quotaBalanceKey;
-
-    private String baseBalanceKey;
 
     private String lastOrderState = "lastOrderState_";
 
@@ -107,8 +75,24 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private volatile boolean profitArrive = false;
 
-    //redismq 日志推送服务
-    private RedisMqService redisMqService, orderMqService, orderProfitService;
+    protected BaseInfoEntity baseInfo;
+
+    /**
+     * 权重计算
+     */
+    protected void weightsCalculation() {
+
+        if ((this.orderState.getType() == OrderType.SELL || this.orderState.getType() == null) &&
+                this.baseInfo.getBuyAllWeights() != 0) {
+            buyCalculation();
+        }
+
+        if (this.orderState.getType() == OrderType.BUY
+                && this.baseInfo.getSellAllWeights() != 0) {
+            sellCalculation();
+        }
+
+    }
 
     public HuoBiStrategyImpl(RedisUtil redisUtil, Integer robotId) {
         this.redisUtil = redisUtil;
@@ -116,6 +100,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         this.startkey = RobotRedisKeyConfig.getRobotIsStartStateKey() + robotId;
         this.isRunKey = RobotRedisKeyConfig.getRobotIsRunStateKey() + robotId;
     }
+
 
     @Override
     public void init(TradingApi tradingApi, MarketConfig market, StrategyConfig config, AccountConfig accountConfig) {
@@ -143,35 +128,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
     @Override
     public void execute() throws StrategyException {
-        try {
-            //设置机器人已经启动状态
-            log.info("机器人{}启动了 配置加载>>>", robotId);
-            redisUtil.set(startkey, true);
-            //加载获取当前机器人的基础币种 配额币种 价格的精度 数量的精度
-            boolean quotaPriceAndPrecision = getQuotaPriceAndPrecision();
-
-            if (!quotaPriceAndPrecision) {
-                redisMqService.sendMsg("获取机器人的基础币种 配额币种 价格的精度 数量的精度失败！机器人退出任务....");
-                return;
-            }
-            //获取当前机器人的最后一次状态
-            Object o = redisUtil.get(lastOrderState + robotId);
-            if (o != null) {
-                try {
-                    log.info("机器人{}上一次运行的状态是{}", robotId, o.toString());
-                    //恢复上一次的运行状态
-                    this.orderState = JSON.parseObject(o.toString(), OrderState.class);
-                    redisUtil.set(lastOrderState + robotId, null);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("恢复机器人{}状态失败{}", robotId, e.getMessage());
-                    redisMqService.sendMsg("机器人上一次的运行状态恢复失败！机器人将以重新的状态启动......");
-                }
-            }
-        } catch (Exception e) {
-            log.error("机器人运行中发生异常：异常信息{}", e);
-            redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
-        }
+        init();
         // 任务循环执行
         while (true) {
             try {
@@ -193,7 +150,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 //计算设置买卖权重
                 weightsCalculation();
                 //判断买卖
-                if (orderState.type == OrderType.BUY) {
+                if (orderState.getType() == OrderType.BUY) {
                     if (profitArrive) {
                         redisMqService.sendMsg("到达盈亏次数,自动退出ing");
                         break;
@@ -210,7 +167,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     }
                     //查看是否达到卖的信号
                     if (this.weights.getSellTotal() != 0 && this.weights.getSellTotal() >= this.baseInfo.getSellAllWeights()
-                            && orderState.type == OrderType.BUY) {
+                            && orderState.getType() == OrderType.BUY) {
                         try {
                             createSellOrder();
                         } catch (Exception e) {
@@ -221,14 +178,14 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     } else {
                         redisMqService.sendMsg(this.weights.getSellTotal() == 0 ? "当前策略设置不进行卖出操作!!!" : "当前策略计算卖出权重:" + this.weights.getSellTotal() + ",未达到策略卖出总权重【" + baseInfo.getSellAllWeights() + "】不进行操作。。。");
                     }
-                } else if (orderState.type == OrderType.SELL) {
+                } else if (orderState.getType() == OrderType.SELL) {
                     if (profitArrive) {
                         redisMqService.sendMsg("到达盈亏次数,自动退出ing");
                         break;
                     }
                     //查看是否到达买的信号
                     if (this.weights.getBuyTotal() != 0 && this.weights.getBuyTotal() >= this.baseInfo.getBuyAllWeights()
-                            && orderState.type == OrderType.SELL) {
+                            && orderState.getType() == OrderType.SELL) {
                         try {
                             createBuyOrder();
                         } catch (Exception e) {
@@ -240,7 +197,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                         redisMqService.sendMsg(this.weights.getBuyTotal() == 0 ? "当前策略设置不进行买入操作!!!" : "当前策略计算买入权重:" + this.weights.getBuyTotal() + ",未达到策略买入总权重【" + baseInfo.getBuyAllWeights() + "】不进行操作。。。");
                     }
 
-                } else if (orderState.type == null) {
+                } else if (orderState.getType() == null) {
                     if (profitArrive) {
                         redisMqService.sendMsg("到达盈亏次数,自动退出ing");
                         break;
@@ -287,13 +244,13 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @return true 需要直接卖 不走其他流程
      */
     private boolean takeProfitStopLoss() {
-        if (this.orderState.type == OrderType.BUY) {//当前订单是买入
+        if (this.orderState.getType() == OrderType.BUY) {//当前订单是买入
             if (this.setting6.getIsAble() == 1) {//开启状态下
                 BigDecimal diff;
                 //只拿当前的卖出价格
                 if (this.baseInfo.getIsLimitPrice() == 1) {//限价方式\
                     //买入的价格
-                    BigDecimal buyPrice = this.orderState.price;
+                    BigDecimal buyPrice = this.orderState.getPrice();
                     if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
                         return false;
                     }
@@ -306,19 +263,19 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 } else {
                     //市价方式
                     //当前卖出价格计算
-                    BigDecimal buyPrice = this.orderState.price;
+                    BigDecimal buyPrice = this.orderState.getPrice();
                     //当前价格 通过获取订单详情来获取
                     try {
-                        if (this.orderState.price.compareTo(BigDecimal.ZERO) == 0) {
+                        if (this.orderState.getPrice().compareTo(BigDecimal.ZERO) == 0) {
                             //为0的情况下 算出购买时候的价格 （总的交易额/总的数量）=价格;
-                            OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.id);
+                            OrdersDetail ordersDetail = this.tradingApi.orderDetail(this.orderState.getId());
                             if (new BigDecimal(ordersDetail.getFieldAmount()).compareTo(BigDecimal.ZERO) == 0) {
                                 log.info("消费总数量为0");
                                 return false;
                             }
                             buyPrice = new BigDecimal(ordersDetail.getFieldCashAmount()).divide(new BigDecimal(ordersDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
                             log.info("市价buyPrice{}", buyPrice);
-                            this.orderState.price = buyPrice;
+                            this.orderState.setPrice(buyPrice);
                         }
                         if (buyPrice.compareTo(BigDecimal.ZERO) == 0) {
                             log.info("购买价格为0");
@@ -381,26 +338,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     }
 
     /**
-     * //获取用户的余额 价格的精度 数量的精度获取quote的交易对 quota 是当前的配额 例如usdt
-     */
-    private boolean getQuotaPriceAndPrecision() {
-        String quota_price_amount = String.valueOf(redisUtil.get(RobotRedisKeyConfig.getSymbol() + marketConfig.markName()));
-        String[] split = quota_price_amount.split("_");
-        if (split.length < 3) {
-            return false;
-        }
-        this.baseCurrency = split[0];
-        this.quotaCurrency = split[1];
-        this.pricePrecision = Integer.parseInt(split[2]);
-        this.amountPrecision = Integer.parseInt(split[3]);
-        quotaBalanceKey = quotaCurrency + "_balance_" + accountConfig.accountId();
-        baseBalanceKey = baseCurrency + "_balance_" + accountConfig.accountId();
-        log.info("当前机器人的基础币种{} 配额币种{} 价格的精度{} 数量的精度{}", baseCurrency, quotaCurrency, pricePrecision, amountPrecision);
-        redisMqService.sendMsg("当前机器人的基础币种{" + baseCurrency + "} 配额币种{" + quotaCurrency + "} 价格的精度{" + pricePrecision + "} 数量的精度{" + amountPrecision + "}");
-        return true;
-    }
-
-    /**
      * 检查订单 如果订单没有撮合成功 直接取消
      * 返回true 可以执行下单操作
      * 返回false 不可执行下单操作
@@ -409,43 +346,43 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private boolean checkOrder(TradingApi tradingApi) {
         log.info("当前订单状态{}", this.orderState.toString());
-        if (this.orderState.id == null) {
+        if (this.orderState.getId() == null) {
             log.info("当前账户{}没有任何订单,开始下单", accountConfig.accountId());
             return true;
         }
         try {
             List<OpenOrder> openOrders = tradingApi.getOpenOrders(this.marketConfig, this.accountConfig, "10");
-            Optional<OpenOrder> first = openOrders.stream().filter(openOrder -> openOrder.getId().equals(String.valueOf(this.orderState.id))).findFirst();
+            Optional<OpenOrder> first = openOrders.stream().filter(openOrder -> openOrder.getId().equals(String.valueOf(this.orderState.getId()))).findFirst();
             if (first.isPresent()) {
-                redisMqService.sendMsg("当前订单状态:【" + this.orderState.type.getStringValue() + "】======");
+                redisMqService.sendMsg("当前订单状态:【" + this.orderState.getType().getStringValue() + "】======");
                 //比较上次的下单价格和这次的价格 如果相同的话 说明购买或者卖出订单可以被吃 等待被吃
-                if (this.orderState.type == OrderType.BUY
-                        && this.orderState.price.compareTo(this.currentNewBuyPrice) == 0) {
+                if (this.orderState.getType() == OrderType.BUY
+                        && this.orderState.getPrice().compareTo(this.currentNewBuyPrice) == 0) {
                     return false;
                 }
-                if (this.orderState.type == OrderType.SELL
-                        && this.orderState.price.compareTo(this.currentNewSellPrice) == 0) {
+                if (this.orderState.getType() == OrderType.SELL
+                        && this.orderState.getPrice().compareTo(this.currentNewSellPrice) == 0) {
                     return false;
                 }
                 //取消刚刚下的订单
                 boolean cancel = tradingApi.cancelOrder(first.get().getId(), first.get().getMarketId());
                 if (cancel) {
-                    redisMqService.sendMsg("查询到未成功的订单开始取消订单,orderId【" + first.get().getId() + "】, 取消【" + this.orderState.type.getStringValue() + "】订单成功!!!");
-                    if (this.orderState.type == OrderType.BUY) {
+                    redisMqService.sendMsg("查询到未成功的订单开始取消订单,orderId【" + first.get().getId() + "】, 取消【" + this.orderState.getType().getStringValue() + "】订单成功!!!");
+                    if (this.orderState.getType() == OrderType.BUY) {
                         //如果当前订单是购买订单  取消了 应该继续购买
-                        this.orderState.type = null;
+                        this.orderState.setType(null);
                     }
-                    if (this.orderState.type == OrderType.SELL) {
+                    if (this.orderState.getType() == OrderType.SELL) {
                         //如果是卖出 应该继续卖出
-                        this.orderState.type = OrderType.BUY;
+                        this.orderState.setType(OrderType.BUY);
                     }
-                    this.orderState.id = null;
+                    this.orderState.setId(null);
                     return false;
                 }
             } else {
                 //将成功的订单信息传回admin
-                orderMqService.sendMsg(this.orderState.id);
-                String result = this.orderState.id + "_" + this.orderState.type.getStringValue();
+                orderMqService.sendMsg(this.orderState.getId());
+                String result = this.orderState.getId() + "_" + this.orderState.getType().getStringValue();
                 this.redisUtil.lPush(orderProfitIds + robotId, result);
                 this.CalculateProfit();
                 return true;
@@ -463,7 +400,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private void CalculateProfit() {
         try {
-            if (this.orderState.type == OrderType.SELL) {
+            if (this.orderState.getType() == OrderType.SELL) {
 
                 Object o = this.redisUtil.lPop(orderProfitIds + robotId);
                 if (o == null) {
@@ -520,7 +457,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     return;
                 }
                 //如果是市价的情况
-                if (this.orderState.orderType == com.quant.common.enums.OrderType.SELL_MARKET) {
+                if (this.orderState.getOrderType() == com.quant.common.enums.OrderType.SELL_MARKET) {
                     //上一次购买的交易额就是总金额
                     allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
                     allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
@@ -541,7 +478,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 }
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额
                 diff = allSellBalance.subtract(allBuyBalance).setScale(pricePrecision, RoundingMode.DOWN);
-                log.info("当前的订单状态{},计算后的差价{}", this.orderState.type.getStringValue(), diff);
+                log.info("当前的订单状态{},计算后的差价{}", this.orderState.getType().getStringValue(), diff);
                 divide = diff.divide(allBuyBalance, decimalPoint, RoundingMode.DOWN);
                 log.info("盈亏率:{}", divide);
                 if (diff.compareTo(BigDecimal.ZERO) < 0) {
@@ -577,41 +514,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
     }
 
-    /**
-     * 重试5次
-     *
-     * @param orderId
-     * @return
-     */
-    private OrdersDetail getOrderDetail(Long orderId, int i) {
-        try {
-            return this.tradingApi.orderDetail(orderId);
-        } catch (Exception e) {
-            if (i == 5) {
-                return null;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            } finally {
-                i++;
-            }
-            return getOrderDetail(orderId, i);
-        }
-    }
-
-    /**
-     * 检查是否已经取消了任务
-     *
-     * @param key
-     * @return
-     */
-    private boolean checkRobotIsStop(String key) {
-        Object o = this.redisUtil.get(key);
-        return (boolean) o;
-    }
-
 
     /**
      * 计算上涨或下跌 百分比 因为前台是 传 百分比的值 去掉了百分比 所以这里需要乘以100 作为百分比 和前台数据进行对比
@@ -628,40 +530,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 .multiply(new BigDecimal(100));
     }
 
-
-    /**
-     * 创建订单
-     *
-     * @param amount
-     * @param price
-     * @param orderType
-     */
-    private void order(
-            BigDecimal amount,
-            BigDecimal price,
-            com.quant.common.enums.OrderType orderType,
-            TradingApi tradingApi, OrderType type) {
-        //下订单
-        try {
-            redisMqService.sendMsg("叮叮叮>>>开始下单,下单信息 价格:" + price + "数量:" + amount + "订单类型:" + orderType.getTyoe());
-            this.orderState.id = tradingApi.createOrder(this.marketConfig.markName(), this.accountConfig.accountId(), orderType, amount, price);
-            if (this.orderState.id != null) {
-                redisMqService.sendMsg("下单成功>>>订单信息【" + this.orderState.toString() + "】");
-                Thread.sleep(1000);
-                this.orderState.type = type;
-                //将订单信息传送到后台 此时的订单可能未成功
-                orderMqService.sendMsg(this.orderState.id);
-            }
-        } catch (ExchangeNetworkException | TradingApiException e) {
-            e.printStackTrace();
-            log.error("下订单发生异常{}", e.getMessage());
-            redisMqService.sendMsg("下单异常>>>重新尝试下单......");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            log.error("线程异常{}", e.getMessage());
-            redisMqService.sendMsg("当前机器人异常>>>请通知管理员......");
-        }
-    }
 
     /**
      * 创建购买订单
@@ -835,31 +703,10 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      */
     private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, com.quant.common.enums.OrderType orderType, OrderType type) {
 
-        this.orderState.amount = sellAmount;
-        this.orderState.price = sellPrice;
-        this.orderState.orderType = orderType;
+        this.orderState.setAmount(sellAmount);
+        this.orderState.setPrice(sellPrice);
+        this.orderState.setOrderType(orderType);
         this.order(sellAmount, sellPrice, orderType, tradingApi, type);
-    }
-
-    /**
-     * 获取余额
-     *
-     * @return
-     */
-    private boolean getBalance() {
-        try {
-            //获取用户的账户余额 knc_balance_6688515
-            this.tradingApi.getBalanceInfo(this.accountConfig.accountId(), this.redisUtil);
-            //基础货币和对价货币
-            this.baseBalance = new BigDecimal(String.valueOf(redisUtil.get(baseBalanceKey)));
-            this.quotaBalance = new BigDecimal(String.valueOf(redisUtil.get(quotaBalanceKey)));
-            redisMqService.sendMsg("获取当前账户余额：baseBalance" + baseBalance + ",quotaBalance" + quotaBalance);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("获取账户{}的余额失败,失败信息{}", this.accountConfig.accountId(), e.getMessage());
-        }
-        return false;
     }
 
     @Override
@@ -1470,50 +1317,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         }
         redisMqService.sendMsg("策略2：当前最新卖出订单价格：" + currentNewSellPrice + "未超过配置2的价格" + config.getSellOrderUsdt() + ",策略2权重不生效");
         return false;
-    }
-
-
-    /**
-     * 订单状态
-     */
-    @Data
-    public static class OrderState {
-
-        /**
-         * Id - default to null.
-         */
-        private Long id = null;
-
-        /**
-         * Type: buy/sell. We default to null which means no order has been placed yet, i.e. we've just started!
-         */
-        private OrderType type = null;
-
-        /**
-         * 当前订单的类型
-         */
-        private com.quant.common.enums.OrderType orderType = null;
-
-        /**
-         * Price to buy/sell at - default to zero.
-         */
-        private BigDecimal price = BigDecimal.ZERO;
-
-
-        /**
-         * Number of units to buy/sell - default to zero.
-         */
-        private BigDecimal amount = BigDecimal.ZERO;
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("id", id)
-                    .add("type", type)
-                    .add("price", price)
-                    .add("amount", amount)
-                    .toString();
-        }
     }
 
 

@@ -1,18 +1,23 @@
 package com.quant.admin.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.quant.admin.dao.StrategyMapper;
 import com.quant.common.domain.entity.Strategy;
 import com.quant.admin.service.StrategyService;
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
+import com.quant.common.domain.to.llIndicatorTo;
+import com.quant.common.domain.vo.BaseInfoEntity;
 import com.quant.core.api.ApiResult;
 import com.quant.common.enums.Status;
 import com.quant.common.domain.vo.StrategyVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -33,10 +38,11 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
             return new ApiResult(Status.ERROR);
         }
         Strategy strategy = new Strategy();
-        StrategyVo.BaseInfoEntity baseInfo = strategyVo.getBaseInfo();
+        BaseInfoEntity baseInfo = strategyVo.getBaseInfo();
         if (baseInfo != null) {
             //基础信息配置i
             strategy.setUserId(Integer.valueOf(uid));
+            strategy.setStrategyType(0);
             strategy.setStrategyName(baseInfo.getStrategyName());
             strategy.setBuyAmount(baseInfo.getBuyAmount());
             strategy.setSellAmount(baseInfo.getSellAmount());
@@ -83,21 +89,8 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
             strategy.setSetting6(JSON.toJSONString(setting6));
         }
 
-        if (strategyVo.getId() != null) {
-            //修改
-            strategy.setId(strategyVo.getId());
-            if (strategy.updateById()) {
-                return new ApiResult(Status.SUCCESS, strategy.getId());
-            } else {
-                return new ApiResult(Status.ERROR);
-            }
-        } else {
-            if (strategy.insert()) {
-                return new ApiResult(Status.SUCCESS, strategy.getId());
-            } else {
-                return new ApiResult(Status.ERROR);
-            }
-        }
+        Integer id = strategyVo.getId();
+        return addOrUpdate(id, strategy);
     }
 
     @Override
@@ -165,4 +158,53 @@ public class StrategyServiceImpl extends ServiceImpl<StrategyMapper, Strategy> i
         return new ApiResult(Status.ERROR, "删除失败");
     }
 
+    @Override
+    public ApiResult addOrUpdateIndicatorStrategy(llIndicatorTo strategyVo, String uid) {
+        if (strategyVo == null) {
+            return new ApiResult(Status.ERROR);
+        }
+        Strategy strategy = new Strategy();
+        BaseInfoEntity baseInfo = strategyVo.getBaseInfo();
+        if (baseInfo != null) {
+            //基础信息配置i
+            strategy.setUserId(Integer.valueOf(uid));
+            strategy.setStrategyName(baseInfo.getStrategyName());
+            strategy.setBuyAmount(baseInfo.getBuyAmount());
+            strategy.setSellAmount(baseInfo.getSellAmount());
+            strategy.setBuyPrice(baseInfo.getBuyPrice());
+            strategy.setSellPrice(baseInfo.getSellPrice());
+            strategy.setIsAllBuy(baseInfo.getIsAllBuy());
+            strategy.setIsAllSell(baseInfo.getIsAllSell());
+            strategy.setIsLimitPrice(baseInfo.getIsLimitPrice());
+            strategy.setBuyAllWeights(baseInfo.getBuyAllWeights());
+            strategy.setSellAllWeights(baseInfo.getSellAllWeights());
+            strategy.setSleep(baseInfo.getSleep());
+            strategy.setBuyQuotaPrice(baseInfo.getBuyQuotaPrice());
+        }
+        if (strategyVo.getBaseData() != null) {
+
+            strategy.setSetting1(JSON.toJSONString(strategyVo.getBaseData()));
+        }
+        strategy.setStrategyType(1);
+        Integer id = strategyVo.getId();
+        return addOrUpdate(id, strategy);
+    }
+
+
+    ApiResult addOrUpdate(Integer id, Strategy strategy) {
+        if (id != null) {
+            strategy.setId(id);
+            if (strategy.updateById()) {
+                return new ApiResult(Status.SUCCESS, strategy.getId());
+            } else {
+                return new ApiResult(Status.ERROR);
+            }
+        } else {
+            if (strategy.insert()) {
+                return new ApiResult(Status.SUCCESS, strategy.getId());
+            } else {
+                return new ApiResult(Status.ERROR);
+            }
+        }
+    }
 }

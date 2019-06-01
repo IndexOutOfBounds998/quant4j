@@ -31,6 +31,7 @@ public class NodeController extends BaseController {
         Applications applications = eurekaClient.getApplications();
         List<Application> apps = applications.getRegisteredApplications();
         List<JSONObject> list = new ArrayList<>();
+        int i = 0;
         for (Application application : apps) {
             if (application.getName().toLowerCase().equals(clientStr)) {
                 try {
@@ -38,7 +39,9 @@ public class NodeController extends BaseController {
                     for (InstanceInfo instanceInfo : instanceInfos) {
                         JSONObject obj = new JSONObject();
                         obj.put("ipo", instanceInfo.getIPAddr() + ":" + instanceInfo.getPort());
+                        obj.put("id", i);
                         list.add(obj);
+                        i++;
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();

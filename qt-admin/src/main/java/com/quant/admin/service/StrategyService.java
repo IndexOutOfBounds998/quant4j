@@ -1,7 +1,10 @@
 package com.quant.admin.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.service.IService;
 import com.quant.common.domain.entity.Strategy;
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
+import com.quant.common.domain.to.llIndicatorTo;
 import com.quant.core.api.ApiResult;
 import com.quant.common.domain.vo.StrategyVo;
 
@@ -24,4 +27,6 @@ public interface StrategyService extends IService<Strategy> {
     ApiResult getStrategyById(int id, String uid);
 
     ApiResult deleteStrategy(int id, String uid);
+
+    ApiResult addOrUpdateIndicatorStrategy(llIndicatorTo strategyVo, String uid);
 }

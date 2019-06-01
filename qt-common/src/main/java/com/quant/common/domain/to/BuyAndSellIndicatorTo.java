@@ -1,5 +1,7 @@
 package com.quant.common.domain.to;
 
+import com.quant.common.domain.vo.BaseInfoEntity;
+import com.quant.common.domain.vo.StrategyVo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,7 +24,6 @@ public class BuyAndSellIndicatorTo {
      * indicatorBuy : [{"condition":"or","compare":{"value":"num_down","label":"小于"},"ruleFirst":{"name":"价格","value":"price","params":"默认指标"},"ruleSecond":{"value":"240"}},{"condition":"and","compare":{"value":"num_down","label":"小于"},"ruleFirst":{"name":"rsi-14","value":"RSI","params":"14"},"ruleSecond":{"value":"30"}}]
      * indicatorSell : [{"condition":"and","compare":{"value":"num_over","label":"大于"},"ruleFirst":{"name":"价格","value":"price","params":"默认指标"},"ruleSecond":{"value":"270"}},{"condition":"and","compare":{"value":"num_over","label":"大于"},"ruleFirst":{"name":"rsi-14","value":"RSI","params":"14"},"ruleSecond":{"value":"70"}}]
      */
-
     private Double stopLoss;
     private Double stopGain;
     private String kline;

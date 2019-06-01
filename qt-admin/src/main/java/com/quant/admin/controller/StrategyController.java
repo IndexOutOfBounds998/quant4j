@@ -1,6 +1,9 @@
 package com.quant.admin.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.quant.admin.service.StrategyService;
+import com.quant.common.domain.to.BuyAndSellIndicatorTo;
+import com.quant.common.domain.to.llIndicatorTo;
 import com.quant.core.api.ApiResult;
 import com.quant.common.enums.Status;
 import com.quant.common.domain.vo.StrategyVo;
@@ -30,6 +33,20 @@ public class StrategyController extends BaseController{
         }
     }
 
+    /**
+     * 添加一个策略
+     *
+     * @return
+     */
+    @PostMapping("/addOrUpdateIndicatorStrategy")
+    public ApiResult addOrUpdateIndicatorStrategy(@RequestBody llIndicatorTo to, HttpServletRequest httpRequest) {
+        String uid = getUid(httpRequest);
+        if (uid == null) {
+            return new ApiResult(Status.Login_out);
+        } else {
+            return strategyService.addOrUpdateIndicatorStrategy(to, uid);
+        }
+    }
     /**
      * 获取我的策略列表
      *

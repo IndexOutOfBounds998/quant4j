@@ -7,6 +7,7 @@
         <id column="id" property="id" />
         <result column="user_id" property="userId" />
         <result column="strategy_name" property="strategyName" />
+        <result column="strategy_type" property="strategyType" />
         <result column="buy_amount" property="buyAmount" />
         <result column="buy_quota_price" property="buyQuotaPrice" />
         <result column="sell_amount" property="sellAmount" />
@@ -29,7 +30,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id AS userId, strategy_name AS strategyName, buy_amount AS buyAmount, buy_quota_price AS buyQuotaPrice, sell_amount AS sellAmount, buy_price AS buyPrice, sell_price AS sellPrice, is_all_buy AS isAllBuy, is_all_sell AS isAllSell, is_limit_price AS isLimitPrice, sell_all_weights AS sellAllWeights, buy_all_weights AS buyAllWeights, profit, sleep, setting1, setting2, setting3, setting4, setting5, setting6
+        id, user_id AS userId, strategy_name AS strategyName, strategy_type AS strategyType, buy_amount AS buyAmount, buy_quota_price AS buyQuotaPrice, sell_amount AS sellAmount, buy_price AS buyPrice, sell_price AS sellPrice, is_all_buy AS isAllBuy, is_all_sell AS isAllSell, is_limit_price AS isLimitPrice, sell_all_weights AS sellAllWeights, buy_all_weights AS buyAllWeights, profit, sleep, setting1, setting2, setting3, setting4, setting5, setting6
     </sql>
 
 </mapper>

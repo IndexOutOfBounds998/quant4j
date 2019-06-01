@@ -138,10 +138,11 @@ public class IndicatorHelper {
             Indicator indicatorFirst = IndicatorHelper.builderIndicator(bean.getRuleFirst(), timeSeries);
 
             //获取第二个指标的
+            String name = bean.getRuleSecond().getName();
             String value2 = bean.getRuleSecond().getValue();
             String params2 = bean.getRuleSecond().getParams();
-
-            if (params2 == null) {
+            //第二个是数值的时候
+            if (params2 == null || params2.equals("") || name.equals("number")) {
                 entry = AddOrAnd(indicatorFirst, entry, compare, ruleOnlyOne, condition, value2);
             } else {
                 Indicator indicatorSecond = IndicatorHelper.builderIndicator(bean.getRuleSecond(), timeSeries);

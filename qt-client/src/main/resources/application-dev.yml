@@ -1,10 +1,13 @@
 server:
   port: 8024
+  address: 0.0.0.0
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_ZONE_HOST:localhost}:${EUREKA_ZONE_PORT:8761}/eureka/
-
+      defaultZone: http://${EUREKA_ZONE_HOST:127.0.0.1}:${EUREKA_ZONE_PORT:8761}/eureka/
+  instance:
+    prefer-ip-address: true
+    ip-address: ${server.address}
 spring:
   application:
     name: qt-client

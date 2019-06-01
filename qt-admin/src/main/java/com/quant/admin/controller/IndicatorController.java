@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.ta4j.core.*;
 import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.num.PrecisionNum;
 import org.ta4j.core.trading.rules.StopGainRule;
 import org.ta4j.core.trading.rules.StopLossRule;
 
@@ -91,17 +92,48 @@ public class IndicatorController extends BaseController {
         //构建策略
         Strategy strategy = new BaseStrategy(entry, exit);
         // 回测
+        TradingRecord tradingRecord = new BaseTradingRecord();
+        for (int i = 0; i < series.getEndIndex(); i++) {
+
+            int endIndex = i;
+            Bar newBar = series.getBar(endIndex);
+            if (strategy.shouldEnter(endIndex)) {
+                // Our strategy should enter
+                System.out.println("Strategy should ENTER on " + endIndex);
+
+                boolean entered = tradingRecord.enter(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(10));
+                if (entered) {
+                    Order entryOrder = tradingRecord.getLastEntry();
+                    System.out.println("Entered on " + entryOrder.getIndex()
+                            + " (price=" + entryOrder.getPricePerAsset().doubleValue()
+                            + ", amount=" + entryOrder.getAmount().doubleValue() + ")");
+                }
+            } else if (strategy.shouldExit(endIndex)) {
+                // Our strategy should exit
+                System.out.println("Strategy should EXIT on " + endIndex);
+                boolean exited = tradingRecord.exit(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(10));
+                if (exited) {
+                    Order exitOrder = tradingRecord.getLastExit();
+                    System.out.println("Exited on " + exitOrder.getIndex()
+                            + " (price=" + exitOrder.getPricePerAsset().doubleValue()
+                            + ", amount=" + exitOrder.getAmount().doubleValue() + ")");
+                }
+
+
+            }
+        }
+
         TimeSeriesManager seriesManager = new TimeSeriesManager(series);
-        TradingRecord tradingRecord = seriesManager.run(strategy);
+        TradingRecord tr = seriesManager.run(strategy);
         // Analysis
         System.out.println("策略总收益: "
-                + new TotalProfitCriterion().calculate(series, tradingRecord));
+                + new TotalProfitCriterion().calculate(series, tr));
 
         System.out.println("策略总交易数: "
-                + tradingRecord.getTradeCount());
+                + tr.getTradeCount());
         HashMap<String, Object> param = new HashMap<>(2);
         List<HashMap> backDataList = new ArrayList<>(data.size());
-        List<HashMap> buyAndSell = new ArrayList<>(tradingRecord.getTradeCount() * 2);
+        List<HashMap> buyAndSell = new ArrayList<>(tr.getTradeCount() * 2);
         int l = 0;
         for (Kline k : data) {
             HashMap<Object, Object> date = new HashMap<>();

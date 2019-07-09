@@ -23,26 +23,14 @@
 
 package com.quant.core.config;
 
-import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import com.quant.common.domain.to.llIndicatorTo;
 import com.quant.common.domain.vo.StrategyVo;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
- * <p>
- * Encapsulates any (optional) configuration for a Trading Strategy.
- * Basically just a map of key-value pairs.
- * </p>
- * <p>
- * <p>
- * Configuration comes from the strategies.xml file.
- * </p>
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+ * @desc 策略配置扩展
+ * @date 2019/7/9
  */
-
 public interface StrategyConfig {
 
     StrategyVo getStrategyVo();

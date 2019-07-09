@@ -24,11 +24,10 @@
 package com.quant.core.strategy;
 
 /**
- * Trading Strategy implementations should throw this exception if they want the Trading Engine to shutdown the bot
- * immediately.
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc StrategyException
+ * @date 2019/7/9
  */
 public final class StrategyException extends Exception {
 

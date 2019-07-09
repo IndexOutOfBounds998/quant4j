@@ -30,15 +30,10 @@ import com.quant.core.trading.TradingApi;
 import com.quant.core.config.StrategyConfig;
 
 /**
- * <p>
- * All user defined Trading Strategies must implement this interface.
- * </p>
- * <p>
- * The Trading Engine will send only 1 thread through your strategy code at a time - you do not have to code for concurrency.
- * </p>
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc TradingStrategy
+ * @date 2019/7/9
  */
 public interface TradingStrategy {
 

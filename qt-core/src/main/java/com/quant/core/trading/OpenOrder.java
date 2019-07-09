@@ -27,10 +27,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Represents an Open Order (active order) on the exchange.
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc OpenOrder
+ * @date 2019/7/9
  */
 public interface OpenOrder {
 

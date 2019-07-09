@@ -36,13 +36,14 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-/**
- * API client.
- *
- * @Date 2018/1/14
- * @Time 16:02
- */
 
+
+/**
+ * @author yang
+
+ * @desc API client.
+ * @date 2019/7/9
+ */
 public class ApiClient {
 
     /**
@@ -511,9 +512,7 @@ public class ApiClient {
  * API签名，签名规范：
  * <p>
  * http://docs.aws.amazon.com/zh_cn/general/latest/gr/signature-version-2.html
- *
- * @Date 2018/1/14
- * @Time 16:02
+
  */
 class ApiSignature {
 

@@ -7,6 +7,12 @@ import com.quant.core.config.AccountConfig;
 import com.quant.common.domain.vo.OrderTaskMessage;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author yang
+
+ * @desc 订单推送到admin 处理
+ * @date 2019/7/9
+ */
 @Slf4j
 public class OrderIdRedisMqServiceImpl implements RedisMqService {
 

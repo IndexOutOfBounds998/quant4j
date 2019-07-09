@@ -24,21 +24,10 @@
 package com.quant.core.trading;
 
 /**
- * <p>
- * This exception is thrown from Exchange Adapter implementations when there is a problem making an API call to the exchange.
- * </p>
- * <p>
- * If your Trading Strategy receives this exception, this means something bad as happened; you would probably want to
- * wrap this exception in a StrategyException and let the Trading Engine shutdown the bot immediately to prevent
- * unexpected losses.
- * </p>
- * <p>
- * If the Trading Engine receives one of these exceptions from directly calling an Exchange Adapter method,
- * it shuts down the bot immediately.
- * </p>
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc TradingApiException
+ * @date 2019/7/9
  */
 public class TradingApiException extends Exception {
 

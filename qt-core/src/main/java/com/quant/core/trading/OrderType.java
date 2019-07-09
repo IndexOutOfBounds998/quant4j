@@ -24,10 +24,10 @@
 package com.quant.core.trading;
 
 /**
- * Defines the different order types for sending to the exchange.
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc OrderType
+ * @date 2019/7/9
  */
 public enum OrderType {
 

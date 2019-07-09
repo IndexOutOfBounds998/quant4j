@@ -5,6 +5,12 @@ import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author yang
+
+ * @desc 订单盈利推送到admin
+ * @date 2019/7/9
+ */
 @Slf4j
 public class OrderProfitRedisMqServiceImpl implements RedisMqService {
 

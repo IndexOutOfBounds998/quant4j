@@ -27,10 +27,10 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 /**
- * Encapsulates wallet balance info held on the exchange.
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc BalanceInfo
+ * @date 2019/7/9
  */
 public interface BalanceInfo {
 

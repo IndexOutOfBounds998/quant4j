@@ -4,8 +4,11 @@ import com.quant.common.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+
 /**
- * 返回的数据结构
+ * @author yang
+ * @desc 返回的数据结构
+ * @date 2019/7/9
  */
 @Data
 @AllArgsConstructor

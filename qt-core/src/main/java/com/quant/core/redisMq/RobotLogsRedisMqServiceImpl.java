@@ -11,6 +11,12 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * @author yang
+
+ * @desc 机器人实时日志 推送admin
+ * @date 2019/7/9
+ */
 @Slf4j
 public class RobotLogsRedisMqServiceImpl implements RedisMqService {
 

@@ -24,26 +24,10 @@
 package com.quant.core.trading;
 
 /**
- * <p>
- * This exception is thrown by the Exchange Adapter when there is a network error when attempting to connect to the
- * exchange to make an API call.
- * </p>
- * <p>
- * The non-fatal error response codes and messages specified in the exchange.xml config file determine whether this
- * exception is thrown by the Exchange Adapter.
- * </p>
- * <p>
- * If your Trading Strategy catches this exception, you could retry the API call, or exit from your Trading Strategy
- * and let the Trading Engine execute your Trading Strategy at the next trade cycle. This allows the you to recover from
- * temporary network issues.
- * </p>
- * <p>
- * If the Trading Engine receives these exceptions from directly calling an Exchange Adapter method, it will log the
- * event and sleep until the next trade cycle.
- * </p>
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc ExchangeNetworkException
+ * @date 2019/7/9
  */
 public final class ExchangeNetworkException extends Exception {
 

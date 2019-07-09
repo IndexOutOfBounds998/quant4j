@@ -1,14 +1,12 @@
 package com.quant.core.helpers;
 
-import com.quant.common.domain.to.BuyAndSellIndicatorTo;
-import com.quant.common.domain.to.IndicatorBean;
-import com.quant.common.exception.IndicatorException;
-import com.quant.core.factory.IndicatorFactory;
 import com.quant.common.domain.response.Kline;
+import com.quant.common.domain.to.IndicatorBean;
 import com.quant.common.domain.to.RuleBean;
 import com.quant.common.domain.vo.IndicatorCalParam;
+import com.quant.common.exception.IndicatorException;
+import com.quant.core.factory.IndicatorFactory;
 import org.ta4j.core.*;
-import org.ta4j.core.indicators.helpers.VolumeIndicator;
 import org.ta4j.core.trading.rules.*;
 
 import java.math.BigDecimal;

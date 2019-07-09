@@ -26,15 +26,10 @@ package com.quant.core.trading;
 import java.math.BigDecimal;
 
 /**
- * Holds Exchange Ticker information.
- * <p>
- * Not all exchangeAdapter provide the information returned in the Ticker methods - you'll need to check the relevant
- * Exchange Adapter code/Javadoc and online Exchange API documentation.
- * <p>
- * If the exchange does not provide the information, a null value is returned.
- *
- * @author gazbert
- * @since 1.1
+ * @author yang
+
+ * @desc Ticker
+ * @date 2019/7/9
  */
 public interface Ticker {
 

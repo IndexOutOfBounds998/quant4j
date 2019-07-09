@@ -20,7 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 
 /**
- * 策略基类
+ * @author yang
+
+ * @desc 策略基类
+ * @date 2019/7/9
  */
 @Slf4j
 public abstract class AbstractStrategy {

@@ -1,5 +1,10 @@
 package com.quant.core.config;
 
+/**
+ * @author yang
+ * @desc k线扩展
+ * @date 2019/7/9
+ */
 public interface KlineConfig {
     /**
      * 每次获取数据的大小

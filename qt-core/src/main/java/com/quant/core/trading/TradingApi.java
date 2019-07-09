@@ -35,23 +35,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * <p>
- * BX-bot's Trading API.
- * </p>
- * <p>
- * This is what Trading Strategies use to trade.
- * </p>
- * <p>
- * Exchange Adapters provide their own implementation of the API for the exchange they wish to integrate with.
- * </p>
- * <p>
- * This version of the Trading API only supports <a href="http://www.investopedia.com/terms/l/limitorder.asp">limit orders</a>
- * traded at the <a href="http://www.investopedia.com/terms/s/spotprice.asp">spot price</a>.
- * It does not support futures or margin trading.
- * </p>
- *
- * @author gazbert
- * @since 1.0
+ * @author yang
+
+ * @desc TradingApi
+ * @date 2019/7/9
  */
 public interface TradingApi {
 

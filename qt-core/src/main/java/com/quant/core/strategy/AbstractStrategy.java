@@ -6,6 +6,7 @@ import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
 import com.quant.common.domain.response.OrdersDetail;
 import com.quant.common.domain.vo.StrategyVo;
+import com.quant.common.enums.HBOrderType;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.MarketConfig;
 import com.quant.core.redisMq.RedisMqService;
@@ -94,7 +95,7 @@ public abstract class AbstractStrategy {
             Object o = redisUtil.get(lastOrderState + robotId);
             if (o != null) {
                 try {
-                    log.info("机器人{}上一次运行的状态是{}", robotId, o.toString());
+                    log.info("机器人{}上一次运行的状态:{}", robotId, o.toString());
                     //恢复上一次的运行状态
                     this.orderState = JSON.parseObject(o.toString(), OrderState.class);
                     redisUtil.set(lastOrderState + robotId, null);
@@ -115,17 +116,17 @@ public abstract class AbstractStrategy {
      *
      * @param amount
      * @param price
-     * @param orderType
+     * @param HBOrderType
      */
     protected void order(
             BigDecimal amount,
             BigDecimal price,
-            com.quant.common.enums.OrderType orderType,
+            HBOrderType HBOrderType,
             TradingApi tradingApi, OrderType type) {
         //下订单
         try {
-            redisMqService.sendMsg("叮叮叮>>>开始下单,下单信息 价格:" + price + "数量:" + amount + "订单类型:" + orderType.getTyoe());
-            this.orderState.setId(tradingApi.createOrder(this.marketConfig.markName(), this.accountConfig.accountId(), orderType, amount, price));
+            redisMqService.sendMsg("叮叮叮>>>开始下单,下单信息 价格:" + price + "数量:" + amount + "订单类型:" + HBOrderType.getTyoe());
+            this.orderState.setId(tradingApi.createOrder(this.marketConfig.markName(), this.accountConfig.accountId(), HBOrderType, amount, price));
             if (this.orderState.getId() != null) {
                 redisMqService.sendMsg("下单成功>>>订单信息【" + this.orderState.toString() + "】");
                 Thread.sleep(1000);
@@ -239,7 +240,7 @@ public abstract class AbstractStrategy {
         /**
          * 当前订单的类型
          */
-        private com.quant.common.enums.OrderType orderType = null;
+        private HBOrderType HBOrderType = null;
 
         /**
          * Price to buy/sell at - default to zero.

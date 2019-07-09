@@ -1,6 +1,6 @@
 package com.quant.common.enums;
 
-public enum OrderType {
+public enum HBOrderType {
     /**
      * 限价买入
      */
@@ -21,7 +21,7 @@ public enum OrderType {
 
     String tyoe;
 
-    OrderType(String tyoe) {
+    HBOrderType(String tyoe) {
         this.tyoe = tyoe;
     }
 

@@ -3,12 +3,13 @@ package com.quant.core.exchangeAdapter;
 import com.alibaba.fastjson.JSON;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
+import com.quant.common.enums.HBOrderType;
 import com.quant.core.api.ApiClient;
 import com.quant.common.exception.ApiException;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
-import com.quant.common.enums.OrderType;
+import com.quant.common.enums.HBOrderType;
 import com.quant.common.domain.request.CreateOrderRequest;
 import com.quant.common.domain.response.*;
 import com.quant.core.trading.*;
@@ -118,23 +119,23 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
      * 创建订单
      *
      * @param marketId  the id of the market.
-     * @param orderType 订单对应的类型
+     * @param HBOrderType 订单对应的类型
      * @param quantity  amount of units you are buying/selling in this order.
      * @param price     the price per unit you are buying/selling at.
      * @return
      */
     @Override
-    public Long createOrder(String marketId, String accountId, OrderType orderType, BigDecimal quantity, BigDecimal price) {
+    public Long createOrder(String marketId, String accountId, HBOrderType HBOrderType, BigDecimal quantity, BigDecimal price) {
 
             CreateOrderRequest createOrderRequest = new CreateOrderRequest();
             createOrderRequest.setAmount(quantity.toPlainString());
             createOrderRequest.setAccountId(accountId);
             createOrderRequest.setSource("api");
-            if (!orderType.getTyoe().equals(OrderType.SELL_MARKET.getTyoe()) || !orderType.getTyoe().equals(OrderType.BUY_MARKET.getTyoe())) {
+            if (!HBOrderType.getTyoe().equals(HBOrderType.SELL_MARKET.getTyoe()) || !HBOrderType.getTyoe().equals(HBOrderType.BUY_MARKET.getTyoe())) {
                 createOrderRequest.setPrice(price.toPlainString());
             }
             createOrderRequest.setSymbol(marketId);
-            createOrderRequest.setType(orderType.getTyoe());
+            createOrderRequest.setType(HBOrderType.getTyoe());
             logger.info("创建订单详情:{}", JSON.toJSONString(createOrderRequest));
             return apiClient.createOrder(createOrderRequest);
 

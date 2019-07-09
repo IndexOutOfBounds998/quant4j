@@ -24,6 +24,7 @@
 package com.quant.core.trading;
 
 import com.quant.common.config.RedisUtil;
+import com.quant.common.enums.HBOrderType;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
@@ -94,7 +95,7 @@ public interface TradingApi {
      * Places an order on the exchange.
      *
      * @param marketId  the id of the market.
-     * @param orderType Value must be {@link OrderType#BUY} or {@link OrderType#SELL}.
+     * @param HBOrderType Value must be {@link OrderType#BUY} or {@link OrderType#SELL}.
      * @param quantity  amount of units you are buying/selling in this order.
      * @param price     the price per unit you are buying/selling at.
      * @return the id of the order.
@@ -108,7 +109,7 @@ public interface TradingApi {
      *                                  to prevent unexpected losses.
      * @since 1.0
      */
-    Long createOrder(String marketId, String accountId, com.quant.common.enums.OrderType orderType, BigDecimal quantity, BigDecimal price)
+    Long createOrder(String marketId, String accountId, HBOrderType HBOrderType, BigDecimal quantity, BigDecimal price)
             throws ExchangeNetworkException, TradingApiException;
 
     /**

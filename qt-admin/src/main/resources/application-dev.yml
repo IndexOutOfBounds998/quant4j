@@ -1,5 +1,6 @@
 server:
   port: 8080
+  connection-timeout: 10000
 #添加数据源
 spring:
   datasource:

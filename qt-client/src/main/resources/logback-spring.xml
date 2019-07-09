@@ -106,8 +106,8 @@
     <logger name="org.springframework" level="ERROR"/>
     <!--<logger name="org.apache.commons" level="ERROR"/>-->
     <!--<logger name="org.apache.zookeeper" level="ERROR"/>-->
-    <!--<logger name="com.alibaba.dubbo.monitor" level="ERROR"/>-->
-    <logger name="com.qklx.qt.core" level="INFO"/>
+    <logger name="com.netflix.discovery" level="ERROR"/>
+    <logger name="com.quant.core" level="INFO"/>
 
     <!-- ${LOG_ROOT_LEVEL} 日志级别 -->
     <root level="${LOG_ROOT_LEVEL}">

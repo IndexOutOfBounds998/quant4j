@@ -10,6 +10,7 @@ import com.quant.common.domain.to.llIndicatorTo;
 import com.quant.common.domain.vo.BaseInfoEntity;
 import com.quant.common.domain.vo.ProfitMessage;
 import com.quant.common.domain.vo.StrategyVo;
+import com.quant.common.enums.HBOrderType;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
@@ -28,6 +29,7 @@ import com.quant.core.trading.*;
 import lombok.extern.slf4j.Slf4j;
 import org.ta4j.core.*;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.num.DoubleNum;
 import org.ta4j.core.num.PrecisionNum;
 import org.ta4j.core.trading.rules.StopGainRule;
 import org.ta4j.core.trading.rules.StopLossRule;
@@ -53,8 +55,6 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
     private static final int decimalPoint = 4;
 
     private llIndicatorTo config;
-
-    private long runTimes = 0;
 
 
     private BaseInfoEntity baseInfo;
@@ -93,21 +93,46 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
     @Override
     public void execute() throws StrategyException {
         init();
-        TradingRecord tradingRecord;
-        if (this.orderState.getType() == null) {
-            tradingRecord = new BaseTradingRecord();
-        } else {
-            Order.OrderType type = Order.OrderType.BUY;
+        TradingRecord tradingRecord = new BaseTradingRecord();
+        if (this.orderState.getType() != null) {
+
             if (this.orderState.getType() == OrderType.BUY) {
-                type = Order.OrderType.BUY;
+                tradingRecord = new BaseTradingRecord();
+                if (this.orderState.getPrice() == null) {
+                    tradingRecord.enter(1999, null, null);
+                } else {
+                    tradingRecord.enter(1999, PrecisionNum.valueOf(this.orderState.getPrice().setScale(pricePrecision, RoundingMode.DOWN).doubleValue()), PrecisionNum.valueOf(1));
+                }
             }
             if (this.orderState.getType() == OrderType.SELL) {
-                type = Order.OrderType.SELL;
+                tradingRecord = new BaseTradingRecord(Order.OrderType.SELL);
             }
-            tradingRecord = new BaseTradingRecord(type);
         }
-        //获取最大的k线数据
-        List<Kline> klines = getKlines(tradingApi, marketConfig, this.config.getBaseData().getKline(), "2000");
+        List<Kline> klines;
+        while (true) {
+            //获取最大的k线数据
+            try {
+                klines = getKlines(tradingApi, marketConfig, this.config.getBaseData().getKline(), "2000");
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                continue;
+            }
+            if (klines == null) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                continue;
+            }
+            break;
+        }
+
         TimeSeries timeSeries = IndicatorHelper.buildSeries(klines);
         Strategy strategy = buildStrategyByConfig(timeSeries, this.config.getBaseData());
         if (strategy == null) {
@@ -135,47 +160,59 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 }
                 int endIndex = timeSeries.getEndIndex();
                 //判断买卖
-                if (strategy.shouldExit(endIndex,tradingRecord) && orderState.getType() == OrderType.BUY) {
+                if (strategy.shouldExit(endIndex, tradingRecord) && orderState.getType() == OrderType.BUY) {
                     //查看是否达到卖的信号
-                    try {
-                        this.orderState.setType(OrderType.SELL);
-                        tradingRecord.exit(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(1));
-//                        createSellOrder();
+                    boolean exit = tradingRecord.exit(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(1));
+                    if (exit) {
+                        try {
+                            createSellOrder();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                            redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
+                            continue;
+                        }
+                        setStatus(OrderType.SELL, new BigDecimal(newBar.getClosePrice().doubleValue()));
                         log.error("add sell order price is {}", newBar.getClosePrice().doubleValue());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
-                        redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
                     }
+
                 }
                 //查看是否到达买的信号
-                else if (strategy.shouldEnter(endIndex,tradingRecord) && orderState.getType() == OrderType.SELL) {
-                    try {
-                        tradingRecord.enter(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(1));
-//                        createBuyOrder();
+                else if (strategy.shouldEnter(endIndex, tradingRecord) && orderState.getType() == OrderType.SELL) {
+
+                    boolean enter = tradingRecord.enter(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(1));
+                    if (enter) {
+                        try {
+                            createBuyOrder();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
+                            log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                            continue;
+                        }
                         log.error("add buy order price is {}", newBar.getClosePrice().doubleValue());
-                    } catch (Exception e) {
-                        redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
-                        e.printStackTrace();
-                        log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                        setStatus(OrderType.BUY, new BigDecimal(newBar.getClosePrice().doubleValue()));
+
                     }
-                } else if (strategy.shouldEnter(endIndex,tradingRecord) && orderState.getType() == null) {
+
+                } else if (strategy.shouldEnter(endIndex, tradingRecord) && orderState.getType() == null) {
                     //查看当前订单状态 订单不存在的情况下 首先要出现买的信号 有了买的信号 进行购买
-                    try {
-                        this.orderState.setType(OrderType.BUY);
-                        tradingRecord.enter(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(1));
+
+                    boolean enter = tradingRecord.enter(endIndex, newBar.getClosePrice(), PrecisionNum.valueOf(1));
+                    if (enter) {
+                        try {
+                            createBuyOrder();
+                        } catch (Exception e) {
+                            redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
+                            log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                            continue;
+                        }
                         log.error("add buy order price is {}", newBar.getClosePrice().doubleValue());
-//                        createBuyOrder();
-                    } catch (Exception e) {
-                        redisMqService.sendMsg("当前下单信息【" + this.orderState.toString() + "】==下单失败 重新下单！");
-                        e.printStackTrace();
-                        log.error("下单失败{},{}", this.orderState.toString(), e.getMessage());
+                        setStatus(OrderType.BUY, new BigDecimal(newBar.getClosePrice().doubleValue()));
                     }
+
                 }
                 try {
-                    ++runTimes;
-//                    redisMqService.sendMsg("机器人已经运行了>>>" + runTimes + "次");
-//                    log.info("=========================================");
                     //休眠几秒
                     Thread.sleep((long) (baseInfo.getSleep() * 1000));
                 } catch (InterruptedException e) {
@@ -191,11 +228,24 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 log.error("机器人{}运行中发生异常：异常信息{}", robotId, e.getMessage());
                 redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
             } finally {
-                //记录当前机器人的最后一次状态
-                redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
+                if (this.orderState.getType() != null) {
+                    //记录当前机器人的最后一次状态
+                    redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
+                }
             }
         }
 
+    }
+
+    void setStatus(OrderType type, BigDecimal price) {
+        this.orderState.setType(type);
+        this.orderState.setPrice(price);
+    }
+
+    void setStatus(OrderType type, BigDecimal price, Long id) {
+        this.orderState.setType(type);
+        this.orderState.setPrice(price);
+        this.orderState.setId(id);
     }
 
     Strategy buildStrategyByConfig(TimeSeries series, BuyAndSellIndicatorTo to) {
@@ -222,13 +272,13 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         if (to.getStopGain() != null && to.getStopGain() != 0) {
             //给卖出条件增加止盈
             StopGainRule stopGainRule = new StopGainRule(new ClosePriceIndicator(series), to.getStopGain());
-            exit = exit.and(stopGainRule);
+            exit = exit.or(stopGainRule);
 
         }
         if (to.getStopLoss() != null && to.getStopLoss() != 0) {
             //给卖出条件增加止损
             StopLossRule stopLossRule = new StopLossRule(new ClosePriceIndicator(series), to.getStopLoss());
-            exit = exit.and(stopLossRule);
+            exit = exit.or(stopLossRule);
 
         }
         //构建策略
@@ -257,16 +307,15 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 //取消刚刚下的订单
                 boolean cancel = tradingApi.cancelOrder(first.get().getId(), first.get().getMarketId());
                 if (cancel) {
-                    redisMqService.sendMsg("查询到未成功的订单开始取消订单,orderId【" + first.get().getId() + "】, 取消【" + this.orderState.getType().getStringValue() + "】订单成功!!!");
+                    redisMqService.sendMsg("查询到未成功的订单,orderId【" + first.get().getId() + "】, 取消【" + this.orderState.getType().getStringValue() + "】订单成功!!!");
                     if (this.orderState.getType() == OrderType.BUY) {
                         //如果当前订单是购买订单  取消了 应该继续购买
-                        this.orderState.setType(null);
+                        setStatus(null, first.get().getPrice(), null);
                     }
                     if (this.orderState.getType() == OrderType.SELL) {
                         //如果是卖出 应该继续卖出
-                        this.orderState.setType(OrderType.BUY);
+                        setStatus(OrderType.BUY, first.get().getPrice(), null);
                     }
-                    this.orderState.setId(null);
                     return false;
                 }
             } else {
@@ -347,7 +396,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                     return;
                 }
                 //如果是市价的情况
-                if (this.orderState.getOrderType() == com.quant.common.enums.OrderType.SELL_MARKET) {
+                if (this.orderState.getHBOrderType() == HBOrderType.SELL_MARKET) {
                     //上一次购买的交易额就是总金额
                     allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
                     allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
@@ -405,7 +454,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         //当前无订单 创建购买订单
         BigDecimal buyAmount = BigDecimal.ZERO;
         BigDecimal buyPrice = BigDecimal.ZERO;
-        com.quant.common.enums.OrderType orderType;
+        HBOrderType HBOrderType = null;
         //获取余额
         if (!getBalance()) {
             redisMqService.sendMsg("未获取账户【" + this.accountConfig.accountId() + "】的余额信息！！！");
@@ -445,7 +494,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 redisMqService.sendMsg("限价自定义购买数量为【" + buyAmount + "】");
             }
             //设置当前订单的type 为限价买入
-            orderType = com.quant.common.enums.OrderType.BUY_LIMIT;
+            HBOrderType = HBOrderType.BUY_LIMIT;
         } else {
             redisMqService.sendMsg("=========当前策略交易方式:市价购买交易========");
             //市价买 价格直接填0 交易额的精度固定为8
@@ -471,13 +520,13 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 log.info("市价自定义购买交易额:账户id{},购买数量{}", accountConfig.accountId(), buyAmount);
                 redisMqService.sendMsg("市价自定义购买数量为【" + buyAmount + "】");
             }
-            orderType = com.quant.common.enums.OrderType.BUY_MARKET;
+            HBOrderType = HBOrderType.BUY_MARKET;
         }
 
         //设置当前订单状态为购买
         OrderType type = OrderType.BUY;
         //记录当前的价格和数量
-        orderPlace(tradingApi, buyAmount, buyPrice, orderType, type);
+        orderPlace(tradingApi, buyAmount, buyPrice, HBOrderType, type);
     }
 
     /**
@@ -490,7 +539,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         }
         BigDecimal sellAmount = BigDecimal.ZERO;
         BigDecimal sellPrice = BigDecimal.ZERO;
-        com.quant.common.enums.OrderType orderType;
+        HBOrderType HBOrderType = null;
         if (!getBalance()) {
             return;
         }
@@ -524,7 +573,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 log.info("限价自定义卖出数量:账户id{},卖出数量{}", this.accountConfig.accountId(), sellAmount);
                 redisMqService.sendMsg("限价自定义卖出数量:账户id【" + this.accountConfig.accountId() + "】,卖出数量【" + sellAmount + "】");
             }
-            orderType = com.quant.common.enums.OrderType.SELL_LIMIT;
+            HBOrderType = HBOrderType.SELL_LIMIT;
         } else {
             //市价卖出 价格直接填0 计算交易额度
             if (baseInfo.getIsAllSell() == 1) {
@@ -543,11 +592,11 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 log.info("市价自定义卖出数量:账户id{},卖出币种{},数量{}", this.accountConfig.accountId(), this.baseCurrency, sellAmount);
                 redisMqService.sendMsg("市价自定义卖出数量:账户id【" + this.accountConfig.accountId() + "】,卖出币种【" + this.baseCurrency + "】,数量【" + sellAmount + "】");
             }
-            orderType = com.quant.common.enums.OrderType.SELL_MARKET;
+            HBOrderType = HBOrderType.SELL_MARKET;
         }
         //设置当前订单状态为卖出
         OrderType type = OrderType.SELL;
-        orderPlace(tradingApi, sellAmount, sellPrice, orderType, type);
+        orderPlace(tradingApi, sellAmount, sellPrice, HBOrderType, type);
     }
 
     /**
@@ -556,15 +605,14 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
      * @param tradingApi
      * @param sellAmount
      * @param sellPrice
-     * @param orderType
+     * @param HBOrderType
      * @param type
      */
-    private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, com.quant.common.enums.OrderType orderType, OrderType type) {
-
+    private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, HBOrderType HBOrderType, OrderType type) {
         this.orderState.setAmount(sellAmount);
         this.orderState.setPrice(sellPrice);
-        this.orderState.setOrderType(orderType);
-        this.order(sellAmount, sellPrice, orderType, tradingApi, type);
+        this.orderState.setHBOrderType(HBOrderType);
+        this.order(sellAmount, sellPrice, HBOrderType, tradingApi, type);
     }
 
 

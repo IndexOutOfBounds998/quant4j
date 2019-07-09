@@ -4,24 +4,19 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_ZONE_HOST:47.95.214.100}:${EUREKA_ZONE_PORT:8762}/eureka/
+      defaultZone: http://${EUREKA_ZONE_HOST:124.156.196.215}:${EUREKA_ZONE_PORT:8762}/eureka/
   instance:
     prefer-ip-address: true
-    ip-address: 47.52.207.164
+    ip-address: 124.156.196.215
 
 spring:
   application:
     name: qt-client
-#  rabbitmq:
-#    host: ${RABBIT_MQ_HOST:localhost}
-#    port: ${RABBIT_MQ_PORT:5672}
-#    username: ${RABBIT_MQ_USERNAME:yang}
-#    password: ${RABBIT_MQ_PASSWORD:yang}
   redis:
     database: 0
     host: 127.0.0.1
-    port: 6380
-    password: sjh13693094831
+    port: 6379
+    password:
     jedis:
       pool:
         max-active: 8

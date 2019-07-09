@@ -148,13 +148,13 @@ public class IndicatorHelper {
                 Indicator indicatorSecond = IndicatorHelper.builderIndicator(bean.getRuleSecond(), timeSeries);
                 if (compare.equals(indicator_cross_down)) {
                     //大于等于
-                    CrossedDownIndicatorRule crossedUpIndicatorRule = new CrossedDownIndicatorRule(indicatorFirst, indicatorSecond);
-                    entry = andOr(entry, crossedUpIndicatorRule, ruleOnlyOne.get(), condition);
+                    CrossedDownIndicatorRule crossedDownIndicatorRule = new CrossedDownIndicatorRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, crossedDownIndicatorRule, ruleOnlyOne.get(), condition);
                 }
                 if (compare.equals(indicator_cross_up)) {
                     //小于等于
-                    CrossedUpIndicatorRule crossedDownIndicatorRule = new CrossedUpIndicatorRule(indicatorFirst, indicatorSecond);
-                    entry = andOr(entry, crossedDownIndicatorRule, ruleOnlyOne.get(), condition);
+                    CrossedUpIndicatorRule crossedUpIndicatorRule = new CrossedUpIndicatorRule(indicatorFirst, indicatorSecond);
+                    entry = andOr(entry, crossedUpIndicatorRule, ruleOnlyOne.get(), condition);
                 }
                 if (compare.equals(indicator_under)) {
                     //小于的趋势

@@ -6,7 +6,7 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://47.52.207.164:3308/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://localhost:3306/quant?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: root
     password: sjh13693094831
     druid:
@@ -30,9 +30,9 @@ spring:
     name: qt-admin
   redis:
     database: 0
-    host: 47.52.207.164
-    port: 6380
-    password: sjh13693094831
+    host: 127.0.0.1
+    port: 6379
+    password:
     jedis:
       pool:
         max-active: 8
@@ -62,6 +62,6 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/*Mapper.xml
 
 vpnproxy:
-  enable: true
+  enable: false
   ip: 127.0.0.1
   port: 1088

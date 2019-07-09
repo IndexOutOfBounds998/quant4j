@@ -80,13 +80,13 @@ public class IndicatorController extends BaseController {
         if (to.getStopGain() != null && to.getStopGain() != 0) {
             //给卖出条件增加止盈
             StopGainRule stopGainRule = new StopGainRule(new ClosePriceIndicator(series), to.getStopGain());
-            exit = exit.and(stopGainRule);
+            exit = exit.or(stopGainRule);
 
         }
         if (to.getStopLoss() != null && to.getStopLoss() != 0) {
             //给卖出条件增加止损
             StopLossRule stopLossRule = new StopLossRule(new ClosePriceIndicator(series), to.getStopLoss());
-            exit = exit.and(stopLossRule);
+            exit = exit.or(stopLossRule);
 
         }
         //构建策略

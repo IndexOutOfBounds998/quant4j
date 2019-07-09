@@ -42,7 +42,7 @@ spring:
     timeout: 15000
   mail:
     host: smtp.qq.com #发送邮件服务器
-    username: yangge975965279@vip.qq.com #QQ邮箱
+    username: yangge975965279@vip.qq.com #QQ邮箱 请换自己的邮箱谢谢
     password: sdncjthvgtwrbfgg #客户端授权码
     protocol: smtp #发送邮件协议
     properties.mail.smtp.auth: true

@@ -13,10 +13,10 @@
  
  ![image](https://github.com/tokenIsme/images/blob/master/1557888658(1).jpg)
  
- 
+ # 组合自定义的指标 例如选择rsi 然后选择14 或者其他的天数 来源可以选开盘价闭盘价最高价最低价 这四种价格的选择 买入或者是卖出
  ![image](https://github.com/tokenIsme/images/blob/master/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE(7).png)
  
- 
+ # 收益信息显示
  ![image](https://github.com/tokenIsme/images/blob/master/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE(6).png)
 
  ![image](https://github.com/tokenIsme/images/blob/master/1557888693(1).jpg)

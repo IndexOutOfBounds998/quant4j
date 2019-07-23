@@ -99,7 +99,7 @@ npm run dev
 ## Donate
 
 如果你觉得这个项目帮助到了你，你可以帮作者点个star表示鼓励 :tropical_drink:
-如果你觉得有兴趣 可以一起来改进。
+
 
 
 ## License
@@ -108,7 +108,8 @@ Copyright (c) 2019-present Mryang
 
 
 ## 说明：
-
+ 
+  -该项目为个人学习用,项目不完善，切勿作为公司线上产品，出现问题，自己负责。
   -请勿商业用途
 
 

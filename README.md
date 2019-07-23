@@ -52,8 +52,13 @@ npm run dev
 浏览器访问 http://localhost:9527
 
 
-#后台
- - 后台由一个admin 控制中心 client 机器人运行节点 和一个注册中心管理 节点信息组成,启动机器人由admin分发信息给相应的机器人节点，redis作为消息中间件，在client和admin之间传递信息。项目由springboot构建 运行admin,client,register三个项目 动态扩展的是client节点。
+#后端
+ - 后台由一个admin 控制中心 client 机器人运行节点 和一个注册中心管理 节点信息组成
+   - 启动机器人由admin分发信息给相应的机器人节点，redis作为消息中间件，在client和admin之间传递信息。
+   - 项目由springboot构建 运行admin,client,register三个项目 动态扩展的是client节点。
+   - 进入admin模块配置好配置文件,run AdminApplication
+   - 进入client模块配置好配置文件,这里主要配置的是redis和节点的外网ip和端口,以便让admin获取到节点的信息。 执行run ClientApplication
+   - 进入register模块配置好配置文件,run RegisterApplication
 ```
 
 

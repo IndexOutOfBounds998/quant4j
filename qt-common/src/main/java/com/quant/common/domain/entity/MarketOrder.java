@@ -1,4 +1,4 @@
-package com.quant.core.trading;
+package com.quant.common.domain.entity;
 
 import com.quant.common.domain.response.TradeBean;
 import lombok.Data;

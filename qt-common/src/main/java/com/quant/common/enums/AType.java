@@ -22,6 +22,7 @@ public enum AType {
 
     public String getStr() {
         return str;
-    }}
+    }
+}
 
 

@@ -23,6 +23,8 @@
 
 package com.quant.core.trading;
 
+import com.quant.common.enums.OrderType;
+
 import java.math.BigDecimal;
 import java.util.Date;
 

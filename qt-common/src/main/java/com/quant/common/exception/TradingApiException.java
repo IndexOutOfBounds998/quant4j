@@ -21,33 +21,34 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.quant.core.trading;
+package com.quant.common.exception;
 
 /**
  * @author yang
 
- * @desc OrderType
+ * @desc TradingApiException
  * @date 2019/7/9
  */
-public enum OrderType {
+public class TradingApiException extends Exception {
+
+    private static final long serialVersionUID = -8279304672615688060L;
 
     /**
-     * Buy order.
+     * Constructor builds exception with error message.
+     *
+     * @param msg the error message.
      */
-    BUY("Buy"),
-
-    /**
-     * Sell order.
-     */
-    SELL("Sell");
-
-    private final String orderType;
-
-    OrderType(String orderType) {
-        this.orderType = orderType;
+    public TradingApiException(String msg) {
+        super(msg);
     }
 
-    public String getStringValue() {
-        return orderType;
+    /**
+     * Constructor builds exception with error message and original throwable.
+     *
+     * @param msg the error message.
+     * @param e   the original exception.
+     */
+    public TradingApiException(String msg, Throwable e) {
+        super(msg, e);
     }
 }

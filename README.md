@@ -62,19 +62,6 @@ npm run dev
 ```
 
 
-## 其它
-```bash
-  - qt量化交易java版本目前只支持火币的所有币币交易，请自备翻墙代理或者香港新加坡日本的服务器
-
-  - qt-admin 量化控制中心 qt-client 机器人节点 支持动态添加节点
-
-  - 当前支持策略组合 实现了几个比较火的指标组合 rsi macd 。。。。。。。。。
-
-  - 新增回测系统（不完善  有兴趣的一起改进，欢迎━(*｀∀´*)ノ亻! 给个star ）
-
-
-
-```
 ## 图片展示
 
  ![image](https://github.com/tokenIsme/images/blob/master/1557888795(1).jpg)
@@ -96,20 +83,24 @@ npm run dev
  
  ![image](https://github.com/tokenIsme/images/blob/master/1557888747(1).jpg)
 
+
+## 其它
+```bash
+  - qt量化交易java版本目前只支持火币的所有币币交易，请自备翻墙代理或者香港新加坡日本的服务器
+
+  - qt-admin 量化控制中心 qt-client 机器人节点 支持动态添加节点
+
+  - 当前支持指标组合策略 可自由组合成金叉死叉等指标策略
+
+```
+
 ## Donate
 
 如果你觉得这个项目帮助到了你，你可以帮作者点个star表示鼓励 :tropical_drink:
 
-
-
-## License
-
-Copyright (c) 2019-present Mryang
-
-
 ## 说明：
  
-  -该项目为个人学习用,项目不完善，切勿作为公司线上产品，出现问题，自己负责。
-  -请勿商业用途
+  -该项目为个人学习用,项目不完善，切勿作为公司线上产品，个人出现亏损问题，请自己负责哦！
+  -小赌怡情大赌伤身
 
 

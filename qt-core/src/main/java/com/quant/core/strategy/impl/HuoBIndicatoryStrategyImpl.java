@@ -147,7 +147,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 //设置机器人的运行状态 在休眠+20s之后没响应 就认为该机器人已经死亡
                 redisUtil.set(isRunKey, "running", (long) (baseInfo.getSleep() + 20));
                 List<Kline> klineList = getKlines(tradingApi, marketConfig, this.config.getBaseData().getKline(), "10");
-                if (klineList == null || klineList.size() <= 0) {
+                if (klineList == null || klineList.isEmpty()) {
                     continue;
                 }
                 Kline line = klineList.get(0);
@@ -238,18 +238,18 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
 
     }
 
-    void setStatus(OrderType type, BigDecimal price) {
+    private void setStatus(OrderType type, BigDecimal price) {
         this.orderState.setType(type);
         this.orderState.setPrice(price);
     }
 
-    void setStatus(OrderType type, BigDecimal price, Long id) {
+    private void setStatus(OrderType type, BigDecimal price, Long id) {
         this.orderState.setType(type);
         this.orderState.setPrice(price);
         this.orderState.setId(id);
     }
 
-    Strategy buildStrategyByConfig(TimeSeries series, BuyAndSellIndicatorTo to) {
+    private Strategy buildStrategyByConfig(TimeSeries series, BuyAndSellIndicatorTo to) {
         IndicatorFactory factory = new IndicatorFactory(series);
         //是否只有一条规则
         buyOnlyOneRule.set(true);

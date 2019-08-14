@@ -35,6 +35,9 @@
 ## 开发
 
 ```bash
+#后端
+ springboot 咋启动？run main！
+
 - [sql脚本](https://github.com/tokenIsme/images/blob/master/quant.sql)
 - [前端ui](https://github.com/tokenIsme/quant-admin)
 

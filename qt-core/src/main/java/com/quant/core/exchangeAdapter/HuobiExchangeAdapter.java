@@ -220,15 +220,6 @@ public class HuobiExchangeAdapter extends BaseExchangeAdapter implements Trading
         return null;
     }
 
-    @Override
-    public BigDecimal getPercentageOfBuyOrderTakenForExchangeFee(String marketId) throws TradingApiException, ExchangeNetworkException {
-        return null;
-    }
-
-    @Override
-    public BigDecimal getPercentageOfSellOrderTakenForExchangeFee(String marketId) throws TradingApiException, ExchangeNetworkException {
-        return null;
-    }
 
     /**
      * 获取k线

@@ -34,26 +34,14 @@ import java.util.Map;
  */
 public interface BalanceInfo {
 
+
     /**
-     * Returns map of available balances.
-     * <p>
-     * The key is the currency id in UPPERCASE, e.g. LTC, BTC, USD
-     * </p>
-     *
-     * @return map of available balances.
+     * 获取可用余额
+     * @return
      */
     Map<String, BigDecimal> getBalancesAvailable();
 
-    /**
-     * Returns map of balances on hold.
-     * <p>
-     * Some exchangeAdapter do not provide this information and the returned map will be empty.
-     * <p>
-     * The key is the currency id in UPPERCASE, e.g. LTC, BTC, USD
-     * </p>
-     *
-     * @return map of balances on hold.
-     */
+
     Map<String, BigDecimal> getBalancesOnHold();
 }
 

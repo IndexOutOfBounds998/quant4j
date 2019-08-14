@@ -97,6 +97,8 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         TradingRecord tradingRecord = new BaseTradingRecord();
         if (this.orderState.getType() != null) {
 
+
+            //最近的2000条k线数据 计算指标
             if (this.orderState.getType() == OrderType.BUY) {
                 tradingRecord = new BaseTradingRecord();
                 if (this.orderState.getPrice() == null) {
@@ -214,7 +216,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
 
                 }
                 try {
-                    //休眠几秒
+                    //机器人休眠
                     Thread.sleep((long) (baseInfo.getSleep() * 1000));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -230,7 +232,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
                 redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
             } finally {
                 if (this.orderState.getType() != null) {
-                    //记录当前机器人的最后一次状态
+                    //记录当前机器人的最后一次状态 用于下一次恢复数据
                     redisUtil.set(lastOrderState + robotId, JSON.toJSONString(this.orderState));
                 }
             }
@@ -340,6 +342,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
      */
     private void CalculateProfit() {
         try {
+            // 一买一卖才会出现
             if (this.orderState.getType() == OrderType.SELL) {
 
                 Object o = this.redisUtil.lPop(orderProfitIds + robotId);
@@ -626,7 +629,10 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
     protected void sellCalculation() {
     }
 
-    private List<Kline> getKlines(TradingApi tradingApi, MarketConfig marketConfig, String buyKline, String size) {
+    private List<Kline> getKlines(TradingApi tradingApi,
+                                  MarketConfig marketConfig,
+                                  String buyKline,
+                                  String size) {
         KlineConfig klineConfig = new HuoBiKlineConfigImpl(size, buyKline);
         List<Kline> lines = null;
         try {

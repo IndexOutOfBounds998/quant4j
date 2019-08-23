@@ -33,7 +33,9 @@ public class HuobiNotLimitBuyPriceHandle extends StrategyHandle {
                                         int pricePrecision,
                                         int amountPrecision,
                                         BigDecimal baseBalance) {
-
+        if (getHandle() == null) {
+            return null;
+        }
         final BaseInfoEntity baseInfo = config.getIndicatorStrategy().getBaseInfo();
         if (baseInfo.getIsLimitPrice() == PirceType.notLimit.getType()) {
             //市价卖出 价格直接填0 计算交易额度

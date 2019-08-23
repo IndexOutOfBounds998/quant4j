@@ -1,6 +1,5 @@
 package com.quant.core.strategy.handle;
 
-import com.quant.common.domain.entity.MarketOrder;
 import com.quant.common.domain.vo.BaseInfoEntity;
 import com.quant.common.enums.HBOrderType;
 import com.quant.common.enums.PirceType;
@@ -15,7 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * 火币限价
+ * 火币市价
  * Created by yang on 2019/8/23.
  */
 @Slf4j

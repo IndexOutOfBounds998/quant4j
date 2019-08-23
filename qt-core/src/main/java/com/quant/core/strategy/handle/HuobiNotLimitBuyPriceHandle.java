@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * 火币限价
+ * 火币市价
  * Created by yang on 2019/8/23.
  */
 @Slf4j

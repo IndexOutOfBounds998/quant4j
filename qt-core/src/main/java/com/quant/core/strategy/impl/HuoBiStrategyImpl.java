@@ -41,7 +41,7 @@ import java.util.Optional;
  * @Date 19.4.15
  */
 @Slf4j
-public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrategy {
+public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrategy, ProfitCall {
 
 
     //精确到小数点的个数
@@ -385,11 +385,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 }
             } else {
                 //将成功的订单信息传回admin
-                orderMqService.sendMsg(this.orderState.getId());
-                String result = this.orderState.getId() + "_" + this.orderState.getType().getStringValue();
-                this.redisUtil.lPush(orderProfitIds + robotId, result);
-                this.CalculateProfit();
-                return true;
+                return messageBackAdmin(this);
             }
         } catch (ExchangeNetworkException | TradingApiException e) {
             log.error("账户{}取消订单失败{}", this.accountConfig.accountId(), e.getMessage());
@@ -402,7 +398,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     /**
      * 计算盈利
      */
-    private void CalculateProfit() {
+    public void CalculateProfit() {
         try {
             if (this.orderState.getType() == OrderType.SELL) {
 
@@ -461,29 +457,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     return;
                 }
                 //如果是市价的情况
-                if (this.orderState.getHBOrderType() == HBOrderType.SELL_MARKET) {
-                    //上一次购买的交易额就是总金额
-                    allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
-                    allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
-                    buyAmount = new BigDecimal(ordersBuyDetail.getAmount()).setScale(8, RoundingMode.DOWN);
-                    sellAmount = new BigDecimal(ordersSellDetail.getAmount()).setScale(8, RoundingMode.DOWN);
-                    //市价购买价格 按照 已经成交的金额除以已经成交的数量
-                    buyPrice = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).divide(new BigDecimal(ordersBuyDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
-                    sellPrice = new BigDecimal(ordersSellDetail.getFieldCashAmount()).divide(new BigDecimal(ordersSellDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
-                } else {
-                    buyPrice = new BigDecimal(ordersBuyDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
-                    sellPrice = new BigDecimal(ordersSellDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
-                    buyAmount = new BigDecimal(ordersBuyDetail.getAmount()).setScale(amountPrecision, RoundingMode.DOWN);
-                    sellAmount = new BigDecimal(ordersSellDetail.getAmount()).setScale(amountPrecision, RoundingMode.DOWN);
-                    //计算上一次买的总的金额
-                    allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount());
-                    //计算卖的总金额
-                    allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount());
-                }
+                Profit profit = new Profit(ordersBuyDetail, ordersSellDetail, orderState).invoke();
+
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额
-                diff = allSellBalance.subtract(allBuyBalance).setScale(pricePrecision, RoundingMode.DOWN);
+                diff = profit.getAllSellBalance().subtract(profit.getAllBuyBalance()).setScale(pricePrecision, RoundingMode.DOWN);
                 log.info("当前的订单状态{},计算后的差价{}", this.orderState.getType().getStringValue(), diff);
-                divide = diff.divide(allBuyBalance, decimalPoint, RoundingMode.DOWN);
+                divide = diff.divide(profit.getAllBuyBalance(), decimalPoint, RoundingMode.DOWN);
                 log.info("盈亏率:{}", divide);
                 if (diff.compareTo(BigDecimal.ZERO) < 0) {
                     profitTimes++;
@@ -492,16 +471,15 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 profitMessage.setBuyOrderId(buyOrderId);
                 profitMessage.setSellOrderId(sellOrderId);
                 profitMessage.setRobot_id(robotId);
-                profitMessage.setBuyAmount(buyAmount);
-                profitMessage.setSellAmount(sellAmount);
+                profitMessage.setBuyAmount(profit.getBuyAmount());
+                profitMessage.setSellAmount(profit.getSellAmount());
                 profitMessage.setDiff(diff);
                 profitMessage.setDivide(divide);
-                profitMessage.setBuyPrice(buyPrice);
-                profitMessage.setSellPrice(sellPrice);
+                profitMessage.setBuyPrice(profit.getBuyPrice());
+                profitMessage.setSellPrice(profit.getSellPrice());
                 profitMessage.setBuyCashAmount(new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
                 profitMessage.setSellCashAmount(new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
                 orderProfitService.sendMsg(profitMessage);
-
                 if (profitTimes >= this.baseInfo.getProfit()) {
                     //如果亏损次数已经达到预设值 机器人退出线程
                     redisMqService.sendMsg("=======当前亏损次数【" + profitTimes + "】==已经达到预设值,机器人退出任务ing,请修改此策略重新来！！");

@@ -8,26 +8,28 @@ import com.quant.common.domain.response.OrdersDetail;
 import com.quant.common.enums.HBOrderType;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.MarketConfig;
+import com.quant.core.config.StrategyConfig;
 import com.quant.core.redisMq.RedisMqService;
 import com.quant.common.exception.ExchangeNetworkException;
 import com.quant.common.enums.OrderType;
+import com.quant.core.strategy.impl.ProfitCall;
 import com.quant.core.trading.TradingApi;
 import com.quant.common.exception.TradingApiException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author yang
-
  * @desc 策略基类
  * @date 2019/7/9
  */
 @Slf4j
 public abstract class AbstractStrategy {
 
-
+    protected StrategyConfig strategyConfig;
     //当前使用的配额币种
     protected String quotaCurrency;
 
@@ -292,5 +294,58 @@ public abstract class AbstractStrategy {
             this.sellTotal = 0;
         }
 
+    }
+
+    public boolean messageBackAdmin(ProfitCall dg) {
+        orderMqService.sendMsg(this.orderState.getId());
+        String result = this.orderState.getId() + "_" + this.orderState.getType().getStringValue();
+        this.redisUtil.lPush(orderProfitIds + robotId, result);
+        dg.CalculateProfit();
+        return true;
+    }
+
+    @Data
+    public class Profit {
+        private OrdersDetail ordersBuyDetail;
+        private OrdersDetail ordersSellDetail;
+        private BigDecimal allBuyBalance;
+        private BigDecimal allSellBalance;
+        private BigDecimal buyAmount;
+        private BigDecimal sellAmount;
+        private BigDecimal buyPrice;
+        private BigDecimal sellPrice;
+        private OrderState orderState;
+
+        public Profit(OrdersDetail ordersBuyDetail,
+                      OrdersDetail ordersSellDetail,
+                      OrderState orderState) {
+            this.ordersBuyDetail = ordersBuyDetail;
+            this.ordersSellDetail = ordersSellDetail;
+            this.orderState = orderState;
+        }
+
+
+        public Profit invoke() {
+            if (orderState.getHBOrderType() == HBOrderType.SELL_MARKET) {
+                //上一次购买的交易额就是总金额
+                allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
+                allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN);
+                buyAmount = new BigDecimal(ordersBuyDetail.getAmount()).setScale(8, RoundingMode.DOWN);
+                sellAmount = new BigDecimal(ordersSellDetail.getAmount()).setScale(8, RoundingMode.DOWN);
+                //市价购买价格 按照 已经成交的金额除以已经成交的数量
+                buyPrice = new BigDecimal(ordersBuyDetail.getFieldCashAmount()).divide(new BigDecimal(ordersBuyDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
+                sellPrice = new BigDecimal(ordersSellDetail.getFieldCashAmount()).divide(new BigDecimal(ordersSellDetail.getFieldAmount()), pricePrecision, RoundingMode.DOWN);
+            } else {
+                buyPrice = new BigDecimal(ordersBuyDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
+                sellPrice = new BigDecimal(ordersSellDetail.getPrice()).setScale(pricePrecision, RoundingMode.DOWN);
+                buyAmount = new BigDecimal(ordersBuyDetail.getAmount()).setScale(amountPrecision, RoundingMode.DOWN);
+                sellAmount = new BigDecimal(ordersSellDetail.getAmount()).setScale(amountPrecision, RoundingMode.DOWN);
+                //计算上一次买的总的金额
+                allBuyBalance = new BigDecimal(ordersBuyDetail.getFieldCashAmount());
+                //计算卖的总金额
+                allSellBalance = new BigDecimal(ordersSellDetail.getFieldCashAmount());
+            }
+            return this;
+        }
     }
 }

@@ -50,7 +50,7 @@ import java.util.Optional;
  * @Date 19.4.15
  */
 @Slf4j
-public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements TradingStrategy, ProfitCall {
+public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements TradingStrategy, StrategyDelegate {
 
     //精确到小数点的个数
     private static final int decimalPoint = 4;
@@ -346,6 +346,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
     /**
      * 计算盈利
      */
+    @Override
     public void CalculateProfit() {
         try {
             // 一买一卖才会出现
@@ -453,10 +454,6 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
             log.info("不创建订单");
             return;
         }
-        //当前无订单 创建购买订单
-        BigDecimal buyAmount, buyPrice;
-
-        HBOrderType HBOrderType;
         //获取余额
         if (!getBalance()) {
             redisMqService.sendMsg("未获取账户【" + this.accountConfig.accountId() + "】的余额信息！！！");
@@ -469,16 +466,9 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         //是否是限价
         StrategyHandle strategyHandle = new HuobiLimitBuyPriceHandle(new HuobiNotLimitBuyPriceHandle(null));
         StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
-        if (handleResult != null) {
 
-            HBOrderType = handleResult.getHbOrderType();
-            buyPrice = handleResult.getPrice();
-            buyAmount = handleResult.getAmount();
-            //设置当前订单状态为购买
-            OrderType type = OrderType.BUY;
-            //记录当前的价格和数量
-            orderPlace(tradingApi, buyAmount, buyPrice, HBOrderType, type);
-        }
+        setHandleResult(handleResult);
+        handleResultForBuy(handleResult, this);
 
 
     }
@@ -491,8 +481,6 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         if (!checkOrder(tradingApi)) {
             return;
         }
-        BigDecimal sellAmount, sellPrice;
-        HBOrderType HBOrderType;
         if (!getBalance()) {
             return;
         }
@@ -505,16 +493,10 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         StrategyHandle strategyHandle = new HuobiLimitSellPriceHandle(new HuobiNotLimitSellPriceHandle(null));
         StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
         //获取结果
-        if (handleResult != null) {
-            HBOrderType = handleResult.getHbOrderType();
-            sellPrice = handleResult.getPrice();
-            sellAmount = handleResult.getAmount();
-            //设置当前订单状态为卖出
-            OrderType type = OrderType.SELL;
-            orderPlace(tradingApi, sellAmount, sellPrice, HBOrderType, type);
-        }
-
+        setHandleResult(handleResult);
+        handleResultForSell(handleResult, this);
     }
+
 
     /**
      * 记录订单状态和每次的交易额和数量
@@ -525,7 +507,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
      * @param HBOrderType
      * @param type
      */
-    private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, HBOrderType HBOrderType, OrderType type) {
+    public void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, HBOrderType HBOrderType, OrderType type) {
         this.orderState.setAmount(sellAmount);
         this.orderState.setPrice(sellPrice);
         this.orderState.setHBOrderType(HBOrderType);
@@ -536,13 +518,13 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
     @Override
     protected void buyCalculation() {
 
-        // 这里不适用
+        // 这里不实现
 
     }
 
     @Override
     protected void sellCalculation() {
-        // 这里不适用
+        // 这里不实现
     }
 
     private List<Kline> getKlines(TradingApi tradingApi,

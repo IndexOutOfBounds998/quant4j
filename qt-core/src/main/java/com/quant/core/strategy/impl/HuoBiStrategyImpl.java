@@ -26,6 +26,7 @@ import com.quant.core.redisMq.RobotLogsRedisMqServiceImpl;
 import com.quant.core.strategy.AbstractStrategy;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
+import com.quant.core.strategy.handle.*;
 import com.quant.core.trading.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,18 +42,14 @@ import java.util.Optional;
  * @Date 19.4.15
  */
 @Slf4j
-public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrategy, ProfitCall {
-
-
+public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrategy, StrategyDelegate {
     //精确到小数点的个数
     private static final int decimalPoint = 4;
     //市场买卖信息
     private MarketOrder marketOrder;
     //亏损次数
     private int profitTimes;
-
     private Weights weights;
-    //    private StrategyVo.BaseInfoEntity baseInfo;
     private StrategyVo.Setting1Entity setting1;
     private StrategyVo.Setting2Entity setting2;
     private StrategyVo.Setting3Entity setting3;
@@ -60,11 +57,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     private StrategyVo.Setting5Entity setting5;
     private StrategyVo.Setting6Entity setting6;
     private long runTimes = 0;
-
-
     private String lastOrderState = "lastOrderState_";
-
-
     private String orderProfitIds = "order_Profit_Ids_";
     /**
      * 当前的最新购买价格
@@ -78,13 +71,12 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * 是否到达了亏损次数
      */
     private volatile boolean profitArrive = false;
-
-    protected BaseInfoEntity baseInfo;
+    private BaseInfoEntity baseInfo;
 
     /**
      * 权重计算
      */
-    protected void weightsCalculation() {
+    private void weightsCalculation() {
 
         if ((this.orderState.getType() == OrderType.SELL || this.orderState.getType() == null) &&
                 this.baseInfo.getBuyAllWeights() != 0) {
@@ -398,6 +390,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
     /**
      * 计算盈利
      */
+    @Override
     public void CalculateProfit() {
         try {
             if (this.orderState.getType() == OrderType.SELL) {
@@ -421,17 +414,16 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 }
 
                 long buyOrderId, sellOrderId;
-                BigDecimal allBuyBalance, allSellBalance, buyAmount, sellAmount,
-                        buyPrice, sellPrice, diff, divide;
+                BigDecimal diff, divide;
                 //获取上一次的购买金额和数量
-                Object last = this.redisUtil.lPop(orderProfitIds + robotId);
+                final Object last = this.redisUtil.lPop(orderProfitIds + robotId);
                 if (last == null) {
                     log.error("获取订单id队列上一次的购买记录错误");
                     return;
                 }
                 log.info("上一次订单id 队列取出来的值是{}", last.toString());
 
-                String[] lastIdAndType = last.toString().split("_");
+                final String[] lastIdAndType = last.toString().split("_");
 
                 //如果当前的订单是市价单 计算盈亏 需要查询这个订单的详情信息
                 buyOrderId = Long.parseLong(lastIdAndType[0]);
@@ -457,7 +449,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                     return;
                 }
                 //如果是市价的情况
-                Profit profit = new Profit(ordersBuyDetail, ordersSellDetail, orderState).invoke();
+                final Profit profit = new Profit(ordersBuyDetail, ordersSellDetail, orderState).invoke();
 
                 //计算盈亏率 卖出总金额-买入总金额 除以 买入总金额
                 diff = profit.getAllSellBalance().subtract(profit.getAllBuyBalance()).setScale(pricePrecision, RoundingMode.DOWN);
@@ -467,18 +459,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
                 if (diff.compareTo(BigDecimal.ZERO) < 0) {
                     profitTimes++;
                 }
-                ProfitMessage profitMessage = new ProfitMessage();
-                profitMessage.setBuyOrderId(buyOrderId);
-                profitMessage.setSellOrderId(sellOrderId);
-                profitMessage.setRobot_id(robotId);
-                profitMessage.setBuyAmount(profit.getBuyAmount());
-                profitMessage.setSellAmount(profit.getSellAmount());
-                profitMessage.setDiff(diff);
-                profitMessage.setDivide(divide);
-                profitMessage.setBuyPrice(profit.getBuyPrice());
-                profitMessage.setSellPrice(profit.getSellPrice());
-                profitMessage.setBuyCashAmount(new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
-                profitMessage.setSellCashAmount(new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
+                final ProfitMessage profitMessage = getProfitMessage(buyOrderId, sellOrderId, diff, divide, ordersBuyDetail, ordersSellDetail, profit);
                 orderProfitService.sendMsg(profitMessage);
                 if (profitTimes >= this.baseInfo.getProfit()) {
                     //如果亏损次数已经达到预设值 机器人退出线程
@@ -494,6 +475,22 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             log.error("计算盈亏率发生异常{}", e.getMessage());
         }
 
+    }
+
+    private ProfitMessage getProfitMessage(long buyOrderId, long sellOrderId, BigDecimal diff, BigDecimal divide, OrdersDetail ordersBuyDetail, OrdersDetail ordersSellDetail, Profit profit) {
+        ProfitMessage profitMessage = new ProfitMessage();
+        profitMessage.setBuyOrderId(buyOrderId);
+        profitMessage.setSellOrderId(sellOrderId);
+        profitMessage.setRobot_id(robotId);
+        profitMessage.setBuyAmount(profit.getBuyAmount());
+        profitMessage.setSellAmount(profit.getSellAmount());
+        profitMessage.setDiff(diff);
+        profitMessage.setDivide(divide);
+        profitMessage.setBuyPrice(profit.getBuyPrice());
+        profitMessage.setSellPrice(profit.getSellPrice());
+        profitMessage.setBuyCashAmount(new BigDecimal(ordersBuyDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
+        profitMessage.setSellCashAmount(new BigDecimal(ordersSellDetail.getFieldCashAmount()).setScale(pricePrecision, RoundingMode.DOWN));
+        return profitMessage;
     }
 
 
@@ -525,10 +522,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             log.info("机器人退出");
             return;
         }
-        //当前无订单 创建购买订单
-        BigDecimal buyAmount = BigDecimal.ZERO;
-        BigDecimal buyPrice = BigDecimal.ZERO;
-        HBOrderType HBOrderType = null;
         //获取余额
         if (!getBalance()) {
             redisMqService.sendMsg("未获取账户【" + this.accountConfig.accountId() + "】的余额信息！！！");
@@ -539,67 +532,10 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             return;
         }
         //是否是限价
-        if (baseInfo.getIsLimitPrice() == 1) {
-            //是限价的方式购买 需要计算价格
-            BigDecimal currentBuyPrice = this.currentNewBuyPrice;
-            //计算购买的价格
-            buyPrice = baseInfo.getBuyPrice().add(currentBuyPrice).setScale(pricePrecision, RoundingMode.DOWN);
-            log.info("限价购买计算价格:当前市场最新的买入的价格:{},计算后的订单价格:{}", currentBuyPrice, buyPrice);
-            redisMqService.sendMsg("=========当前策略交易方式:限价交易========");
-            redisMqService.sendMsg("限价购买价格计算:当前市场最新买入价格:【" + currentBuyPrice + "】,策略计算后的订单价格:【" + buyPrice + "】");
-            //计算购买的数量 是否全部买
-            BigDecimal aviAmount = quotaBalance.divide(buyPrice, amountPrecision, RoundingMode.DOWN);
-            if (baseInfo.getIsAllBuy() == 1) {
-                //计算购买的数量 当前可用余额除以购买价格
-                buyAmount = aviAmount;
-                log.info("限价购买计算数量:全部购买,购买数量为{}", buyAmount);
-                redisMqService.sendMsg("=========当前策略购买方式:全部购买========");
-                redisMqService.sendMsg("限价全部购买计算数量后为【" + buyAmount + "】");
-            } else {
-                //不是全部购买 自定义购买数量
-                buyAmount = buyAmount.add(baseInfo.getBuyAmount().setScale(amountPrecision, RoundingMode.DOWN));
-                if (buyAmount.compareTo(aviAmount) > 0) {
-                    log.info("限价自定义购买:账户{}的余额不足,需要充值......", accountConfig.accountId());
-                    redisMqService.sendMsg("限价自定义购买:账户【" + accountConfig.accountId() + "】的余额不足,需要充值......");
-                    return;
-                }
-                log.info("限价自定义购买数量:账户{},购买数量{}", accountConfig.accountId(), buyAmount);
-                redisMqService.sendMsg("限价自定义购买数量为【" + buyAmount + "】");
-            }
-            //设置当前订单的type 为限价买入
-            HBOrderType = HBOrderType.BUY_LIMIT;
-        } else {
-            redisMqService.sendMsg("=========当前策略交易方式:市价购买交易========");
-            //市价买 价格直接填0 交易额的精度固定为8
-            //计算购买的数量 是否全部买
-            if (baseInfo.getIsAllBuy() == 1) {
-                redisMqService.sendMsg("=========当前策略购买方式:全部购买========");
-                //如果市价全部买 就是价格就是交易额度 quotaBalance; 默认固定为8位
-                buyAmount = this.quotaBalance.setScale(8, RoundingMode.DOWN);
-                if (buyAmount.compareTo(BigDecimal.ONE) < 0) {
-                    redisMqService.sendMsg("市价交易,交易额不能低于1个");
-                    log.info("市价全部购买交易额不能低于1");
-                    return;
-                }
-                redisMqService.sendMsg("市价全部购买,交易额为:" + buyAmount);
-            } else {
-                //不是全部购买 自定义交易额 购买
-                buyAmount = baseInfo.getBuyQuotaPrice().setScale(8, RoundingMode.DOWN);
-                if (buyAmount.compareTo(BigDecimal.ONE) < 0) {
-                    redisMqService.sendMsg("市价自定义购买数量:账户【" + accountConfig.accountId() + "】余额不足,需要充值......");
-                    log.info("市价自定义购买交易额:账户{}的余额不足,需要充值......", accountConfig.accountId());
-                    return;
-                }
-                log.info("市价自定义购买交易额:账户id{},购买数量{}", accountConfig.accountId(), buyAmount);
-                redisMqService.sendMsg("市价自定义购买数量为【" + buyAmount + "】");
-            }
-            HBOrderType = HBOrderType.BUY_MARKET;
-        }
-
-        //设置当前订单状态为购买
-        OrderType type = OrderType.BUY;
-        //记录当前的价格和数量
-        orderPlace(tradingApi, buyAmount, buyPrice, HBOrderType, type);
+        StrategyHandle strategyHandle = new HuobiLimitBuyPriceHandle(new HuobiNotLimitBuyPriceHandle(null));
+        StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
+        setHandleResult(handleResult);
+        handleResultForBuy(handleResult, this);
     }
 
     /**
@@ -613,9 +549,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         if (profitArrive) {
             return;
         }
-        BigDecimal sellAmount = BigDecimal.ZERO;
-        BigDecimal sellPrice = BigDecimal.ZERO;
-        HBOrderType HBOrderType = null;
+
         if (!getBalance()) {
             return;
         }
@@ -625,53 +559,11 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
             return;
         }
         //是否是限价
-        if (baseInfo.getIsLimitPrice() == 1) {
-            //从当前的20个卖出订单里找出最优的价格 （限价卖出）
-            BigDecimal currentSellPrice = marketOrder.getSell().get(0).getPrice();
-            //计算卖出的价格
-            sellPrice = baseInfo.getSellPrice().add(currentSellPrice).setScale(pricePrecision, RoundingMode.UP);
-            log.info("限价卖出:当前卖出的价格:{},计算后的订单卖出价格:{}", currentSellPrice, sellPrice);
-            redisMqService.sendMsg("限价卖出:当前卖出的价格:【" + currentSellPrice + "】,计算后的订单卖出价格:【" + sellPrice + "】");
-            //计算购买的数量 是否全部卖出
-            if (baseInfo.getIsAllSell() == 1) {
-                //从用户api的表里查询到他的账户相应的base 火币的数量全部购买
-                sellAmount = sellAmount.add(this.baseBalance).setScale(this.amountPrecision, RoundingMode.DOWN);
-                log.info("限价全部卖出:账户id{}卖出数量为{}", this.accountConfig.accountId(), sellAmount);
-                redisMqService.sendMsg("限价全部卖出:账户id【" + this.accountConfig.accountId() + "】卖出数量为【" + sellAmount + "】");
-            } else {
-                sellAmount = sellAmount.add(this.baseInfo.getSellAmount().setScale(this.amountPrecision, RoundingMode.DOWN));
-                if (sellAmount.compareTo(this.baseBalance) > 0) {
-                    log.info("限价自定义卖出余额{}大于账户余额{}:账户id{}的余额不足,需要充值......", sellAmount, this.baseBalance, accountConfig.accountId());
-                    redisMqService.sendMsg("限价自定义卖出余额【" + sellAmount + "】大于账户余额【" + this.baseBalance + "】>>>账户id【" + this.accountConfig.accountId() + "】的余额不足,需要充值......");
-                    return;
-                }
-                log.info("限价自定义卖出数量:账户id{},卖出数量{}", this.accountConfig.accountId(), sellAmount);
-                redisMqService.sendMsg("限价自定义卖出数量:账户id【" + this.accountConfig.accountId() + "】,卖出数量【" + sellAmount + "】");
-            }
-            HBOrderType = HBOrderType.SELL_LIMIT;
-        } else {
-            //市价卖出 价格直接填0 计算交易额度
-            if (baseInfo.getIsAllSell() == 1) {
-                //如果市价全部卖出 卖出为币 卖出所有的币 就是价格就是交易额度 quotaBalance;
-                sellAmount = this.baseBalance.setScale(this.amountPrecision, RoundingMode.DOWN);
-                log.info("市价全部卖出,卖出数量{}", sellAmount);
-                redisMqService.sendMsg("市价全部卖出,卖出数量【" + sellAmount + "】");
-            } else {
-                //不是全部购买 自定义交易额 购买
-                sellAmount = sellAmount.add(baseInfo.getSellAmount()).setScale(this.amountPrecision, RoundingMode.DOWN);
-                if (sellAmount.compareTo(this.baseBalance) > 0) {
-                    log.info("市价自定义卖出:账户id{}的余额不足,需要充值......", this.accountConfig.accountId());
-                    redisMqService.sendMsg("市价自定义卖出:账户id【" + this.accountConfig.accountId() + "】的余额不足,需要充值......");
-                    return;
-                }
-                log.info("市价自定义卖出数量:账户id{},卖出币种{},数量{}", this.accountConfig.accountId(), this.baseCurrency, sellAmount);
-                redisMqService.sendMsg("市价自定义卖出数量:账户id【" + this.accountConfig.accountId() + "】,卖出币种【" + this.baseCurrency + "】,数量【" + sellAmount + "】");
-            }
-            HBOrderType = HBOrderType.SELL_MARKET;
-        }
-        //设置当前订单状态为卖出
-        OrderType type = OrderType.SELL;
-        orderPlace(tradingApi, sellAmount, sellPrice, HBOrderType, type);
+        final StrategyHandle strategyHandle = new HuobiLimitSellPriceHandle(new HuobiNotLimitSellPriceHandle(null));
+        final StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
+        //获取结果
+        setHandleResult(handleResult);
+        handleResultForSell(handleResult, this);
     }
 
     /**
@@ -683,7 +575,7 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
      * @param HBOrderType
      * @param type
      */
-    private void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, HBOrderType HBOrderType, OrderType type) {
+    public void orderPlace(TradingApi tradingApi, BigDecimal sellAmount, BigDecimal sellPrice, HBOrderType HBOrderType, OrderType type) {
 
         this.orderState.setAmount(sellAmount);
         this.orderState.setPrice(sellPrice);

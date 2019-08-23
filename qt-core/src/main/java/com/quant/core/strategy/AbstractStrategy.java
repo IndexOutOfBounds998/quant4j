@@ -12,7 +12,8 @@ import com.quant.core.config.StrategyConfig;
 import com.quant.core.redisMq.RedisMqService;
 import com.quant.common.exception.ExchangeNetworkException;
 import com.quant.common.enums.OrderType;
-import com.quant.core.strategy.impl.ProfitCall;
+import com.quant.core.strategy.handle.StrategyHandle;
+import com.quant.core.strategy.impl.StrategyDelegate;
 import com.quant.core.trading.TradingApi;
 import com.quant.common.exception.TradingApiException;
 import lombok.Data;
@@ -28,23 +29,17 @@ import java.math.RoundingMode;
  */
 @Slf4j
 public abstract class AbstractStrategy {
-
     protected StrategyConfig strategyConfig;
     //当前使用的配额币种
-    protected String quotaCurrency;
-
+    private String quotaCurrency;
     //当前使用的基础币种
     protected String baseCurrency;
-
     //价格精度
     protected int pricePrecision;
     //数量金额精度
     protected int amountPrecision;
-
     protected OrderState orderState;
-
     protected String lastOrderState = "last_Order_State_";
-
     protected String orderProfitIds = "order_Profit_Ids_";
     protected RedisUtil redisUtil;
     protected Integer robotId;
@@ -54,23 +49,15 @@ public abstract class AbstractStrategy {
     protected volatile String isRunKey;
     //redismq 日志推送服务
     protected RedisMqService redisMqService, orderMqService, orderProfitService;
-
-
-    protected String quotaBalanceKey;
-
-    protected String baseBalanceKey;
-
+    private String quotaBalanceKey;
+    private String baseBalanceKey;
     //当前账户余额
     protected BigDecimal quotaBalance;
-
     //当前账户base余额
     protected BigDecimal baseBalance;
-
     protected TradingApi tradingApi;
     protected MarketConfig marketConfig;
-    //    private OrderState orderState;
     protected AccountConfig accountConfig;
-    //    private StrategyVo.BaseInfoEntity baseInfo;
 
     /**
      * 买入权重计算
@@ -82,6 +69,16 @@ public abstract class AbstractStrategy {
      */
     protected abstract void sellCalculation();
 
+
+    protected StrategyHandle.HandleResult handleResult;
+
+    public StrategyHandle.HandleResult getHandleResult() {
+        return handleResult;
+    }
+
+    public void setHandleResult(StrategyHandle.HandleResult handleResult) {
+        this.handleResult = handleResult;
+    }
 
     public void init() {
         try {
@@ -225,6 +222,36 @@ public abstract class AbstractStrategy {
         return false;
     }
 
+    public void handleResultForSell(StrategyHandle.HandleResult handleResult, StrategyDelegate dg) {
+        HBOrderType HBOrderType;
+        BigDecimal sellPrice;
+        BigDecimal sellAmount;
+        if (handleResult != null) {
+            HBOrderType = handleResult.getHbOrderType();
+            sellPrice = handleResult.getPrice();
+            sellAmount = handleResult.getAmount();
+            //设置当前订单状态为卖出
+            OrderType type = OrderType.SELL;
+            dg.orderPlace(tradingApi, sellAmount, sellPrice, HBOrderType, type);
+        }
+    }
+
+    public void handleResultForBuy(StrategyHandle.HandleResult handleResult, StrategyDelegate dg) {
+        HBOrderType HBOrderType;
+        BigDecimal buyPrice;
+        BigDecimal buyAmount;
+        if (handleResult != null) {
+
+            HBOrderType = handleResult.getHbOrderType();
+            buyPrice = handleResult.getPrice();
+            buyAmount = handleResult.getAmount();
+            //设置当前订单状态为购买
+            OrderType type = OrderType.BUY;
+            //记录当前的价格和数量
+            dg.orderPlace(tradingApi, buyAmount, buyPrice, HBOrderType, type);
+        }
+    }
+
     /**
      * 订单状态
      */
@@ -296,7 +323,7 @@ public abstract class AbstractStrategy {
 
     }
 
-    public boolean messageBackAdmin(ProfitCall dg) {
+    public boolean messageBackAdmin(StrategyDelegate dg) {
         orderMqService.sendMsg(this.orderState.getId());
         String result = this.orderState.getId() + "_" + this.orderState.getType().getStringValue();
         this.redisUtil.lPush(orderProfitIds + robotId, result);

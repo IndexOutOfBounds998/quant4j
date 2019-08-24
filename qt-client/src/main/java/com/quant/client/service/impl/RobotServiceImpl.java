@@ -1,11 +1,10 @@
 package com.quant.client.service.impl;
 
 import com.quant.client.task.IndicatorRobotOperate;
-import com.quant.client.task.RobotOperate;
+import com.quant.client.task.SimpleNumRobotOperate;
 import com.quant.client.service.RobotService;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;
-import com.quant.common.domain.to.BuyAndSellIndicatorTo;
 import com.quant.common.domain.vo.IndicatorStrategyVo;
 import com.quant.core.api.ApiResult;
 import com.quant.common.enums.Status;
@@ -31,7 +30,7 @@ public class RobotServiceImpl implements RobotService {
         //启动机器人
         try {
             executorService.execute(() -> {
-                RobotOperate robotOperate = new RobotOperate(redisUtil, vpnProxyConfig);
+                SimpleNumRobotOperate robotOperate = new SimpleNumRobotOperate(redisUtil, vpnProxyConfig);
                 robotOperate.doRobotTask(vo);
             });
             return new ApiResult(Status.SUCCESS);

@@ -24,6 +24,7 @@
 package com.quant.core.strategy;
 
 
+import com.quant.core.builder.StrategyBuilder;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.MarketConfig;
 import com.quant.core.trading.TradingApi;
@@ -31,31 +32,17 @@ import com.quant.core.config.StrategyConfig;
 
 /**
  * @author yang
-
  * @desc TradingStrategy
  * @date 2019/7/9
  */
 public interface TradingStrategy {
 
-    /**
-     * Called once by the Trading Engine when it starts up.
-     *
-     * @param tradingApi the Trading API.
-     * @param market     the market for this strategy.
-     * @param config     optional configuration for the strategy.
-     */
-    void init(TradingApi tradingApi, MarketConfig market, StrategyConfig config, AccountConfig accountConfig);
 
-    /**
-     * <p>
-     * Called by the Trading Engine during each trade cycle.
-     * </p>
-     * <p>
-     * Here, you can create some orders, cancel some, buy some beer... do whatever you want.
-     * </p>
-     *
-     * @throws StrategyException if something goes bad. Trading Strategy implementations should throw this exception
-     *                           if they want the Trading Engine to shutdown the bot immediately.
-     */
+   // void init(TradingApi tradingApi, MarketConfig market, StrategyConfig config, AccountConfig accountConfig);
+
+
+    void init(StrategyBuilder builder);
+
+
     void execute() throws StrategyException;
 }

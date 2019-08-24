@@ -13,6 +13,7 @@ import com.quant.common.domain.vo.ProfitMessage;
 import com.quant.common.enums.HBOrderType;
 import com.quant.common.exception.ExchangeNetworkException;
 import com.quant.common.exception.TradingApiException;
+import com.quant.core.builder.StrategyBuilder;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
@@ -52,7 +53,7 @@ import java.util.Optional;
 @Slf4j
 public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements TradingStrategy, StrategyDelegate {
 
-    //精确到小数点的个数
+    //精确到小数点的个数   这个有问题的  当时用火币服务器获取的精度 但是下单却提示精度不对。
     private static final int decimalPoint = 4;
 
     private llIndicatorTo config;
@@ -77,17 +78,21 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         this.isRunKey = RobotRedisKeyConfig.getRobotIsRunStateKey() + robotId;
     }
 
+
     @Override
-    public void init(TradingApi tradingApi, MarketConfig market, StrategyConfig config, AccountConfig accountConfig) {
-        log.info("===============初始化参数" + config.getIndicatorStrategy().toString());
-        this.strategyConfig = config;
-        this.tradingApi = tradingApi;
-        this.marketConfig = market;
-        this.accountConfig = accountConfig;
-        this.config = config.getIndicatorStrategy();
+    public void init(StrategyBuilder builder) {
+        log.info("===============初始化参数" + builder.toString());
+        this.strategyConfig = builder.getStrategyConfig();
+        this.tradingApi = builder.getTradingApi();
+        this.marketConfig = builder.getMarketConfig();
+        this.accountConfig = builder.getAccountConfig();
+        this.config = builder.getStrategyConfig().getIndicatorStrategy();
         this.baseInfo = this.config.getBaseInfo();
         this.orderState = new OrderState();
-        this.redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
+        this.redisUtil = builder.getRedisUtil();
+        this.robotId = builder.getIndicatorStrategyVo().getRobotId();
+        this.redisMqService = new RobotLogsRedisMqServiceImpl(redisUtil, robotId,
+                Integer.parseInt(this.accountConfig.getUserId()));
         this.orderMqService = new OrderIdRedisMqServiceImpl(this.redisUtil, accountConfig, robotId);
         this.orderProfitService = new OrderProfitRedisMqServiceImpl(this.redisUtil);
     }

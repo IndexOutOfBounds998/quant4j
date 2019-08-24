@@ -15,6 +15,7 @@ import com.quant.common.enums.HBOrderType;
 import com.quant.common.enums.TraceType;
 import com.quant.common.exception.ExchangeNetworkException;
 import com.quant.common.exception.TradingApiException;
+import com.quant.core.builder.StrategyBuilder;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
@@ -42,7 +43,7 @@ import java.util.Optional;
  * @Date 19.4.15
  */
 @Slf4j
-public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrategy, StrategyDelegate {
+public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements TradingStrategy, StrategyDelegate {
     //精确到小数点的个数
     private static final int decimalPoint = 4;
     //市场买卖信息
@@ -90,20 +91,22 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
 
     }
 
-    public HuoBiStrategyImpl(RedisUtil redisUtil, Integer robotId) {
+    public HuoBiSimpleStrategyImpl(RedisUtil redisUtil, Integer robotId) {
         this.redisUtil = redisUtil;
         this.robotId = robotId;
         this.startkey = RobotRedisKeyConfig.getRobotIsStartStateKey() + robotId;
         this.isRunKey = RobotRedisKeyConfig.getRobotIsRunStateKey() + robotId;
     }
 
-
     @Override
-    public void init(TradingApi tradingApi, MarketConfig market, StrategyConfig config, AccountConfig accountConfig) {
-        log.info("===============初始化参数" + config.getStrategyVo().toString());
-        this.tradingApi = tradingApi;
-        this.marketConfig = market;
-        this.accountConfig = accountConfig;
+    public void init(StrategyBuilder builder) {
+        log.info("===============初始化参数" + builder.toString());
+        this.tradingApi = builder.getTradingApi();
+        this.marketConfig = builder.getMarketConfig();
+        this.accountConfig = builder.getAccountConfig();
+        this.redisUtil = builder.getRedisUtil();
+        this.robotId = builder.getRobotStrategyVo().getRobotId();
+        final StrategyConfig config = builder.getStrategyConfig();
         this.baseInfo = config.getStrategyVo().getBaseInfo();
         this.setting1 = config.getStrategyVo().getSetting1();
         this.setting2 = config.getStrategyVo().getSetting2();
@@ -111,7 +114,6 @@ public class HuoBiStrategyImpl extends AbstractStrategy implements TradingStrate
         this.setting4 = config.getStrategyVo().getSetting4();
         this.setting5 = config.getStrategyVo().getSetting5();
         this.setting6 = config.getStrategyVo().getSetting6();
-
         this.orderState = new OrderState();
         this.weights = new Weights();
         this.redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));

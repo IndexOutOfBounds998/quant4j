@@ -3,7 +3,7 @@ package com.quant.client.task;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;
 import com.quant.common.domain.vo.IndicatorStrategyVo;
-import com.quant.common.enums.StratrgyType;
+import com.quant.common.enums.StrategyType;
 import com.quant.core.builder.StrategyBuilder;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
@@ -39,7 +39,7 @@ public class IndicatorRobotOperate {
 
     private TradingStrategy builderStrategy(IndicatorStrategyVo vo) {
 
-        StratrgyType indicator = StratrgyType.indicator;
+        StrategyType indicator = StrategyType.indicator;
         StrategyBuilder builder = new StrategyBuilder().setRedisUtil(redisUtil)
                 .setStratrgyType(indicator)
                 .setIndicatorStrategyVo(vo).setVpnProxyConfig(vpnProxyConfig)

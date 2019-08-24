@@ -5,7 +5,7 @@ import com.quant.common.config.VpnProxyConfig;
 import com.quant.common.domain.vo.IndicatorStrategyVo;
 import com.quant.common.domain.vo.Market;
 import com.quant.common.domain.vo.RobotStrategyVo;
-import com.quant.common.enums.StratrgyType;
+import com.quant.common.enums.StrategyType;
 import com.quant.core.api.ApiClient;
 import com.quant.core.config.AccountConfig;
 import com.quant.core.config.MarketConfig;
@@ -32,9 +32,7 @@ public class StrategyBuilder {
     @Setter
     private RedisUtil redisUtil;
     @Setter
-    private StratrgyType stratrgyType;
-
-
+    private StrategyType stratrgyType;
     @Getter
     @Setter
     private VpnProxyConfig vpnProxyConfig;
@@ -60,10 +58,10 @@ public class StrategyBuilder {
     public StrategyBuilder buildApiClient() {
 
 
-        if (stratrgyType == StratrgyType.indicator) {
+        if (stratrgyType == StrategyType.indicator) {
             this.apiClient = new ApiClient(indicatorStrategyVo.getAppKey(), indicatorStrategyVo.getAppSecret(), vpnProxyConfig);
 
-        } else if (stratrgyType == StratrgyType.simple) {
+        } else if (stratrgyType == StrategyType.simple) {
             this.apiClient = new ApiClient(robotStrategyVo.getAppKey(), robotStrategyVo.getAppSecret(), vpnProxyConfig);
         }
         return this;
@@ -82,9 +80,9 @@ public class StrategyBuilder {
     }
 
     public StrategyBuilder buildMarketConfig() {
-        if (stratrgyType == StratrgyType.indicator) {
+        if (stratrgyType == StrategyType.indicator) {
             this.marketConfig = new HuoBiMarketConfigImpl(new Market(indicatorStrategyVo.getSymbol()));
-        } else if (stratrgyType == StratrgyType.simple) {
+        } else if (stratrgyType == StrategyType.simple) {
             this.marketConfig = new HuoBiMarketConfigImpl(new Market(robotStrategyVo.getSymbol()));
         }
         return this;
@@ -92,9 +90,9 @@ public class StrategyBuilder {
 
 
     public StrategyBuilder buildStrategyConfig() {
-        if (stratrgyType == StratrgyType.indicator) {
+        if (stratrgyType == StrategyType.indicator) {
             this.strategyConfig = new HuoboIndicatorStragegyConfig(indicatorStrategyVo.getIndicatorTo());
-        } else if (stratrgyType == StratrgyType.simple) {
+        } else if (stratrgyType == StrategyType.simple) {
             this.strategyConfig = new HuoboSimpleStragegyConfig(robotStrategyVo.getStrategyVo());
         }
         return this;
@@ -102,9 +100,9 @@ public class StrategyBuilder {
 
     public StrategyBuilder buildAccountConfig() {
 
-        if (stratrgyType == StratrgyType.indicator) {
+        if (stratrgyType == StrategyType.indicator) {
             this.accountConfig = new HuoBiAccountConfigImpl(indicatorStrategyVo.getAccountConfig());
-        } else if (stratrgyType == StratrgyType.simple) {
+        } else if (stratrgyType == StrategyType.simple) {
             this.accountConfig = new HuoBiAccountConfigImpl(robotStrategyVo.getAccountConfig());
         }
 

@@ -3,7 +3,7 @@ package com.quant.common.enums;
 /**
  * Created by yang on 2019/8/24.
  */
-public enum StratrgyType {
+public enum StrategyType {
     /**
      * 简单数值
      */
@@ -16,7 +16,7 @@ public enum StratrgyType {
 
     Integer type;
 
-    StratrgyType(Integer type) {
+    StrategyType(Integer type) {
         this.type = type;
     }
 

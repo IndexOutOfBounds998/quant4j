@@ -2,7 +2,7 @@ package com.quant.client.task;
 
 import com.quant.common.config.RedisUtil;
 import com.quant.common.config.VpnProxyConfig;
-import com.quant.common.enums.StratrgyType;
+import com.quant.common.enums.StrategyType;
 import com.quant.core.builder.StrategyBuilder;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
@@ -36,7 +36,7 @@ public class SimpleNumRobotOperate {
 
     private TradingStrategy builderStrategy(RobotStrategyVo vo) {
 
-        StratrgyType simple = StratrgyType.simple;
+        StrategyType simple = StrategyType.simple;
         StrategyBuilder builder = new StrategyBuilder().setRedisUtil(redisUtil)
                 .setStratrgyType(simple)
                 .setRobotStrategyVo(vo)

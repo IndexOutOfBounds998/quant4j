@@ -40,9 +40,15 @@ public interface TradingStrategy {
 
    // void init(TradingApi tradingApi, MarketConfig market, StrategyConfig config, AccountConfig accountConfig);
 
-
+    /**
+     * 初始化数据
+     * @param builder
+     */
     void init(StrategyBuilder builder);
 
-
+    /**
+     * 执行策略
+     * @throws StrategyException
+     */
     void execute() throws StrategyException;
 }

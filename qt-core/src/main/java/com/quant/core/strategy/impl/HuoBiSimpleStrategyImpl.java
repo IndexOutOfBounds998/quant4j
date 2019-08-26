@@ -16,7 +16,6 @@ import com.quant.common.enums.TraceType;
 import com.quant.common.exception.ExchangeNetworkException;
 import com.quant.common.exception.TradingApiException;
 import com.quant.core.builder.StrategyBuilder;
-import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
 import com.quant.core.config.StrategyConfig;
@@ -107,13 +106,7 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
         this.redisUtil = builder.getRedisUtil();
         this.robotId = builder.getRobotStrategyVo().getRobotId();
         final StrategyConfig config = builder.getStrategyConfig();
-        this.baseInfo = config.getStrategyVo().getBaseInfo();
-        this.setting1 = config.getStrategyVo().getSetting1();
-        this.setting2 = config.getStrategyVo().getSetting2();
-        this.setting3 = config.getStrategyVo().getSetting3();
-        this.setting4 = config.getStrategyVo().getSetting4();
-        this.setting5 = config.getStrategyVo().getSetting5();
-        this.setting6 = config.getStrategyVo().getSetting6();
+        initSetting(config);
         this.orderState = new OrderState();
         this.weights = new Weights();
         this.redisMqService = new RobotLogsRedisMqServiceImpl(this.redisUtil, this.robotId, Integer.parseInt(this.accountConfig.getUserId()));
@@ -122,6 +115,16 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
         //限价 市价方式 redis key
         this.lastOrderState = lastOrderState + "type_" + this.baseInfo.getIsLimitPrice() + "_";
         this.orderProfitIds = orderProfitIds + "type_" + this.baseInfo.getIsLimitPrice() + "_";
+    }
+
+    private void initSetting(StrategyConfig config) {
+        this.baseInfo = config.getStrategyVo().getBaseInfo();
+        this.setting1 = config.getStrategyVo().getSetting1();
+        this.setting2 = config.getStrategyVo().getSetting2();
+        this.setting3 = config.getStrategyVo().getSetting3();
+        this.setting4 = config.getStrategyVo().getSetting4();
+        this.setting5 = config.getStrategyVo().getSetting5();
+        this.setting6 = config.getStrategyVo().getSetting6();
     }
 
     @Override
@@ -537,7 +540,7 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
         StrategyHandle strategyHandle = new HuobiLimitBuyPriceHandle(new HuobiNotLimitBuyPriceHandle(null));
         StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
         setHandleResult(handleResult);
-        handleResultForBuy(handleResult, this);
+        handleResultForBuy(this);
     }
 
     /**
@@ -565,7 +568,7 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
         final StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
         //获取结果
         setHandleResult(handleResult);
-        handleResultForSell(handleResult, this);
+        handleResultForSell( this);
     }
 
     /**

@@ -473,7 +473,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
 
         setHandleResult(handleResult);
-        handleResultForBuy(handleResult, this);
+        handleResultForBuy(this);
 
 
     }
@@ -499,7 +499,7 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
         StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
         //获取结果
         setHandleResult(handleResult);
-        handleResultForSell(handleResult, this);
+        handleResultForSell(this);
     }
 
 

@@ -93,22 +93,26 @@ public abstract class AbstractStrategy {
                 return;
             }
             //获取当前机器人的最后一次状态
-            Object o = redisUtil.get(lastOrderState + robotId);
-            if (o != null) {
-                try {
-                    log.info("机器人{}上一次运行的状态:{}", robotId, o.toString());
-                    //恢复上一次的运行状态
-                    this.orderState = JSON.parseObject(o.toString(), OrderState.class);
-                    redisUtil.set(lastOrderState + robotId, null);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("恢复机器人{}状态失败{}", robotId, e.getMessage());
-                    redisMqService.sendMsg("机器人上一次的运行状态恢复失败！机器人将以重新的状态启动......");
-                }
-            }
+            getLastRobotStatus();
         } catch (Exception e) {
             log.error("机器人运行中发生异常：异常信息{}", e);
             redisMqService.sendMsg("机器人运行中发生异常：异常信息" + e.getMessage());
+        }
+    }
+
+    private void getLastRobotStatus() {
+        Object o = redisUtil.get(lastOrderState + robotId);
+        if (o != null) {
+            try {
+                log.info("机器人{}上一次运行的状态:{}", robotId, o.toString());
+                //恢复上一次的运行状态
+                this.orderState = JSON.parseObject(o.toString(), OrderState.class);
+                redisUtil.set(lastOrderState + robotId, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("恢复机器人{}状态失败{}", robotId, e.getMessage());
+                redisMqService.sendMsg("机器人上一次的运行状态恢复失败！机器人将以重新的状态启动......");
+            }
         }
     }
 
@@ -222,29 +226,29 @@ public abstract class AbstractStrategy {
         return false;
     }
 
-    public void handleResultForSell(StrategyHandle.HandleResult handleResult, StrategyDelegate dg) {
+    public void handleResultForSell(StrategyDelegate dg) {
         HBOrderType HBOrderType;
         BigDecimal sellPrice;
         BigDecimal sellAmount;
-        if (handleResult != null) {
-            HBOrderType = handleResult.getHbOrderType();
-            sellPrice = handleResult.getPrice();
-            sellAmount = handleResult.getAmount();
+        if (getHandleResult() != null) {
+            HBOrderType = getHandleResult().getHbOrderType();
+            sellPrice = getHandleResult().getPrice();
+            sellAmount = getHandleResult().getAmount();
             //设置当前订单状态为卖出
             OrderType type = OrderType.SELL;
             dg.orderPlace(tradingApi, sellAmount, sellPrice, HBOrderType, type);
         }
     }
 
-    public void handleResultForBuy(StrategyHandle.HandleResult handleResult, StrategyDelegate dg) {
+    public void handleResultForBuy(StrategyDelegate dg) {
         HBOrderType HBOrderType;
         BigDecimal buyPrice;
         BigDecimal buyAmount;
-        if (handleResult != null) {
+        if (getHandleResult() != null) {
 
-            HBOrderType = handleResult.getHbOrderType();
-            buyPrice = handleResult.getPrice();
-            buyAmount = handleResult.getAmount();
+            HBOrderType = getHandleResult().getHbOrderType();
+            buyPrice = getHandleResult().getPrice();
+            buyAmount = getHandleResult().getAmount();
             //设置当前订单状态为购买
             OrderType type = OrderType.BUY;
             //记录当前的价格和数量

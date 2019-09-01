@@ -136,7 +136,7 @@ public class MysqlGenerator {
                 // 自定义 service 实现类父类
                 // .setSuperServiceImplClass("com.baomidou.demo.TestServiceImpl")
                 // 自定义 controller 父类
-                .setSuperControllerClass("com.qklx."+packageName+".controller.AbstractController")
+                .setSuperControllerClass("com.temp."+packageName+".controller.AbstractController")
                 // 【实体】是否生成字段常量（默认 false）
                 // public static final String ID = "test_id";
                 // .setEntityColumnConstant(true)
@@ -153,7 +153,7 @@ public class MysqlGenerator {
                 // 包配置
                 new PackageConfig()
                         //.setModuleName("User")
-                        .setParent("com.qklx."+packageName)// 自定义包路径
+                        .setParent("com.temp."+packageName)// 自定义包路径
                         .setController("controller")// 这里是控制器包名，默认 web
                         .setEntity("entity")
                         .setMapper("dao")

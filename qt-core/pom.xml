@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
     <artifactId>qt-core</artifactId>
     <properties>
-        <jackson.version>2.9.10.1</jackson.version>
+        <jackson.version>2.9.10.5</jackson.version>
         <okhttp.version>3.6.0</okhttp.version>
         <slf4j.version>1.7.24</slf4j.version>
     </properties>

@@ -3,7 +3,6 @@ package com.quant.core.strategy.impl;
 import com.alibaba.fastjson.JSON;
 import com.quant.common.config.RedisUtil;
 import com.quant.common.constans.RobotRedisKeyConfig;
-import com.quant.common.enums.OrderType;
 import com.quant.common.domain.response.Kline;
 import com.quant.common.domain.response.OrdersDetail;
 import com.quant.common.domain.to.BuyAndSellIndicatorTo;
@@ -11,13 +10,12 @@ import com.quant.common.domain.to.llIndicatorTo;
 import com.quant.common.domain.vo.BaseInfoEntity;
 import com.quant.common.domain.vo.ProfitMessage;
 import com.quant.common.enums.HBOrderType;
+import com.quant.common.enums.OrderType;
 import com.quant.common.exception.ExchangeNetworkException;
 import com.quant.common.exception.TradingApiException;
 import com.quant.core.builder.StrategyBuilder;
-import com.quant.core.config.AccountConfig;
 import com.quant.core.config.KlineConfig;
 import com.quant.core.config.MarketConfig;
-import com.quant.core.config.StrategyConfig;
 import com.quant.core.config.imp.HuoBiKlineConfigImpl;
 import com.quant.core.factory.IndicatorFactory;
 import com.quant.core.helpers.IndicatorHelper;
@@ -28,7 +26,8 @@ import com.quant.core.strategy.AbstractStrategy;
 import com.quant.core.strategy.StrategyException;
 import com.quant.core.strategy.TradingStrategy;
 import com.quant.core.strategy.handle.*;
-import com.quant.core.trading.*;
+import com.quant.core.trading.OpenOrder;
+import com.quant.core.trading.TradingApi;
 import lombok.extern.slf4j.Slf4j;
 import org.ta4j.core.*;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
@@ -298,10 +297,15 @@ public class HuoBIndicatoryStrategyImpl extends AbstractStrategy implements Trad
             exit = exit.or(stopLossRule);
 
         }
+        remove();
         //构建策略
         return new BaseStrategy(entry, exit);
     }
 
+    private static void remove() {
+        buyOnlyOneRule.remove();
+        sellOnlyOneRule.remove();
+    }
 
     /**
      * 检查订单 如果订单没有撮合成功 直接取消

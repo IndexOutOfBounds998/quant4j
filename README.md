@@ -1,5 +1,5 @@
 
-[0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/files/5718998/0.13-SNAPSHOT.zip)
+ta4j包的目录 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/files/5718998/0.13-SNAPSHOT.zip)
 查看附件
 
 网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti

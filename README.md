@@ -1,7 +1,9 @@
 
 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/files/5718998/0.13-SNAPSHOT.zip)
 查看附件
- 
+
+网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
+
 #召集令 有没有哥们一起来完善的 加我微信 13693094831
 ## 功能
  主要用于创建和管理自己的机器人,后台动态查看运行状态和收益信息。 

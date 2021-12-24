@@ -4,7 +4,7 @@ ta4j包的目录 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/
 
 网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
 
-#召集令 有没有哥们一起来完善的 加我微信 13693094831
+# 喜欢研究策略的可以加我微信 13693094831
 ## 功能
  主要用于创建和管理自己的机器人,后台动态查看运行状态和收益信息。 
 # 一: 简单策略 基于配置条件达到自己的条件计算总体权重触发买入卖出
@@ -45,7 +45,7 @@ ta4j包的目录 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/
 
 ```bash
 #后端
- springboot 咋启动？run main！
+ springboot 
 
 - [sql脚本](https://github.com/tokenIsme/images/blob/master/quant.sql)
 - [前端ui](https://github.com/tokenIsme/quant-admin)
@@ -110,7 +110,7 @@ npm run dev
 
 ## 说明：
  
-  - 该项目为个人学习用,项目不完善，切勿作为公司线上产品，个人出现亏损问题，请自己负责哦！
+  - 该项目为个人学习用,项目不完善，个人出现亏损问题，请自己负责哦！
   - 小赌怡情大赌伤身
 
 

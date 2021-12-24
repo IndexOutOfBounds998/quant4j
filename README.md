@@ -2,9 +2,9 @@
 ta4j包的目录 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/files/5718998/0.13-SNAPSHOT.zip)
 查看附件
 
-（不喜欢写代码的可以下载这款app 内置网格 马丁 期现套利 等等策略 需要用国外的邮箱进行注册 ）网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
+# （不喜欢写代码的可以下载这款app 内置网格 马丁 期现套利 等等策略 需要用国外的邮箱进行注册 ）网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
 
-# 喜欢研究策略的可以加我微信 13693094831
+喜欢研究策略的可以加我微信 13693094831
 ## 功能
  主要用于创建和管理自己的机器人,后台动态查看运行状态和收益信息。 
 # 一: 简单策略 基于配置条件达到自己的条件计算总体权重触发买入卖出

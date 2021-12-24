@@ -2,7 +2,7 @@
 ta4j包的目录 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/files/5718998/0.13-SNAPSHOT.zip)
 查看附件
 
-网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
+（不喜欢写代码的可以下载这款app 内置网格 马丁 期现套利 等等策略 需要用国外的邮箱进行注册 ）网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
 
 # 喜欢研究策略的可以加我微信 13693094831
 ## 功能

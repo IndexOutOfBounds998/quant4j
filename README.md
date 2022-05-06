@@ -2,8 +2,6 @@
 ta4j包的目录 [0.13-SNAPSHOT.zip](https://github.com/yangyangchu1992/quant4j/files/5718998/0.13-SNAPSHOT.zip)
 查看附件
 
-# （不喜欢写代码的可以下载这款app 内置网格 马丁 期现套利 等等策略 需要用国外的邮箱进行注册 ）网格交易策略机器人下载地址：https://www.pionex.cc/zh-CN/sign/ref/AvhkZjti
-
  
 ## 功能
  主要用于创建和管理自己的机器人,后台动态查看运行状态和收益信息。 
@@ -73,44 +71,5 @@ npm run dev
    - 进入register模块配置好配置文件,run RegisterApplication
 ```
 
-
-## 图片展示
-
- ![image](https://github.com/tokenIsme/images/blob/master/1557888795(1).jpg)
- 
- ![image](https://github.com/tokenIsme/images/blob/master/1557888642(1).jpg)
- 
- ![image](https://github.com/tokenIsme/images/blob/master/1557888658(1).jpg)
- 
- - 组合自定义的指标 例如选择rsi 然后选择14 或者其他的天数 来源可以选开盘价闭盘价最高价最低价 这四种价格的选择 买入或者是卖出
- ![image](https://github.com/tokenIsme/images/blob/master/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE(7).png)
- 
- - 收益信息显示
- ![image](https://github.com/tokenIsme/images/blob/master/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE(6).png)
-
- ![image](https://github.com/tokenIsme/images/blob/master/1557888693(1).jpg)
- 
- ![image](https://github.com/tokenIsme/images/blob/master/1557888732(1).jpg)
- 
- 
- ![image](https://github.com/tokenIsme/images/blob/master/1557888747(1).jpg)
-
-
-## 其它
- 
-  - qt量化交易java版本目前只支持火币的所有币币交易，请自备翻墙代理或者香港新加坡日本的服务器
-
-  - qt-admin 量化控制中心 qt-client 机器人节点 支持动态添加节点
-
-  - 当前支持指标组合策略 可自由组合成金叉死叉等指标策略
-
-## Donate
-
-如果你觉得这个项目帮助到了你，你可以帮作者点个star表示鼓励 :tropical_drink:
-
-## 说明：
- 
-  - 该项目为个人学习用,项目不完善，个人出现亏损问题，请自己负责哦！
-   
 
 
